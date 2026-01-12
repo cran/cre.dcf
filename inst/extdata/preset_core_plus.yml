@@ -1,0 +1,44 @@
+# ------------------------------------------------------------------------------------
+# Scenario: CORE PLUS — Lyon Part-Dieu (institutional-quality, light asset management, >5,000 sqm)
+# Asset: high-quality office in [[Lyon Part-Dieu]] with minor re-letting/refresh cycles.
+# Strategy: stable operations with selective value-accretive leasing; modest capex at rollover.
+# Horizon: 8 years, purchase in 2025.
+# Financial stance: moderate leverage and cost of debt; moderately softer exit.
+# ------------------------------------------------------------------------------------
+purchase_year: 2025
+horizon_years: 8
+index_rate: 0.012
+entry_yield: 0.055
+acq_cost_rate: 0.065
+exit_yield_spread_bps: 0
+exit_transaction_costs:
+  brokerage: 0.01
+  taxes: 0.00
+ltv_base: "price_di"
+capitalized_fees: true
+arrangement_fee_pct: 0.00
+disc_method: "wacc"
+disc_rate_wacc:
+  KE: 0.070
+  KD: 0.023
+opex_sqm: 55
+ltv_init: 0.5
+rate_annual: 0.023
+extra_amort_pct: 0.00
+scr_ratio: 0.33
+leasing_cost_pct: 0.07
+leases:
+  - unit: "A"
+    area: 2000
+    events:
+      - {start: 2025, end: 2028, rent: 320, free_months: 0, capex_sqm: 0,  vac: 0.05, new_lease: 0}
+      - {start: 2029, end: 2033, rent: 340, free_months: 3, capex_sqm: 30, vac: 0.07, new_lease: 1}
+  - unit: "B"
+    area: 2000
+    events:
+      - {start: 2025, end: 2028, rent: 315, free_months: 0, capex_sqm: 0,  vac: 0.07, new_lease: 0}
+      - {start: 2029, end: 2033, rent: 335, free_months: 3, capex_sqm: 25, vac: 0.1, new_lease: 1}
+
+hurdle_equity_irr: 0.07
+hurdle_project_irr: 0.07
+hurdle_equity_npv: 0

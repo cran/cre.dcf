@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Package cre.dcf" />
+
+
+<title>Reproducibility: identical inputs, identical outputs</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Reproducibility: identical inputs,
+identical outputs</h1>
+<h4 class="author">Package cre.dcf</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#purpose" id="toc-purpose"><span class="toc-section-number">1</span> Purpose</a></li>
+<li><a href="#load-and-validate-a-canonical-configuration" id="toc-load-and-validate-a-canonical-configuration"><span class="toc-section-number">2</span> Load and validate a canonical
+configuration</a></li>
+<li><a href="#two-runs-under-identical-conditions" id="toc-two-runs-under-identical-conditions"><span class="toc-section-number">3</span> Two runs under identical
+conditions</a></li>
+<li><a href="#numerical-drift-diagnostics-for-transparency" id="toc-numerical-drift-diagnostics-for-transparency"><span class="toc-section-number">4</span> Numerical drift diagnostics (for
+transparency)</a></li>
+<li><a href="#interpretation" id="toc-interpretation"><span class="toc-section-number">5</span> Interpretation</a></li>
+</ul>
+</div>
+
+<div id="purpose" class="section level2" number="1">
+<h2><span class="header-section-number">1</span> Purpose</h2>
+<p>This vignette evaluates strict reproducibility of run_case() under
+identical inputs. In a deterministic DCF pipeline, two invocations on
+the same configuration should yield byte-for-byte identical results for
+core metrics and tabular outputs. The checks proceed in two layers:</p>
+<p>Exact identity via serialization (byte-level comparison).</p>
+<p>Numerical guardrail printing (max absolute differences) to diagnose
+any minute deviations that may occur under heterogeneous BLAS/lapack
+builds or platform-specific floating-point behavior.</p>
+<p>Passing the first layer establishes computational determinism; the
+second layer is provided for transparency.</p>
+</div>
+<div id="load-and-validate-a-canonical-configuration" class="section level2" number="2">
+<h2><span class="header-section-number">2</span> Load and validate a
+canonical configuration</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># 1) Load a canonical configuration</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>cfg_path <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;preset_default.yml&quot;</span>, <span class="at">package =</span> <span class="st">&quot;cre.dcf&quot;</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">nzchar</span>(cfg_path))</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>cfg <span class="ot">&lt;-</span> yaml<span class="sc">::</span><span class="fu">read_yaml</span>(cfg_path)</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">is.list</span>(cfg), <span class="fu">length</span>(cfg) <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co"># Optional but recommended: validate before use</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>cfg <span class="ot">&lt;-</span> cre.dcf<span class="sc">::</span><span class="fu">cfg_validate</span>(cfg)</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;✓ Configuration loaded and validated.</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## ✓ Configuration loaded and validated.</code></pre>
+</div>
+<div id="two-runs-under-identical-conditions" class="section level2" number="3">
+<h2><span class="header-section-number">3</span> Two runs under
+identical conditions</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># 2) Run twice under identical conditions</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>case1 <span class="ot">&lt;-</span> <span class="fu">run_case</span>(cfg)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>case2 <span class="ot">&lt;-</span> <span class="fu">run_case</span>(cfg)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co"># 3) Build compact metric vectors (named for clarity)</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="at">irr_project =</span> case1<span class="sc">$</span>all_equity<span class="sc">$</span>irr_project,</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="at">npv_project =</span> case1<span class="sc">$</span>all_equity<span class="sc">$</span>npv_project,</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="at">irr_equity  =</span> case1<span class="sc">$</span>leveraged<span class="sc">$</span>irr_equity,</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="at">npv_equity  =</span> case1<span class="sc">$</span>leveraged<span class="sc">$</span>npv_equity</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>)</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="at">irr_project =</span> case2<span class="sc">$</span>all_equity<span class="sc">$</span>irr_project,</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="at">npv_project =</span> case2<span class="sc">$</span>all_equity<span class="sc">$</span>npv_project,</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="at">irr_equity  =</span> case2<span class="sc">$</span>leveraged<span class="sc">$</span>irr_equity,</span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="at">npv_equity  =</span> case2<span class="sc">$</span>leveraged<span class="sc">$</span>npv_equity</span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>)</span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co"># 4) Byte-for-byte identity on metrics (primary assertion)</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>bytes_equal_metrics <span class="ot">&lt;-</span> <span class="fu">identical</span>(<span class="fu">serialize</span>(m1, <span class="cn">NULL</span>), <span class="fu">serialize</span>(m2, <span class="cn">NULL</span>))</span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="fu">stopifnot</span>(bytes_equal_metrics)</span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="co"># 5) Byte-for-byte identity on key tables (secondary assertions)</span></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="co"># (a) all-equity cashflows</span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a>ae1 <span class="ot">&lt;-</span> case1<span class="sc">$</span>all_equity<span class="sc">$</span>cashflows</span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a>ae2 <span class="ot">&lt;-</span> case2<span class="sc">$</span>all_equity<span class="sc">$</span>cashflows</span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a><span class="co"># (b) leveraged cashflows</span></span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a></span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a>lv1 <span class="ot">&lt;-</span> case1<span class="sc">$</span>leveraged<span class="sc">$</span>cashflows</span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a>lv2 <span class="ot">&lt;-</span> case2<span class="sc">$</span>leveraged<span class="sc">$</span>cashflows</span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a></span>
+<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a><span class="co"># (c) comparison summary (if present)</span></span>
+<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a></span>
+<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a>sm1 <span class="ot">&lt;-</span> case1<span class="sc">$</span>comparison<span class="sc">$</span>summary</span>
+<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a>sm2 <span class="ot">&lt;-</span> case2<span class="sc">$</span>comparison<span class="sc">$</span>summary</span>
+<span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a></span>
+<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a><span class="fu">stopifnot</span>(</span>
+<span id="cb3-45"><a href="#cb3-45" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">serialize</span>(ae1, <span class="cn">NULL</span>), <span class="fu">serialize</span>(ae2, <span class="cn">NULL</span>)),</span>
+<span id="cb3-46"><a href="#cb3-46" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">serialize</span>(lv1, <span class="cn">NULL</span>), <span class="fu">serialize</span>(lv2, <span class="cn">NULL</span>)),</span>
+<span id="cb3-47"><a href="#cb3-47" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">serialize</span>(sm1, <span class="cn">NULL</span>), <span class="fu">serialize</span>(sm2, <span class="cn">NULL</span>))</span>
+<span id="cb3-48"><a href="#cb3-48" tabindex="-1"></a>)</span>
+<span id="cb3-49"><a href="#cb3-49" tabindex="-1"></a></span>
+<span id="cb3-50"><a href="#cb3-50" tabindex="-1"></a><span class="fu">cat</span>(</span>
+<span id="cb3-51"><a href="#cb3-51" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">Reproducibility diagnostics (byte-level):</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb3-52"><a href="#cb3-52" tabindex="-1"></a><span class="st">&quot;  • Core metrics: byte-level identity confirmed.</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb3-53"><a href="#cb3-53" tabindex="-1"></a><span class="st">&quot;  • All-equity cashflows: byte-level identity confirmed.</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb3-54"><a href="#cb3-54" tabindex="-1"></a><span class="st">&quot;  • Leveraged cashflows: byte-level identity confirmed.</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb3-55"><a href="#cb3-55" tabindex="-1"></a><span class="st">&quot;  • Comparison summary: byte-level identity confirmed.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
+<span id="cb3-56"><a href="#cb3-56" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## 
+## Reproducibility diagnostics (byte-level):
+##    • Core metrics: byte-level identity confirmed.
+##    • All-equity cashflows: byte-level identity confirmed.
+##    • Leveraged cashflows: byte-level identity confirmed.
+##    • Comparison summary: byte-level identity confirmed.</code></pre>
+<p>These assertions guarantee that, on the current platform, run_case()
+behaves as a deterministic mapping from the YAML configuration to the
+computed outputs.</p>
+</div>
+<div id="numerical-drift-diagnostics-for-transparency" class="section level2" number="4">
+<h2><span class="header-section-number">4</span> Numerical drift
+diagnostics (for transparency)</h2>
+<p>To document the absence (or presence) of any small numerical
+differences, we compute maximum absolute differences on numeric columns.
+If byte-level identity holds, all these diagnostics should be exactly
+zero; they are nevertheless informative if a future platform breaks
+strict identity.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>max_abs_diff <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y) {</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co"># Vector case</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">is.null</span>(<span class="fu">dim</span>(x)) <span class="sc">&amp;&amp;</span> <span class="fu">is.null</span>(<span class="fu">dim</span>(y))) {</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">is.numeric</span>(x) <span class="sc">&amp;&amp;</span> <span class="fu">is.numeric</span>(y) <span class="sc">&amp;&amp;</span> <span class="fu">length</span>(x) <span class="sc">==</span> <span class="fu">length</span>(y)) {</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="fu">return</span>(<span class="fu">max</span>(<span class="fu">abs</span>(x <span class="sc">-</span> y), <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="fu">return</span>(<span class="cn">NA_real_</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>}</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>}</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co"># Data frame case</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">is.data.frame</span>(x) <span class="sc">&amp;&amp;</span> <span class="fu">is.data.frame</span>(y)) {</span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>common <span class="ot">&lt;-</span> <span class="fu">intersect</span>(<span class="fu">names</span>(x), <span class="fu">names</span>(y))</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">length</span>(common) <span class="sc">==</span> <span class="dv">0</span><span class="dt">L</span>) <span class="fu">return</span>(<span class="cn">NA_real_</span>)</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>numeric_cols <span class="ot">&lt;-</span> common[</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>  <span class="fu">vapply</span>(x[common], is.numeric, <span class="cn">TRUE</span>) <span class="sc">&amp;</span></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>  <span class="fu">vapply</span>(y[common], is.numeric, <span class="cn">TRUE</span>)</span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>]</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">length</span>(numeric_cols) <span class="sc">==</span> <span class="dv">0</span><span class="dt">L</span>) <span class="fu">return</span>(<span class="cn">NA_real_</span>)</span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a></span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>mx <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="cf">for</span> (nm <span class="cf">in</span> numeric_cols) {</span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a>  d <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="fu">abs</span>(x[[nm]] <span class="sc">-</span> y[[nm]]), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.finite</span>(d) <span class="sc">&amp;&amp;</span> d <span class="sc">&gt;</span> mx) mx <span class="ot">&lt;-</span> d</span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a>}</span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a><span class="fu">return</span>(mx)</span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a></span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a></span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a>}</span>
+<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a></span>
+<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a><span class="co"># Fallback</span></span>
+<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a></span>
+<span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a><span class="cn">NA_real_</span></span>
+<span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a>}</span>
+<span id="cb5-40"><a href="#cb5-40" tabindex="-1"></a></span>
+<span id="cb5-41"><a href="#cb5-41" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;  • Max |Δ| metrics (numeric drift): %s</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb5-42"><a href="#cb5-42" tabindex="-1"></a><span class="fu">formatC</span>(<span class="fu">max_abs_diff</span>(m1, m2), <span class="at">format =</span> <span class="st">&quot;g&quot;</span>)))</span></code></pre></div>
+<pre><code>##   • Max |Δ| metrics (numeric drift): 0</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;  • Max |Δ| AE cashflows: %s</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">formatC</span>(<span class="fu">max_abs_diff</span>(ae1, ae2), <span class="at">format =</span> <span class="st">&quot;g&quot;</span>)))</span></code></pre></div>
+<pre><code>##   • Max |Δ| AE cashflows: 0</code></pre>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;  • Max |Δ| LV cashflows: %s</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">formatC</span>(<span class="fu">max_abs_diff</span>(lv1, lv2), <span class="at">format =</span> <span class="st">&quot;g&quot;</span>)))</span></code></pre></div>
+<pre><code>##   • Max |Δ| LV cashflows: 0</code></pre>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;  • Max |Δ| comparison summary: %s</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">formatC</span>(<span class="fu">max_abs_diff</span>(sm1, sm2), <span class="at">format =</span> <span class="st">&quot;g&quot;</span>)), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>##   • Max |Δ| comparison summary: 0
+## </code></pre>
+</div>
+<div id="interpretation" class="section level2" number="5">
+<h2><span class="header-section-number">5</span> Interpretation</h2>
+<p>The results obtained in this vignette show that:</p>
+<p>Core scalar metrics (irr_project, npv_project, irr_equity,
+npv_equity) are exactly identical at the byte level across two runs with
+the same configuration.</p>
+<p>Key tabular outputs (all-equity cashflows, leveraged cashflows,
+comparison summary) are also byte-identical.</p>
+<p>The maximum absolute differences on numeric entries are zero,
+confirming the absence of hidden numerical drift in this
+environment.</p>
+<p>This establishes that run_case() behaves as a deterministic map from
+a validated YAML configuration to a structured output object, which is a
+strong form of reproducibility in computational finance:</p>
+<p>identical YAML files ⇒ identical DCF outputs,</p>
+<p>any divergence in valuation metrics must therefore be traced to
+explicit differences in configuration, not to stochastic elements or
+unstable numerical routines.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

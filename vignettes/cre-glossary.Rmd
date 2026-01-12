@@ -1,0 +1,56 @@
+---
+title: "Glossary of CRE finance and DCF terms"
+author: "Package cre.dcf"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Glossary of CRE finance and DCF terms}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+library(cre.dcf)
+library(dplyr)
+```
+
+## Aim
+
+This vignette summarises the main discounted cash flow and debt notions used throughout the cre.dcf package. Each term is given in English and French with a short operational definition.
+
+## Full glossary
+
+```{r}
+cre_glossary |>
+arrange(term_en) |>
+select(term_en, term_fr, definition_en, definition_fr, category, subcategory) |>
+knitr::kable()
+
+```
+
+## Debt metrics
+
+```{r}
+cre_glossary |>
+filter(category == "debt_metrics") |>
+select(term_en, term_fr, definition_en, definition_fr) |>
+knitr::kable()
+
+```
+
+## Using the glossary programmatically
+
+The glossary can be accessed directly:
+
+```{r}
+head(cre_glossary)
+
+```
+
+It can also be queried inside any notebook or report:
+
+```{r}
+cre_glossary |> filter(term_id == "irr")
+```

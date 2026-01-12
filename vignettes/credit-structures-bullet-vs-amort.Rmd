@@ -1,0 +1,284 @@
+---
+title: "Credit structures: bullet vs amortization (baseline comparison)"
+author: "Package cre.dcf"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{Credit structures: bullet vs amortization}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(cre.dcf)
+library(dplyr)
+
+```
+
+## Purpose
+
+This vignette explores the comparative behaviour of **bullet** and **amortizing** debt structures within a standardized discounted-cash-flow (DCF) framework.  
+Its objective is to verify that the model reproduces the *expected qualitative ordering* between both credit forms using the built-in `run_case()` comparison-without resorting to external scenario shocks.
+
+From a financial standpoint, the exercise highlights how repayment profiles affect both the **temporal distribution of leverage** and the **sensitivity of equity returns**:
+
+- In a **bullet (in fine)** structure, only interest is serviced during the term, and principal is repaid entirely at maturity.  
+  This configuration maximizes leverage and tends to enhance the *equity internal rate of return (IRR)*, but also concentrates refinancing risk at the end of the loan.
+- In an **amortizing** structure, regular principal repayments reduce the outstanding balance through time.  
+  The resulting *Debt Service Coverage Ratio (DSCR)* and *forward Loan-to-Value (LTV)* trajectories reflect progressive deleveraging and improved solvency, though at the cost of lower financial gearing.
+
+## Build a case and extract comparison details
+
+```{r}
+cfg_path <- system.file("extdata", "preset_default.yml", package = "cre.dcf")
+stopifnot(nzchar(cfg_path))
+
+cfg  <- yaml::read_yaml(cfg_path)
+case <- run_case(cfg)
+
+cmp <- case$comparison
+stopifnot(is.list(cmp), is.data.frame(cmp$summary))
+
+# Ensure expected fields are present
+
+required_fields <- c("scenario","irr_equity","npv_equity","min_dscr","max_ltv_forward")
+stopifnot(all(required_fields %in% names(cmp$summary)))
+
+knitr::kable(cmp$summary, caption = "Summary comparison of bullet vs amortizing structures")
+
+```
+
+## Qualitative invariants: bullet vs amort
+
+```{r}
+# Extract scenario rows --------------------------------------------------
+
+rows <- split(cmp$summary, cmp$summary$scenario)
+stopifnot(all(c("debt_bullet", "debt_amort") %in% names(rows)))
+
+bullet <- rows$debt_bullet
+amort  <- rows$debt_amort
+
+# readable diagnostics --------------------------------------------
+
+cat("\nComparaison qualitative des structures de dette :\n")
+cat(sprintf(
+  "• IRR equity : bullet = %.4f%% | amort. = %.4f%%\n",
+  100 * bullet$irr_equity,
+  100 * amort$irr_equity
+))
+cat(sprintf(
+  "• Min DSCR   : bullet = %.3f  | amort. = %.3f\n",
+  bullet$min_dscr,
+  amort$min_dscr
+))
+cat(sprintf(
+  "• Max LTV f. : bullet = %.3f  | amort. = %.3f\n",
+  bullet$max_ltv_forward,
+  amort$max_ltv_forward
+))
+
+# Expected financial ordering (sanity checks) ----------------------------
+
+## (a) Leverage effect on IRR - bullet should give a higher equity IRR
+stopifnot(bullet$irr_equity > amort$irr_equity)
+
+## (b) DSCR - in this preset, the worst year is driven by negative NOI
+##     (vacancy + CAPEX). For a given interest profile, adding principal
+##     in the amortizing case makes DSCR less negative (closer to zero),
+##     so min DSCR for amortization should be higher than for bullet.
+stopifnot(bullet$min_dscr <= amort$min_dscr)
+
+## (c) Forward LTV - amortizing structure should deleverage over time
+stopifnot(bullet$max_ltv_forward > amort$max_ltv_forward)
+
+```
+
+Financial interpretation:
+
+- The bullet loan increases IRR by deferring principal.
+- Amortization increases debt service --> DSCR goes down.
+- Amortization decreases principal outstanding --> forward LTV improves.
+
+## Interest cover (ICR): confirming the expected ordering
+
+```{r}
+# Extract interest-cover paths ------------------------------------------
+
+rat_bul <- case$comparison$details$debt_bullet$ratios
+rat_amo <- case$comparison$details$debt_amort$ratios
+
+required_ratio_fields <- c("year", "interest_cover_ratio", "interest")
+stopifnot(all(required_ratio_fields %in% names(rat_bul)))
+stopifnot(all(required_ratio_fields %in% names(rat_amo)))
+
+# Restrict to operating years (exclude t = 0)
+
+icr_bul <- rat_bul$interest_cover_ratio[rat_bul$year >= 1]
+icr_amo <- rat_amo$interest_cover_ratio[rat_amo$year >= 1]
+
+icr_min_bul  <- min(icr_bul, na.rm = TRUE)
+icr_min_amo  <- min(icr_amo, na.rm = TRUE)
+icr_mean_bul <- mean(icr_bul, na.rm = TRUE)
+icr_mean_amo <- mean(icr_amo, na.rm = TRUE)
+
+last_year_bul <- max(rat_bul$year[rat_bul$year >= 1])
+last_year_amo <- max(rat_amo$year[rat_amo$year >= 1])
+
+# Last-year ICR among operating years
+
+icr_last_bul <- tail(icr_bul, 1L)
+icr_last_amo <- tail(icr_amo, 1L)
+
+cat(
+"\nInterest cover diagnostics:\n",
+sprintf("• Min ICR    : bullet = %.3f | amort. = %.3f\n", icr_min_bul, icr_min_amo),
+sprintf("• Mean ICR   : bullet = %.3f | amort. = %.3f\n", icr_mean_bul, icr_mean_amo),
+sprintf(
+"• Last-year ICR (t = %d / %d) : bullet = %.3f | amort. = %.3f\n",
+last_year_bul, last_year_amo, icr_last_bul, icr_last_amo
+),
+"\n",
+"Interpretation:\n",
+"  • Negative ICR values reflect periods where NOI is temporarily negative\n",
+"    (for example, vacancy combined with heavy CAPEX), while interest remains\n",
+"    strictly positive.\n",
+"  • The amortizing structure can exhibit a lower minimum ICR than the bullet\n",
+"    if transitional phases are front-loaded and debt service remains high.\n",
+"  • ICR should therefore be read jointly with DSCR, Debt Yield and forward LTV\n",
+"    to characterise the temporal profile of credit risk.\n"
+)
+
+# Internal sanity check: ICR must be finite whenever interest > 0 --------
+
+stopifnot(all(is.finite(rat_bul$interest_cover_ratio[rat_bul$interest > 0])))
+stopifnot(all(is.finite(rat_amo$interest_cover_ratio[rat_amo$interest > 0])))
+
+
+```
+
+Financial interpretation:
+
+The bullet loan increases the equity IRR by deferring principal to maturity and keeping leverage higher during the life of the loan.
+
+Amortization increases annual debt service and may depress the minimum DSCR, even though the outstanding principal is reduced.
+
+Because amortization mechanically reduces the debt balance, the forward LTV path improves more quickly than under a bullet structure.
+
+## Internal consistency checks on credit ratios
+
+```{r}
+# DSCR availability when interest is positive ----------------------------
+
+stopifnot("dscr" %in% names(rat_bul))
+stopifnot("dscr" %in% names(rat_amo))
+
+bul_idx <- rat_bul$interest > 0
+amo_idx <- rat_amo$interest > 0
+
+stopifnot(all(is.finite(rat_bul$dscr[bul_idx])))
+stopifnot(all(is.finite(rat_amo$dscr[amo_idx])))
+
+# Descriptive diagnostics on the sign of DSCR ----------------------------
+
+neg_share_bul <- mean(rat_bul$dscr[bul_idx] < 0, na.rm = TRUE)
+neg_share_amo <- mean(rat_amo$dscr[amo_idx] < 0, na.rm = TRUE)
+
+cat(
+"\nDSCR sign diagnostics:\n",
+sprintf(
+"• Bullet   – min DSCR = %.3f, share of negative DSCR (interest > 0): %.1f%%\n",
+min(rat_bul$dscr[bul_idx], na.rm = TRUE),
+100 * neg_share_bul
+),
+sprintf(
+"• Amort.   – min DSCR = %.3f, share of negative DSCR (interest > 0): %.1f%%\n",
+min(rat_amo$dscr[amo_idx], na.rm = TRUE),
+100 * neg_share_amo
+),
+"\nInterpretation:\n",
+"  • Negative DSCR values correspond to periods where NOI is negative\n",
+"    (for instance, vacancy combined with CAPEX), while debt service remains\n",
+"    strictly positive.\n",
+"  • Such configurations are typical in transitional or value-added strategies,\n",
+"    and should not be treated as numerical errors.\n",
+"  • The role of the model is to produce coherent ratio values (finite, correctly\n",
+"    timed), while the economic interpretation of negative DSCR remains with\n",
+"    the analyst.\n"
+)
+
+```
+
+## Equity NPV identity
+
+```{r}
+# Global sum of discounted equity flows in the consolidated table --------
+
+cf_all <- case$cashflows
+stopifnot("equity_disc" %in% names(cf_all))
+
+npv_equity_sum <- sum(cf_all$equity_disc, na.rm = TRUE)
+stopifnot(is.finite(npv_equity_sum))
+
+# 5.2 Scenario-level equity NPVs from the comparison summary -----------------
+
+npv_equity_bullet <- cmp$summary$npv_equity[cmp$summary$scenario == "debt_bullet"]
+npv_equity_amort  <- cmp$summary$npv_equity[cmp$summary$scenario == "debt_amort"]
+
+stopifnot(
+length(npv_equity_bullet) == 1L,
+length(npv_equity_amort)  == 1L
+)
+
+# Leveraged NPV reported in the main case object -------------------------
+
+npv_equity_lev <- case$leveraged$npv_equity
+stopifnot(is.finite(npv_equity_lev))
+
+# Diagnostics on the relationship between these quantities ---------------
+
+gap_bullet_global <- npv_equity_sum - npv_equity_bullet
+gap_amort_global  <- npv_equity_sum - npv_equity_amort
+
+cat(
+"\nEquity NPV diagnostics:\n",
+sprintf(
+"• Global sum of discounted equity flows (cf_all$equity_disc): %s\n",
+formatC(npv_equity_sum, format = 'f', big.mark = " ")
+),
+sprintf(
+"• Bullet scenario equity NPV (comparison summary)        : %s\n",
+formatC(npv_equity_bullet, format = 'f', big.mark = " ")
+),
+sprintf(
+"• Amort. scenario equity NPV (comparison summary)        : %s\n",
+formatC(npv_equity_amort, format = 'f', big.mark = " ")
+),
+sprintf(
+"• Leveraged equity NPV reported in case$leveraged        : %s\n",
+formatC(npv_equity_lev, format = 'f', big.mark = " ")
+),
+sprintf(
+"• Global – bullet NPV gap                               : %s\n",
+formatC(gap_bullet_global, format = 'f', big.mark = " ")
+),
+sprintf(
+"• Global – amort. NPV gap                              : %s\n",
+formatC(gap_amort_global,  format = 'f', big.mark = " ")
+),
+"\nInterpretation:\n",
+"  • The consolidated column `equity_disc` aggregates discounted equity flows at\n",
+"    the model level; it is not, in this configuration, identical to any single\n",
+"    scenario-level NPV (bullet or amortizing).\n",
+"  • Scenario NPVs reported in the comparison summary and in `case$leveraged`\n",
+"    are computed from their own scenario-specific equity cash-flow streams.\n",
+"  • The role of this diagnostic is therefore descriptive: it documents how the\n",
+"    global discounted equity flows relate in magnitude and sign to scenario-level\n",
+"    NPVs, rather than enforcing an exact algebraic identity.\n"
+)
+
+```

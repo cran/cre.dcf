@@ -1,0 +1,43 @@
+# ------------------------------------------------------------------------------------
+# Scenario: OPPORTUNISTIC — Rueil-Malmaison (light refurbishment & exit, ~5,500 sqm)
+# Asset: largely vacant 1990s office in [[Rueil-Malmaison]], deferred maintenance, functional mismatch.
+# Strategy: light renovation, accelerated leasing to stabilise, quick exit.
+# Horizon: 4 years, purchase in 2025.
+# Financial stance: high leverage, higher debt cost, improved exit yield on successful trade.
+# ------------------------------------------------------------------------------------
+purchase_year: 2025
+horizon_years: 4
+index_rate: 0.012
+entry_yield: 0.08
+acq_cost_rate: 0.060
+exit_yield_spread_bps: -75
+exit_transaction_costs:
+  brokerage: 0.01
+  taxes: 0.00
+ltv_base: "price_di"
+capitalized_fees: true
+arrangement_fee_pct: 0.00
+disc_method: "wacc"
+disc_rate_wacc:
+  KE: 0.150
+  KD: 0.035
+opex_sqm: 30
+ltv_init: 0.8
+rate_annual: 0.04
+extra_amort_pct: 0.00
+scr_ratio: 0.35
+leasing_cost_pct: 0.15
+leases:
+  - unit: "Wing A"
+    area: 2500
+    events:
+      - {start: 2025, end: 2025, rent: 100, free_months: 0, capex_sqm: 350, vac: 1, new_lease: 0}
+      - {start: 2026, end: 2029, rent: 200, free_months: 1, capex_sqm: 0,  vac: 0.2, new_lease: 1}
+  - unit: "Wing B"
+    area: 2500
+    events:
+      - {start: 2025, end: 2025, rent: 100, free_months: 0, capex_sqm: 350, vac: 1, new_lease: 0}
+      - {start: 2026, end: 2029, rent: 200, free_months: 1, capex_sqm: 0,  vac: 0.2, new_lease: 1}
+hurdle_equity_irr: 0.15
+hurdle_project_irr: 0.12
+hurdle_equity_npv: 0

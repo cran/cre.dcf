@@ -1,0 +1,51 @@
+# ------------------------------------------------------------------------------------
+# Scenario: CORE — Paris 8e (Institutional, trophy asset, long hold, >10,000 sqm)
+# Asset: prime Haussmannian office property in [[Paris 8e]], stabilised institutional tenancy.
+# Strategy: buy-and-hold, minimal [[capex]], indexed rents, very low structural [[vacancy]].
+# Horizon: 10 years, purchase in 2025.
+# Financial stance: conservative [[leverage]], low cost of debt, mildly higher exit yield.
+# ------------------------------------------------------------------------------------
+purchase_year: 2025
+horizon_years: 10
+
+# Rental and pricing mechanics
+index_rate: 0.010          # modest indexation
+entry_yield: 0.045         # HIGHER than before → lower price / higher income share
+acq_cost_rate: 0.07
+exit_yield_spread_bps: 25  # exit yield = entry_yield + 25 bps → mild yield softening
+exit_transaction_costs:
+  brokerage: 0.01
+  taxes: 0.00
+ltv_base: "price_di"
+capitalized_fees: true
+arrangement_fee_pct: 0.00
+
+# Discounting: keep WACC close to property yield
+disc_method: "wacc"
+disc_rate_wacc:
+  KE: 0.050    # higher equity return requirement
+  KD: 0.025    # slightly higher cost of debt
+# LTV and tax shield handled below via ltv_init / scr_ratio
+
+# Operating costs
+opex_sqm: 65
+
+# Debt stance
+ltv_init: 0.30      # slightly lower LTV, consistent with core
+rate_annual: 0.022  # close to KD, low but not ultra-cheap
+extra_amort_pct: 0.00
+scr_ratio: 0.33
+leasing_cost_pct: 0.05
+
+leases:
+  - unit: "U1"
+    area: 3000
+    events:
+      # Stabilised phase, very low vacancy, no works
+      - {start: 2025, end: 2030, rent: 800, free_months: 0,  capex_sqm: 0,  vac: 0.01, new_lease: 0}
+      # Renewal phase, modest step-up, some vacancy and light works
+      - {start: 2031, end: 2034, rent: 840, free_months: 2,  capex_sqm: 20, vac: 0.05, new_lease: 1}
+
+hurdle_equity_irr: 0.045
+hurdle_project_irr: 0.040
+hurdle_equity_npv: 0

@@ -1,0 +1,77 @@
+# ===================== PARAMÈTRES GÉNÉRAUX =====================
+purchase_year: 2020          # achat fin 2019 ⇒ 1re année d'exploitation = 2020
+horizon_years: 5             # 2020–2024, revente fin 2024
+index_rate: 0.01             # indexation annuelle des loyers (1 %)
+
+opex_inflation_rate: 0.01    # inflation des charges d'exploitation
+capex_inflation_rate: 0.01   # inflation des CAPEX
+
+entry_yield: 0.065           # cap-rate d'entrée 6,50 %
+acq_cost_rate: 0.075         # droits/frais d'acquisition (hypothèse standard France)
+exit_yield_spread_bps: -150  # taux de sortie 5,00 % ⇒ 6,5 % - 150 bps
+exit_transaction_costs:
+  brokerage: 0.01
+  taxes: 0.00
+ltv_base: "price_di"         # dette calculée sur le prix "droits inclus"
+capitalized_fees: false      # pas de frais capitalisés sur la dette
+arrangement_fee_pct: 0.00    # pas de frais d’arrangement explicites
+
+# ===================== TAUX D'ACTUALISATION =====================
+disc_method: "wacc"          # on actualise au WACC
+
+# WACC direct (Ke / Kd fournis)
+disc_rate_wacc:
+  KE: 0.055                  # objectif de rentabilité des fonds propres = 5,5 %
+  KD: 0.020                  # coût facial de la dette (2 %)
+  tax_rate: 0.35             # taux d’imposition retenu (35 %)
+
+# WACC avec Ke via CAPM (option, non utilisé ici)
+disc_rate_wacc_capm:
+  risk_free: 0.02            # taux sans risque stylisé
+  beta: 1.0
+  mkt_return: 0.06
+  size_illiquidity_bps: 0
+  KD: 0.020
+  target_ltv: 0.30           # structure cible 30 % dette / 70 % equity
+  tax_rate: 0.35
+
+# Prime de risque agrégative (option, non utilisé)
+disc_rate_risk_premium:
+  rf: 0.02
+  liquidity_premium: 0.01
+  obsolescence_premium: 0.005
+  income_risk_premium: 0.005
+
+# Cap-rate + croissance (option, non utilisé)
+disc_rate_yield_plus_growth:
+  property_yield: 0.065
+  growth: 0.01
+
+# ===================== EXPLOITATION =====================
+opex_sqm: 60                 # charges non récupérables, €/m²/an (incluant fiscalité locale)
+
+# ===================== DETTE =====================
+ltv_init: 0.30               # cas "SPV" : 30 % de dette / 70 % fonds propres
+rate_annual: 0.020           # taux facial annuel de la dette (2 %)
+extra_amort_pct: 0.00        # remboursement in fine (pas d’amortissement annuel)
+scr_ratio: 0.35              # proxy d’impôt (aligné sur tax_rate)
+
+# ===================== BROKERAGE / LEASING =====================
+leasing_cost_pct: 0.15       # coût de commercialisation (15 % d’un loyer annuel)
+
+# ===================== LOTS / BAUX =====================
+leases:
+  - unit: "U1"
+    area: 1000
+    events:
+      # Sale & lease back : bail "investisseur" sur 3 ans à 200 €/m²
+      - { start: 2020, end: 2022, rent: 200, free_months: 0, capex_sqm: 0,   vac: 0, new_lease: 0 }
+      # Départ à la fin de la 1re triennale → 1 an de vacance + travaux 300 €/m²
+      - { start: 2023, end: 2023, rent: 200, free_months: 0, capex_sqm: 300, vac: 1, new_lease: 0 }
+      # Relocation à 190 €/m², bail ferme 6 ans (on ne modélise ici que 2024)
+      - { start: 2024, end: 2024, rent: 190, free_months: 0, capex_sqm: 0,   vac: 0, new_lease: 1 }
+
+# ===================== HURDLES (optionnels) =====================
+hurdle_equity_irr: 0.055     # cible TRI equity 5,5 %
+hurdle_project_irr: 0.055
+hurdle_equity_npv: 0.0

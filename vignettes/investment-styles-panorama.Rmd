@@ -1,0 +1,586 @@
+---
+title: "Investment styles panorama: API-only comparison"
+author: "Package cre.dcf"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{Investment styles panorama: API-only comparison}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+library(cre.dcf)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(readr)
+library(scales)
+
+```
+
+## Aim of this vignette
+
+This vignette exploits the preset YAML files shipped in `inst/extdata` to construct a compact yet expressive panorama of four canonical commercial real-estate (CRE) investment styles:
+
+* `core`
+* `core_plus`
+* `value_added`
+* `opportunistic`
+
+All four presets are processed through the same modelling pipeline (`run_case()`), under a common grammar of assumptions (DCF engine, debt schedule, covenant logic). The vignette then extracts a restricted set of style-defining indicators that are salient for both investors and lenders:
+
+* unlevered project IRR,
+* levered equity IRR and equity NPV,
+* minimum DSCR along the debt path,
+* maximum forward LTV under a bullet structure.
+
+The overarching objective is to document, in a transparent and reproducible way, that the presets encode the expected ordering:
+
+* *core / core_plus* --> lower risk, lower return, stronger coverage, lower leverage;
+* *value_added / opportunistic* --> higher expected return, but weaker DSCR and more elevated forward LTV.
+
+## A style-by-style manifest
+
+To make the four profiles directly comparable, the vignette begins by constructing a compact “manifest” that records, for each style:
+
+* project IRR (all-equity),
+* equity IRR (levered),
+* minimum DSCR under a bullet structure,
+* maximum forward LTV under a bullet structure,
+* equity NPV.
+
+Under the canonical calibration, the four styles are designed to satisfy a strict risk–return and leverage–coverage hierarchy:
+
+* project and equity IRR increase monotonically along
+  `core --> core_plus --> value_added --> opportunistic`;
+* minimum DSCR under the bullet structure decreases monotonically along the same sequence;
+* maximum forward LTV under the bullet structure increases monotonically along the same sequence.
+
+```{r}
+# Retrieve manifest
+tbl_print <- styles_manifest()
+
+# Ensure expected ordering
+tbl_print <- tbl_print |>
+  dplyr::filter(style %in% c("core", "core_plus", "value_added", "opportunistic")) |>
+  dplyr::mutate(
+    style = factor(
+      style,
+      levels = c("core", "core_plus", "value_added", "opportunistic")
+    )
+  ) |>
+  dplyr::arrange(style) |>
+  dplyr::select(
+    style,
+    irr_project,
+    irr_equity,
+    dscr_min_bul,
+    ltv_max_fwd,
+    npv_equity
+  )
+
+# Defensive: stop if table empty (should never happen if helpers/tests are correct)
+if (nrow(tbl_print) == 0L) {
+  stop("No canonical presets were found. Check inst/extdata and helper logic.")
+}
+
+# Render table
+knitr::kable(
+  tbl_print,
+  digits = c(0, 0, 4, 4, 3, 3, 0),
+  caption = "Style presets: unlevered (project IRR) and lender-salient (equity IRR, min-DSCR, forward-LTV) indicators"
+)
+```
+
+## Risk–return cloud: project vs equity IRR
+
+The next step positions the four styles in a simple risk–return “cloud”, with unlevered project IRR on the x-axis and levered equity IRR on the y-axis. The 45-degree line represents the locus where leverage would leave IRR unchanged. Under the canonical presets, two constraints are imposed:
+
+* for each style, equity IRR is strictly higher than project IRR;
+* the leverage uplift (equity IRR minus project IRR) is non-decreasing along
+  `core --> core_plus --> value_added --> opportunistic`.
+
+These inequalities are enforced both by automated tests and by the geometry of the figure.
+
+```{r}
+tbl_rr <- styles_manifest() |>
+  dplyr::filter(style %in% c("core", "core_plus", "value_added", "opportunistic")) |>
+  dplyr::mutate(
+    style = factor(
+      style,
+      levels = c("core", "core_plus", "value_added", "opportunistic")
+    ),
+    irr_uplift = irr_equity - irr_project
+  ) |>
+  dplyr::arrange(style)
+
+if (requireNamespace("ggplot2", quietly = TRUE)) {
+  ggplot2::ggplot(
+    tbl_rr,
+    ggplot2::aes(x = irr_project, y = irr_equity, label = style, colour = style)
+  ) +
+    ggplot2::geom_abline(slope = 1, intercept = 0, linetype = 3) +
+    ggplot2::geom_point(size = 3) +
+    ggplot2::geom_text(nudge_y = 0.002, size = 3) +
+    ggplot2::scale_x_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+    ggplot2::scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+    ggplot2::labs(
+      title  = "Risk–return cloud (project vs equity IRR)",
+      x      = "IRR project (unlevered)",
+      y      = "IRR equity (levered)"
+    )
+}
+```
+
+In typical calibrations, core-like styles cluster in the lower-left part of the chart, with limited leverage-induced uplift. Non-core styles shift towards the north-east, with equity IRR increasingly distant from project IRR, reflecting both higher risk and higher target return.
+
+## Leverage–coverage map (initial LTV vs min-DSCR)
+
+The second diagnostic focuses on the credit profile of each style from a lender’s standpoint. For each preset, and under the bullet-debt scenario, it considers:
+
+* the *initial LTV* at origination (`ltv_init`, x-axis), and
+* the *minimum DSCR* over the life of the loan (`dscr_min_bul`, y-axis).
+
+The initial LTV reflects a structural leverage choice at signing, before any business-plan uncertainty has materialised. It measures how much debt is carried relative to the acquisition price (plus costs). By contrast, the minimum DSCR captures the deepest coverage trough induced by the business plan, that is, the weakest ratio of NOI to debt service once vacancy and capex have bitten into rents while interest remains due.
+
+For completeness, the manifest also tracks the maximum forward LTV (`ltv_max_fwd`), which summarises the worst ratio of outstanding debt to revalued asset value under the simulated plan. This is a *conditional* balance-sheet indicator, after value creation and repricing have played out.
+
+```{r}
+tbl_cov <- styles_manifest() |>
+  dplyr::filter(style %in% c("core", "core_plus", "value_added", "opportunistic")) |>
+  dplyr::mutate(
+    style = factor(
+      style,
+      levels = c("core", "core_plus", "value_added", "opportunistic")
+    )
+  ) |>
+  dplyr::arrange(style) |>
+  dplyr::select(
+    style,
+    irr_project,
+    irr_equity,
+    dscr_min_bul,
+    ltv_init,      # structural leverage at origination
+    ltv_max_fwd,   # worst forward LTV under the business plan
+    npv_equity
+  )
+
+if (requireNamespace("ggplot2", quietly = TRUE)) {
+  ggplot2::ggplot(
+    tbl_cov,
+    ggplot2::aes(
+      x     = ltv_init,
+      y     = dscr_min_bul,
+      label = style,
+      colour = style
+    )
+  ) +
+    ggplot2::geom_hline(yintercept = 1.2, linetype = 3) +  # illustrative DSCR guardrail
+    ggplot2::geom_vline(xintercept = 0.65, linetype = 3) + # illustrative initial-LTV guardrail
+    ggplot2::geom_point(size = 3) +
+    ggplot2::geom_text(nudge_y = 0.05, size = 3) +
+    ggplot2::scale_x_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+    ggplot2::labs(
+      title  = "Leverage–coverage map",
+      x      = "Initial LTV (bullet)",
+      y      = "Min DSCR (bullet)"
+    )
+}
+```
+
+The dashed lines illustrate generic covenant guardrails (DSCR ≈ 1.20, initial LTV ≈ 65 %). In the canonical presets:
+
+* `core` sits comfortably in the quadrant of low LTV and high DSCR;
+* `core_plus` moves closer to the guardrails but remains covenant-friendly;
+* `value_added` and `opportunistic` migrate towards higher LTV and lower DSCR, where covenant breaches become plausible if the business plan underperforms.
+
+## Covenant flags and breach counts
+
+Beyond static summaries, one often wishes to know how frequently a given style approaches or breaches covenant thresholds over the life of the loan. The next block explores this dimension, again under the bullet-debt scenario for comparability.
+
+```{r}
+guard <- list(min_dscr = 1.20, max_ltv = 0.65)
+
+breach_tbl <- styles_breach_counts(
+  styles         = c("core", "core_plus", "value_added", "opportunistic"),
+  min_dscr_guard = guard$min_dscr,
+  max_ltv_guard  = guard$max_ltv
+)
+
+knitr::kable(
+  breach_tbl,
+  caption = "Covenant-breach counts by style (bullet)"
+)
+```
+
+Under typical assumptions:
+
+* `core` and `core_plus` exhibit zero or very few breaches, even under relatively tight guardrails;
+* `value_added` and especially `opportunistic` generate more frequent or earlier breaches, concentrating credit risk in the non-core segment.
+
+## Robustness to discounting convention
+
+The canonical presets are first calibrated under a WACC-based discounting convention: the discount rate combines a cost of equity, a cost of debt and a target LTV according to the chosen `disc_method`. This choice is standard in valuation practice, but it is important to verify that the *ordinal* risk–return ranking of styles does not hinge on this specific convention.
+
+A simple robustness check consists in re-evaluating the same YAML presets under a more parsimonious `"yield_plus_growth"` rule, while leaving all cash-flow assumptions unchanged. In this alternative, the discount rate is reconstructed as
+
+* a property-yield component equal to `entry_yield`; and
+* a growth component equal to the global indexation rate `index_rate`,
+
+without explicit reference to capital structure.
+
+The helper `styles_revalue_yield_plus_growth()` performs this re-evaluation style by style and returns the leveraged equity IRR and NPV under the alternative convention. These can be compared with the baseline WACC outputs from `styles_manifest()`:
+
+```{r}
+styles_vec <- c("core", "core_plus", "value_added", "opportunistic")
+
+# Baseline (WACC) equity metrics from the manifest
+base_tbl <- styles_manifest(styles_vec) |>
+  dplyr::select(style, irr_equity, npv_equity)
+
+# Re-evaluation under the yield+growth rule
+yg_tbl <- styles_revalue_yield_plus_growth(styles_vec)
+
+rob_tbl <- dplyr::left_join(base_tbl, yg_tbl, by = "style") |>
+  dplyr::mutate(
+    delta_npv = npv_equity_y - npv_equity
+  )
+
+knitr::kable(
+  rob_tbl,
+  digits  = 4,
+  caption = "Robustness: equity IRR (invariant) and NPV under WACC vs yield+growth"
+)
+```
+
+In the current calibration, equity IRRs are identical across the two conventions (by construction), while equity NPVs differ. The persistence of the risk–return ordering across discounting schemes indicates that the style hierarchy is driven by the cash-flow patterns and leverage choices, rather than by an arbitrary discounting recipe.
+
+## Time profile of equity cash flows
+
+A further dimension of style differentiation concerns the *time profile* of leveraged equity cash flows. In the canonical presets:
+
+* `core` and `core_plus` configurations are calibrated to return a meaningful fraction of equity progressively, on the back of relatively stable NOI and modest refinancing risk;
+* `value_added` and `opportunistic` strategies tend to back-load value creation into the terminal event, with thinner interim distributions and a stronger dependence on the exit.
+
+The helper `styles_equity_cashflows()` extracts, for each style, the year-by-year equity cash flow under the leveraged scenario. Rather than using a coarse payback-period (which, in these presets, coincides with the final year for all styles), the vignette constructs a more discriminating timing indicator: the *share of total positive equity distributions received before the final year*.
+
+Formally, for each style, `share_early_equity` is defined as the ratio between:
+
+1. the sum of positive equity cash flows in years strictly earlier than the horizon; and
+2. the sum of all positive equity cash flows over the horizon.
+
+```{r}
+styles_vec <- c("core", "core_plus", "value_added", "opportunistic")
+
+# 1) Equity cash flows and horizons ----------------------------------------
+
+eq_tbl <- styles_equity_cashflows(styles_vec) |>
+  dplyr::group_by(style) |>
+  dplyr::arrange(style, year)
+
+horizon_tbl <- eq_tbl |>
+  dplyr::group_by(style) |>
+  dplyr::summarise(
+    horizon_years = max(year),
+    .groups       = "drop"
+  )
+
+eq_with_h <- dplyr::left_join(eq_tbl, horizon_tbl, by = "style")
+
+# 2) Share of total positive equity CF received before the final year ------
+
+timing_tbl <- eq_with_h |>
+  dplyr::group_by(style) |>
+  dplyr::summarise(
+    total_pos_equity  = sum(pmax(equity_cf, 0), na.rm = TRUE),
+    early_pos_equity  = sum(
+      pmax(equity_cf, 0) * (year < horizon_years),
+      na.rm = TRUE
+    ),
+    share_early_equity = dplyr::if_else(
+      total_pos_equity > 0,
+      early_pos_equity / total_pos_equity,
+      NA_real_
+    ),
+    .groups = "drop"
+  )
+
+knitr::kable(
+  timing_tbl |>
+    dplyr::select(style, share_early_equity),
+  digits  = 3,
+  caption = "Share of total positive equity distributions received before the final year"
+)
+
+if (requireNamespace("ggplot2", quietly = TRUE)) {
+  eq_cum_tbl <- eq_with_h |>
+    dplyr::group_by(style) |>
+    dplyr::mutate(cum_equity = cumsum(equity_cf))
+
+  ggplot2::ggplot(
+    eq_cum_tbl,
+    ggplot2::aes(x = year, y = cum_equity, colour = style)
+  ) +
+    ggplot2::geom_hline(yintercept = 0, linetype = 3) +
+    ggplot2::geom_line() +
+    ggplot2::labs(
+      title = "Cumulative leveraged equity cash flows by style",
+      x     = "Year",
+      y     = "Cumulative equity CF"
+    )
+}
+```
+
+In the present calibration, this metric is around 0.31–0.34 for `core` and `core_plus` (roughly one third of positive equity distributions received before the terminal year), and falls to about 0.18 for `value_added` and 0.13 for `opportunistic`. Core-like styles therefore display a more “annuity-like” profile, with a non-trivial portion of equity repaid through interim distributions, whereas non-core styles concentrate equity recovery in the final transaction.
+
+The timing indicator thus complements the risk–return and leverage–coverage diagnostics by making explicit *when* along the holding period each style actually returns capital to equity holders.
+
+## IRR decomposition: operations vs exit
+
+The styles also differ in the relative contribution of ongoing operations versus terminal value to project-level performance. In a stylised typology:
+
+* core strategies are expected to derive most of their value from intermediate NOI streams (rents net of opex and recurring capex) in a hold-to-maturity perspective;
+* opportunistic strategies are expected to exhibit a much larger share of value stemming from the terminal event, reflecting business-plan risk (repositioning, lease-up, exit timing).
+
+The helper `styles_pv_split()` approximates this decomposition by computing, for each style, the present value (discounted at the model’s DCF rate) of:
+
+* income-related cash flows from year 1 to horizon, and
+* terminal value (resale proceeds net of exit costs),
+
+and by expressing these components as shares of total present value.
+
+```{r}
+styles_vec <- c("core", "core_plus", "value_added", "opportunistic")
+
+pv_tbl <- styles_pv_split(styles_vec) |>
+  dplyr::mutate(style = factor(style, levels = styles_vec))
+
+knitr::kable(
+  pv_tbl |>
+    dplyr::select(style, share_pv_income, share_pv_resale),
+  digits = 3,
+  caption = "Present-value split between income and resale by style (discounted at DCF rate, t >= 1)"
+)
+```
+
+In line with the targeted calibration, core and core_plus configurations exhibit a higher `share_pv_income`, signalling that recurring NOI explains most of the present value. Value_added and opportunistic presets display a larger `share_pv_resale`, consistent with a greater dependence on exit conditions.
+
+## Exit-yield and rental-growth sensitivities
+
+A different perspective on style differentiation is obtained by examining how sensitive each profile is to small shocks on exit yield and on rental growth. Strategies that rely heavily on value capture at exit should exhibit a larger change in equity IRR for a given shift in exit yield; they effectively have a longer “duration” with respect to terminal-value assumptions.
+
+### Exit-yield shock
+
+The first diagnostic perturbs the exit-yield spread by ±50 basis points around its baseline value and recomputes leveraged equity IRR for each style. Formally, for each preset (s) and shock (\Delta y \in {-50, 0, +50}) bps, the helper `styles_exit_sensitivity()` shifts
+
+[
+\texttt{exit_yield_spread_bps}
+\leftarrow
+\texttt{exit_yield_spread_bps} + \Delta y
+]
+
+and runs `run_case()` under otherwise unchanged assumptions.
+
+```{r}
+## Sensitivity to +/- 50 bps on exit yield ----------------------------------
+
+styles_vec <- c("core", "core_plus", "value_added", "opportunistic")
+
+exit_sens <- styles_exit_sensitivity(
+  styles    = styles_vec,
+  delta_bps = c(-50, 0, 50)
+)
+
+knitr::kable(
+  exit_sens |>
+    tidyr::pivot_wider(
+      names_from  = shock_bps,
+      values_from = irr_equity
+    ),
+  digits  = 4,
+  caption = "Equity IRR sensitivity to +/- 50 bps exit-yield shock by style"
+)
+```
+
+In the canonical calibration, `core` and `core_plus` show relatively modest IRR changes when exit yields move by ±50 bps, consistent with a larger share of value coming from intermediate NOI. By contrast, `value_added` and `opportunistic` profiles typically exhibit a stronger IRR response to the same perturbation, reflecting their concentration of performance in the terminal value and the greater effective duration of their cash-flow profile.
+
+### Rental-growth shock
+
+A symmetric diagnostic focuses on the dependence of each style on rental growth and indexation. Here the global `index_rate` parameter is shifted by ±1 percentage point, and leveraged equity IRR is recomputed for each shocked scenario.
+
+```{r}
+## Sensitivity to rental-growth shocks --------------------------------------
+
+growth_sens <- styles_growth_sensitivity(
+  styles = styles_vec,
+  delta  = c(-0.01, 0, 0.01)
+)
+
+knitr::kable(
+  growth_sens |>
+    tidyr::pivot_wider(
+      names_from  = shock_growth,
+      values_from = irr_equity
+    ),
+  digits  = 4,
+  caption = "Equity IRR sensitivity to rental-growth shocks by style"
+)
+```
+
+This table highlights how strongly each profile depends on NOI growth to reach its target return. In line with the stylised typology, core configurations are comparatively less sensitive to a ±1 percentage-point change in indexation, as their business model rests on stabilised occupancy and moderate leverage rather than aggressive growth assumptions. Conversely, value_added and especially opportunistic strategies exhibit more pronounced IRR movements, consistent with their exposure to lease-up, reversion and rental growth embedded in the business plan.
+
+## Break-even exit yield for a target equity IRR
+
+A further synthetic indicator is the *break-even exit yield* required for each style to achieve a common target equity IRR. This provides an intuitive measure of how “tight” exit assumptions must be for the business plan to meet a given hurdle.
+
+For a style (s) and a target equity IRR (\bar{r}), the helper `styles_break_even_exit_yield()` solves, via `uniroot()`, for the exit yield (y^\ast) such that
+
+[
+\mathrm{IRR}^{\text{equity}}_s(y^\ast) = \bar{r},
+]
+
+holding all other configuration parameters fixed. In practice, the function reconstructs the spread `exit_yield_spread_bps` implied by a candidate (y^\ast), reruns `run_case()`, and searches for the root over a bounded interval.
+
+```{r}
+target_irr <- 0.10  # 10% equity IRR as illustrative hurdle
+
+be_tbl <- styles_break_even_exit_yield(
+  styles     = c("core", "core_plus", "value_added", "opportunistic"),
+  target_irr = target_irr
+)
+
+knitr::kable(
+  be_tbl,
+  digits  = 4,
+  caption = sprintf("Break-even exit yield to hit %.1f%% equity IRR by style", 100 * target_irr)
+)
+```
+
+Interpreting this table requires keeping in view the baseline equity IRRs of the four presets under their unperturbed exit yields. In the current calibration, these baselines are approximately:
+
+* `core`: ( \mathrm{IRR}_e \approx 4.7% ),
+* `core_plus`: ( \mathrm{IRR}_e \approx 7.4% ),
+* `value_added`: ( \mathrm{IRR}_e \approx 14.9% ),
+* `opportunistic`: ( \mathrm{IRR}_e \approx 27.9% ).
+
+A 10 % hurdle is therefore ambitious for the core and core_plus presets, but modest for the value_added and opportunistic ones. This asymmetry explains the pattern usually observed in `be_tbl`:
+
+* For `core`, the equity IRR never reaches 10 % within a realistic exit-yield bracket (for example ([3%, 10%])). The corresponding `be_exit_yield` is therefore `NA`. Economically, this means that, at the given purchase price and leverage, a 10 % equity IRR is simply unattainable without implausibly tight exit pricing. This is consistent with the role of core as a low-risk, low-return style.
+* For `core_plus`, the baseline IRR lies below 10 %, so the root is found by tightening the exit yield. The reported break-even exit yield is below the baseline yield and can be read as the level of pricing perfection required for a core_plus deal to attain a double-digit equity IRR.
+* For `value_added` and `opportunistic`, baseline IRRs exceed 10 %. The root is therefore reached by *widening* the exit yield (higher yield, lower price) until the IRR falls back down to 10 %. The corresponding break-even yields are markedly higher than the baselines, meaning that these non-core styles can absorb a substantial deterioration in exit pricing and still deliver 10 % to equity.
+
+Under this interpretation, the break-even table does not state that non-core styles “require tighter yields” to be viable. Instead, it quantifies how much adverse repricing each style can withstand before falling below a given equity-IRR benchmark. Core exhibits almost no buffer relative to a 10 % target; core_plus has a narrow margin; value_added and opportunistic display a much larger tolerance to exit-yield widening, reflecting both their higher ex ante returns and their greater exposure to exit-pricing risk.
+
+## Distressed exit comparison under covenant breach
+
+The same machinery used to construct baseline credit profiles can be mobilised to emulate a simplified distressed-exit mechanism. The aim is not to model a full restructuring process, but to approximate a lender-driven sale triggered when covenants are breached.
+
+In this stylised setting, a distressed exit is defined as follows:
+
+1. Under the bullet-debt scenario, the paths of DSCR and forward LTV are computed for each style.
+2. For a given covenant regime, the first period (t^\ast \ge 1) at which either
+
+   * (\mathrm{DSCR}*t < \mathrm{DSCR}*{\min}), or
+   * (LTV^{\text{fwd}}*t > LTV*{\max})
+
+   is interpreted as a *covenant breach*.
+3. If a breach occurs *before* a stylised refinancing window (for instance year 3), the exit is shifted to the start of that window; otherwise, the exit takes place at the breach year.
+4. At the distressed exit date, the exit yield is penalised by a fire-sale spread (e.g. +100 bps), and the case is re-run with a shortened horizon.
+
+Because distressed cash-flow patterns can be extreme, the equity IRR may become undefined (no sign change in the equity cash-flow vector). Rather than forcing an artefactual IRR, the diagnostic explicitly preserves such `NA` outcomes and supplements them with more robust performance indicators:
+
+* the equity multiple,
+  (\text{multiple} = \dfrac{\text{total equity returned}}{\text{total equity paid in}});
+* the associated loss percentage,
+  (\text{loss_pct} = \text{multiple} - 1).
+
+The helper `styles_distressed_exit()` (defined in the package utilities) encapsulates this logic. The vignette uses it with three illustrative covenant regimes:
+
+* a *strict* regime (DSCR 1.20, forward LTV 65 %),
+* a *baseline* regime (DSCR 1.15, forward LTV 70 %),
+* a *flexible* regime (DSCR 1.10, forward LTV 75 %),
+
+and applies a one-percentage-point fire-sale penalty to the exit yield in all regimes.
+
+```{r}
+## Distressed exit diagnostic across regimes --------------------------------
+
+# Covenant regimes: strict / baseline / flexible
+regimes <- tibble::tibble(
+  regime   = c("strict", "baseline", "flexible"),
+  min_dscr = c(1.20,      1.15,       1.10),
+  max_ltv  = c(0.65,      0.70,       0.75)
+)
+
+distress_tbl <- styles_distressed_exit(
+  styles               = c("core", "core_plus", "value_added", "opportunistic"),
+  regimes              = regimes,
+  fire_sale_bps        = 100,   # +100 bps exit-yield penalty
+  refi_min_year        = 3L,    # refinancing window opens in year 3
+  allow_year1_distress = FALSE  # breaches before year 3 --> exit at year 3
+)
+
+# For compact display in the vignette, focus on the baseline regime
+distress_baseline <- distress_tbl |>
+  dplyr::filter(regime == "baseline") |>
+  dplyr::select(
+    style,
+    breach_year,
+    breach_type,
+    irr_equity_base,
+    irr_equity_distress,
+    distress_undefined,
+    equity_multiple_base,
+    equity_multiple_distress,
+    equity_loss_pct_distress
+  ) |>
+  dplyr::arrange(style)
+
+knitr::kable(
+  distress_baseline,
+  digits  = c(0, 0, 0, 4, 4, 0, 2, 2, 2),
+  caption = paste(
+    "Baseline distressed-exit diagnostic by style (bullet debt scenario,",
+    "+100 bps fire-sale penalty; breaches before year 3 shifted to year 3)."
+  )
+)
+```
+
+This table is read as follows:
+
+* For each style, `breach_year` and `breach_type` locate the first covenant failure under the baseline regime (DSCR 1.15, forward LTV 70 %).
+* `irr_equity_base` reports the baseline leveraged IRR under the standard horizon and exit yield, while `irr_equity_distress` reports the IRR under the shortened, fire-sale horizon. When the distressed cash-flow path does not contain both negative and positive equity flows, the IRR is left undefined and flagged by `distress_undefined = TRUE`.
+* `equity_multiple_base` and `equity_multiple_distress` summarise total equity returned relative to equity paid in in the baseline and distressed cases, respectively; `equity_loss_pct_distress` reports the loss percentage implied by the distressed multiple.
+
+In a typical calibration, `core` and `core_plus` presets exhibit:
+
+* breaches only in later years of the loan path;
+* a moderate erosion of equity IRR in the distressed run (for example from about 4.7 % to about 2.6 % for `core`);
+* equity multiples that remain close to one, implying limited capital impairment.
+
+By contrast, `value_added` and especially `opportunistic` styles tend to:
+
+* experience their first breach very early in the horizon, even under a refinancing window;
+* display distressed equity IRRs that may be sharply reduced or undefined, because equity is not fully repaid within the truncated window;
+* record equity multiples well below one and strongly negative `equity_loss_pct_distress`, signalling substantial or near-total loss of the initial equity stake.
+
+This comparison operationalises, in reduced form, the idea that non-core strategies are structurally more exposed to covenant-driven forced-sale dynamics and to value capture concentrated in the terminal event. Core-like strategies, in contrast, show both delayed breaches and more resilient equity profiles, even under penalised exit conditions.
+
+## Export for audit and replication
+
+```{r}
+# Export results and breaches (CSV) to facilitate off-notebook auditing
+out_dir <- tempfile("cre_dcf_styles_")
+dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+
+readr::write_csv(tbl_print,  file.path(out_dir, "styles_summary.csv"))
+readr::write_csv(breach_tbl, file.path(out_dir, "covenant_breaches.csv"))
+
+cat(sprintf("\nArtifacts written to: %s\n", out_dir))
+```

@@ -1,0 +1,25 @@
+test_that("config: lecture/validation/normalisation", {
+  f <-system.file("extdata", "preset_default.yml", package = "cre.dcf")
+  cfg <- dcf_read_config(f)
+  expect_type(cfg, "list") # ← au lieu de expect_s3_class(..., "list")
+  expect_no_error(cfg_validate(cfg))
+  norm <- cfg_normalize(cfg)
+  expect_true(all(c("disc_rate", "exit_yield", "noi_vec", "acq_price_ht") %in% names(norm)))
+})
+
+test_that("run_from_config: pipeline complet", {
+  f <-system.file("extdata", "preset_default.yml", package = "cre.dcf")
+  res <- run_from_config(f, ltv_base = "price_ht")
+  expect_true(all(c("dcf", "debt", "full", "ratios") %in% names(res)))
+  expect_equal(min(res$full$year), 0)
+  expect_gt(max(res$full$year), 0)
+})
+test_that("config: lecture/validation/normalisation", {
+  f <-system.file("extdata", "preset_default.yml", package = "cre.dcf")
+  testthat::skip_if(f == "" || !file.exists(f), "Config d'exemple introuvable")
+  cfg <- dcf_read_config(f)
+  expect_type(cfg, "list")
+  expect_no_error(cfg_validate(cfg))
+  norm <- cfg_normalize(cfg)
+  expect_true(all(c("disc_rate", "exit_yield", "noi_vec", "acq_price_ht") %in% names(norm)))
+})

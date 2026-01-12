@@ -1,0 +1,655 @@
+---
+title: "Case study: buy-side investment memo"
+author: "Package cre.dcf"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Étude de cas : note d’investissement buy-side}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+echo    = FALSE,
+message = FALSE,
+warning = FALSE
+)
+
+library(cre.dcf)
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(scales)
+library(yaml)
+library(tibble)
+```
+
+## Purpose of this vignette
+
+This vignette mirrors a typical situation faced by a junior buy-side analyst:
+a small office asset is brought to the investment committee, and the analyst is asked to:
+
+- load a standardised configuration (preset_default) into the DCF engine,
+
+- compute the main project and equity metrics (IRR, NPV, equity multiple),
+
+- compare simple debt structures (bullet vs amortising),
+
+- document credit metrics (DSCR, forward LTV),
+
+- and finally draft a concise investment memo for the managing director.
+
+The numerical example follows the teaching case developed by Karl Delattre (CNAM ICH, Financement immobilier privé, 2020), and is encoded in the preset_default configuration shipped with the package.
+
+The objective is not to build a full-blown investment committee paper, but to show a transparent, reproducible workflow from YAML assumptions to a stylised investment note.
+
+## Setting the scene: the analyst’s brief
+
+In this fictional example, the junior analyst receives the following mandate:
+
+“We are looking at a fully-let office asset with stable rents and limited capex over a 5-year hold. Use the preset_default assumptions, run the DCF, compare a bullet and an amortising loan at 30% LTV, and prepare a short note summarising returns, leverage, and key risks.”
+
+We translate this request into three tasks:
+
+- Load the preset_default configuration and run the DCF engine.
+
+- Extract and visualise the most important indicators for investors
+(unlevered project IRR, leveraged equity IRR/NPV, equity cash-flows).
+
+- Document basic lender-side indicators (DSCR, forward LTV) and synthesise them into a short narrative memo.
+
+## Loading and tailoring preset_default.yml
+
+### Loading the preset configuration
+
+We first read the preset_default.yml file from inst/extdata.
+The configuration encodes pricing, rental assumptions, indexation, capex, debt parameters and covenant guardrails.
+
+```{r}
+
+config_path <- system.file("extdata", "preset_default.yml", package = "cre.dcf")
+stopifnot(nzchar(config_path), file.exists(config_path))
+
+cfg_default <- yaml::read_yaml(config_path)
+
+str(cfg_default, max.level = 1)
+```
+
+At this stage the analyst does not need to modify the configuration: the point of the exercise is precisely to show what the “plain vanilla” default profile looks like.
+
+### Run the DCF engine
+
+We now pass the configuration to run_case(), which:
+
+- builds the pricing block,
+- computes the unlevered DCF,
+- constructs two debt schedules (bullet and amortising),
+- computes leveraged metrics,
+- and assembles a consistent list of outputs.
+
+```{r}
+case <- run_case(cfg_default)
+
+names(case)
+```
+
+For convenience, we will keep direct references to the main components:
+
+```{r}
+pricing     <- case$pricing
+all_equity  <- case$all_equity
+leveraged   <- case$leveraged
+comparison  <- case$comparison
+cf_full     <- case$cashflows
+cfg_finance <- case$config
+```
+
+## Pricing and capital structure at t = 0
+
+### Purchase price and acquisition costs
+
+```{r}
+pricing
+```
+
+In this example, the asset is priced as follows:
+
+- net price (excluding transaction costs): `r scales::comma(pricing$price_ht)` EUR,
+- acquisition costs (fees, taxes): `r scales::comma(pricing$acq_cost)` EUR,
+- “droits inclus” acquisition base: `r scales::comma(pricing$price_di)` EUR.
+
+The DCF and the debt sizing use price_di as the financing base.
+
+### Initial LTV and capital structure
+
+The financing configuration encodes the initial loan-to-value and the debt sizing convention:
+
+```{r}
+cfg_finance
+```
+
+For the preset_default:
+
+the LTV base is the “droits inclus” price (ltv_base = "price_di"),
+
+initial LTV is `(cfg_finance$ltv_init)`,
+
+initial debt is therefore `(cfg_finance$debt_init)` EUR,
+
+initial equity ticket is `(cfg_finance$equity_init)` EUR.
+
+We can summarise the capital structure at origination in a small table:
+
+```{r}
+tab_capital_structure <- tibble::tibble(
+item   = c("Acquisition price (DI)", "Initial debt", "Initial equity", "Initial LTV"),
+amount = c(
+pricing$price_di,
+cfg_finance$debt_init,
+cfg_finance$equity_init,
+cfg_finance$ltv_init
+)
+)
+
+tab_capital_structure
+```
+
+## All-equity view: project fundamentals
+
+From the perspective of the underlying real estate project, the key outputs are the unlevered project IRR and NPV, based on the free cash-flow profile and terminal resale value.
+
+### Cash-flow table
+
+```{r}
+all_equity$cashflows
+```
+
+The last period combines:
+
+- the final year’s net operating income,
+- any capex and operating costs,
+-the terminal sale proceeds.
+
+For a quick visual check, the analyst can plot free cash-flows and sale proceeds over the life of the investment.
+
+```{r}
+cf_ae <- all_equity$cashflows
+
+ggplot(cf_ae, aes(x = factor(year))) +
+geom_col(aes(y = free_cash_flow)) +
+geom_point(aes(y = sale_proceeds)) +
+labs(
+x = "Year",
+y = "Amount (EUR)",
+title = "All-equity free cash-flows and sale proceeds"
+)
+```
+
+### Project IRR and NPV
+
+The unlevered metrics are stored directly in the all_equity object:
+
+```{r}
+all_equity[c("irr_project", "npv_project")]
+```
+
+In words:
+
+the unlevered project IRR is `r scales::percent(all_equity$irr_project, accuracy = 0.01)`,
+
+the unlevered project NPV at the chosen discount rate is
+`r scales::comma(all_equity$npv_project, accuracy = 1)` EUR.
+
+For a junior analyst, this provides the first sanity check:
+
+- the project stands roughly at break-even on a risk-adjusted basis before considering leverage.
+
+## Leveraged view: comparing debt structures
+
+### Summary table: all-equity vs bullet vs amortising
+
+The comparison$summary table aggregates key metrics for three scenarios:
+
+- all-equity,
+- a bullet loan,
+- an amortising loan with constant annuity.
+
+```{r}
+comparison$summary
+```
+
+From this table, the analyst can read:
+
+- the all-equity reference IRR and NPV,
+- the leveraged equity IRR and NPV under each debt structure,
+- the minimum DSCR over the life of the facility,
+- the maximum forward LTV based on next-period NOI.
+
+To prepare an investment memo, it is often useful to reformat the table in a more readable way:
+
+```{r}
+tab_summary <- comparison$summary %>%
+mutate(
+irr_equity    = percent(irr_equity, accuracy = 0.01),
+irr_project   = percent(irr_project, accuracy = 0.01),
+npv_equity    = comma(npv_equity, accuracy = 1),
+npv_project   = comma(npv_project, accuracy = 1),
+min_dscr      = round(min_dscr, 3),
+max_ltv_fwd   = percent(max_ltv_forward, accuracy = 0.1)
+)
+
+tab_summary
+
+```
+
+### Debt schedules
+
+The detailed debt schedules for the bullet and amortising structures are stored in comparison$details:
+
+```{r}
+sch_bullet <- comparison$details$debt_bullet$schedule
+sch_amort  <- comparison$details$debt_amort$schedule
+
+sch_bullet
+sch_amort
+```
+
+These tables show, year by year:
+
+- the interest expense,
+- the principal amortisation,
+- the total payment (debt service),
+- and the outstanding principal.
+
+### Credit ratios: DSCR and forward LTV paths
+
+The credit ratios (DSCR, interest coverage, forward LTV, debt yield) are available in the ratios tables. This is what will matter for the lender and for covenant discussions.
+
+```{r}
+rat_bullet <- comparison$details$debt_bullet$ratios
+rat_amort  <- comparison$details$debt_amort$ratios
+
+dplyr::select(rat_bullet, year, dscr, ltv_forward) %>% head()
+dplyr::select(rat_amort,  year, dscr, ltv_forward) %>% head()
+
+```
+
+For visual comparison, we can stack the two paths and plot DSCR and forward LTV over time (excluding year 0):
+
+```{r}
+rat_long <- bind_rows(
+rat_bullet  %>% mutate(structure = "Bullet"),
+rat_amort   %>% mutate(structure = "Amortising")
+) %>%
+filter(year >= 1)
+
+rat_long_dscr <- rat_long %>%
+select(year, structure, dscr) %>%
+filter(is.finite(dscr))
+
+rat_long_ltv <- rat_long %>%
+select(year, structure, ltv_forward) %>%
+filter(is.finite(ltv_forward))
+
+
+ggplot(rat_long_dscr, aes(x = year, y = dscr, group = structure)) +
+geom_line() +
+geom_point() +
+facet_wrap(~ structure) +
+geom_hline(yintercept = 1.25, linetype = "dashed") +
+labs(
+x = "Year",
+y = "DSCR (x)",
+title = "Debt service coverage ratio by structure",
+subtitle = "Dashed line: illustrative DSCR guardrail at 1.25x"
+)
+```
+
+```{r}
+ggplot(rat_long_ltv, aes(x = year, y = ltv_forward, group = structure)) +
+geom_line() +
+geom_point() +
+facet_wrap(~ structure) +
+geom_hline(yintercept = 0.65, linetype = "dashed") +
+labs(
+x = "Year",
+y = "Forward LTV",
+title = "Forward LTV by structure",
+subtitle = "Dashed line: illustrative maximum forward LTV at 65%"
+)
+```
+
+The plots make two points very clear for the analyst:
+
+- Under the bullet structure, DSCR is extremely comfortable (high coverage), with a moderate forward LTV path.
+
+- Under the amortising structure, leverage is lower but debt service is heavier, which can push DSCR closer to – or even below – typical covenant guardrails, especially if NOI underperforms.
+
+## Equity cash-flows and equity multiple
+
+### Leveraged equity cash-flows
+
+The leveraged$cashflows table stores, among other columns, the equity cash flow (equity_cf) series used to compute the leveraged IRR:
+
+```{r}
+leveraged$cashflows
+```
+
+The sign convention is:
+
+- negative at t = 0 (equity contribution),
+- positive in subsequent years (net distributions back to equity).
+
+A simple bar chart gives the analyst an immediate view of the equity profile:
+
+```{r}
+cf_lev <- leveraged$cashflows
+
+ggplot(cf_lev, aes(x = factor(year), y = equity_cf)) +
+geom_col() +
+labs(
+x = "Year",
+y = "Equity cash-flow (EUR)",
+title = "Leveraged equity cash-flow profile (default structure)"
+)
+```
+
+### Equity IRR, NPV and multiple
+
+```{r}
+leveraged[c("irr_equity", "npv_equity")]
+```
+
+For documentation purposes, the analyst can also recompute the equity multiple using the helper provided by the package:
+
+```{r}
+em <- equity_multiple_safe(cf_lev$equity_cf)
+em
+```
+
+In narrative form:
+
+- leveraged equity IRR (default structure) is `r scales::percent(leveraged$irr_equity, accuracy = 0.01)`,
+- leveraged equity NPV is `r scales::comma(leveraged$npv_equity, accuracy = 1)` EUR,
+- equity multiple is approximately `r round(em, 2)`x.
+
+These three indicators are typically the core of the buy-side decision.
+
+## Exploring alternative financing structures
+
+In many investment-committee settings, the junior analyst is expected not only to assess the project on an all-equity basis and under a single leverage profile, but also to explore how equity performance and credit risk evolve when leverage and repayment structures change.
+
+In this section, we keep the *same real-estate cash-flow profile* as in the base case (the Delattre teaching example encoded in `preset_default.yml`), and vary only the **financing structure** around four canonical variants:
+
+- 100% equity (no leverage),
+- 30% LTV, bullet loan, 2% interest rate,
+- 70% LTV, bullet loan, 3% interest rate,
+- 70% LTV, amortising loan, 2.5% interest rate.
+
+The aim is to build a compact comparison grid of equity IRRs, NPVs and basic credit indicators (DSCR, forward LTV) across these financing cases.
+
+### Normalising the configuration and rebuilding the unlevered DCF
+
+We reuse the YAML configuration already loaded as `cfg_default`, and normalise it exactly as `run_case()` does. This provides a consistent bundle of inputs for the DCF engine.
+
+```{r}
+# Normalised configuration (same logic as in run_case())
+norm <- cfg_normalize(cfg_default)
+
+# Acquisition base consistent with the case object
+ltv_base_used <- case$config$ltv_base
+
+acq_price_scen <- switch(
+  ltv_base_used,
+  "price_di" = norm$acq_price_di,
+  "price_ht" = norm$acq_price_ht,
+  "value"    = {
+    stopifnot(!is.null(norm$noi_vec), length(norm$noi_vec) >= 1L)
+    norm$noi_vec[1] / cfg_default$entry_yield
+  }
+)
+
+# Rebuild the unlevered DCF result for scenario reuse
+dcf_res_scen <- dcf_calculate(
+  acq_price          = acq_price_scen,
+  entry_yield        = cfg_default$entry_yield,
+  exit_yield         = norm$exit_yield,
+  horizon_years      = length(norm$noi_vec),
+  disc_rate          = norm$disc_rate,
+  exit_cost          = norm$exit_cost,
+  capex              = norm$capex_vec,
+  opex               = norm$opex_vec,
+  noi                = norm$noi_vec
+)
+
+maturity_scen <- norm$maturity
+```
+
+### Scenario grid and extraction helper
+
+We define a small scenario grid, then loop over it using compare_financing_scenarios(). For the pure 100% equity case, we simply reuse the all_equity metrics that have already been computed.
+
+```{r}
+library(tibble)
+
+scenarios <- tibble(
+scenario_id = c(
+"eq_100",
+"ltv30_bullet_2",
+"ltv70_bullet_3",
+"ltv70_amort_2_5"
+),
+label = c(
+"100% equity (no leverage)",
+"30% LTV, bullet, 2%",
+"70% LTV, bullet, 3%",
+"70% LTV, amortising, 2.5%"
+),
+ltv   = c(0.00, 0.30, 0.70, 0.70),
+rate  = c(0.00, 0.02, 0.03, 0.025),
+type  = c(NA_character_, "bullet", "bullet", "amort")
+)
+
+# Small helper to pick the relevant row from compare_financing_scenarios()
+
+extract_row <- function(res, type) {
+  if (is.na(type) || type == "all_equity") {
+  dplyr::filter(res$summary, scenario == "all_equity")
+  } else if (type == "bullet") {
+  dplyr::filter(res$summary, scenario == "debt_bullet")
+  } else {
+  dplyr::filter(res$summary, scenario == "debt_amort")
+  }
+}
+```
+
+### Running the financing variants
+
+For each scenario, we either:
+
+- reuse the already-computed all-equity metrics (for 100% equity),
+
+- or call compare_financing_scenarios() with the appropriate LTV and interest rate, and extract the bullet or amortising line from its summary table.
+
+```{r}
+rows <- lapply(seq_len(nrow(scenarios)), function(i) {
+sc <- scenarios[i, ]
+
+if (sc$ltv == 0) {
+# Pure all-equity case: reuse unlevered metrics
+tibble(
+scenario_id   = sc$scenario_id,
+label         = sc$label,
+ltv           = sc$ltv,
+rate          = sc$rate,
+structure     = "all_equity",
+irr_equity    = all_equity$irr_project,
+npv_equity    = all_equity$npv_project,
+irr_project   = all_equity$irr_project,
+npv_project   = all_equity$npv_project,
+min_dscr      = NA_real_,
+max_ltv_fwd   = NA_real_
+)
+} else {
+comp <- compare_financing_scenarios(
+dcf_res  = dcf_res_scen,
+acq_price = acq_price_scen,
+ltv       = sc$ltv,
+rate      = sc$rate,
+maturity  = maturity_scen
+)
+
+row_summary <- extract_row(comp, sc$type)
+
+tibble(
+  scenario_id   = sc$scenario_id,
+  label         = sc$label,
+  ltv           = sc$ltv,
+  rate          = sc$rate,
+  structure     = ifelse(is.na(sc$type), "all_equity", sc$type),
+  irr_equity    = row_summary$irr_equity,
+  npv_equity    = row_summary$npv_equity,
+  irr_project   = row_summary$irr_project,
+  npv_project   = row_summary$npv_project,
+  min_dscr      = row_summary$min_dscr,
+  max_ltv_fwd   = row_summary$max_ltv_forward
+)
+
+}
+})
+
+tab_financing_raw <- dplyr::bind_rows(rows)
+tab_financing_raw
+```
+
+### Formatting the comparison table
+
+Finally, we format the comparison table for direct inclusion in an investment note or slide deck.
+
+```{r}
+tab_financing <- tab_financing_raw %>%
+dplyr::mutate(
+ltv         = percent(ltv, accuracy = 1),
+rate        = ifelse(rate > 0, percent(rate, accuracy = 0.1), "n/a"),
+irr_equity  = percent(irr_equity, accuracy = 0.01),
+irr_project = percent(irr_project, accuracy = 0.01),
+npv_equity  = comma(npv_equity, accuracy = 1),
+npv_project = comma(npv_project, accuracy = 1),
+min_dscr    = round(min_dscr, 3),
+max_ltv_fwd = dplyr::if_else(
+is.finite(max_ltv_fwd),
+percent(max_ltv_fwd, accuracy = 0.1),
+NA_character_
+)
+)
+
+tab_financing
+```
+
+## Drafting a short investment memo
+
+### Extracting key numbers
+
+Before writing the memo, it is useful to consolidate the most important figures in a single table that can be copy-pasted into a presentation or internal note.
+
+```{r}
+# All-equity metrics
+
+irr_proj_ae <- all_equity$irr_project
+npv_proj_ae <- all_equity$npv_project
+
+# Leveraged metrics (bullet and amortising structures)
+
+irr_eq_lev_bullet <- leveraged$irr_equity
+npv_eq_lev_bullet <- leveraged$npv_equity
+
+# Add results for the 70% LTV scenarios (bullet and amortising) to the table
+
+irr_eq_lev_bullet_70 <- comparison$details$debt_bullet$metrics$irr_equity[comparison$details$debt_bullet$metrics$scenario == "levered"]
+npv_eq_lev_bullet_70 <- comparison$details$debt_bullet$metrics$npv_equity[comparison$details$debt_bullet$metrics$scenario == "levered"]
+
+irr_eq_lev_amort_70 <- comparison$details$debt_amort$metrics$irr_equity[comparison$details$debt_amort$metrics$scenario == "levered"]
+npv_eq_lev_amort_70 <- comparison$details$debt_amort$metrics$npv_equity[comparison$details$debt_amort$metrics$scenario == "levered"]
+
+# Credit metrics for the bullet case and amortising case
+
+rat_bullet <- rat_bullet
+min_dscr_bullet <- suppressWarnings(min(rat_bullet$dscr[rat_bullet$year >= 1], na.rm = TRUE))
+max_ltv_bullet  <- suppressWarnings(max(rat_bullet$ltv_forward[rat_bullet$year >= 1], na.rm = TRUE))
+
+rat_amort <- rat_amort
+min_dscr_amort <- suppressWarnings(min(rat_amort$dscr[rat_amort$year >= 1], na.rm = TRUE))
+max_ltv_amort <- suppressWarnings(max(rat_amort$ltv_forward[rat_amort$year >= 1], na.rm = TRUE))
+
+# Combine all metrics for all financing scenarios
+
+tab_memo <- tibble::tibble(
+item   = c(
+"Acquisition price (DI)",
+"Initial LTV",
+"Unlevered project IRR",
+"Unlevered project NPV",
+"Leveraged equity IRR (30% LTV, bullet)",
+"Leveraged equity NPV (30% LTV, bullet)",
+"Leveraged equity IRR (70% LTV, bullet)",
+"Leveraged equity NPV (70% LTV, bullet)",
+"Leveraged equity IRR (70% LTV, amortising)",
+"Leveraged equity NPV (70% LTV, amortising)",
+"Minimum DSCR (bullet)",
+"Maximum forward LTV (bullet)",
+"Minimum DSCR (amortising)",
+"Maximum forward LTV (amortising)",
+"Equity multiple (bullet)"
+),
+value  = c(
+scales::comma(pricing$price_di),
+scales::percent(cfg_finance$ltv_init, accuracy = 0.1),
+scales::percent(irr_proj_ae, accuracy = 0.01),
+scales::comma(npv_proj_ae, accuracy = 1),
+scales::percent(irr_eq_lev_bullet, accuracy = 0.01),
+scales::comma(npv_eq_lev_bullet, accuracy = 1),
+scales::percent(irr_eq_lev_bullet_70, accuracy = 0.01),
+scales::comma(npv_eq_lev_bullet_70, accuracy = 1),
+scales::percent(irr_eq_lev_amort_70, accuracy = 0.01),
+scales::comma(npv_eq_lev_amort_70, accuracy = 1),
+round(min_dscr_bullet, 3),
+scales::percent(max_ltv_bullet, accuracy = 0.1),
+round(min_dscr_amort, 3),
+scales::percent(max_ltv_amort, accuracy = 0.1),
+round(em, 2)  # This still refers to the initial equity multiple (bullet scenario)
+)
+)
+
+tab_memo
+```
+
+### Example narrative
+
+The junior analyst can now translate the table into a short, structured commentary. The text below is only a template; in practice, it can be refined and expanded depending on the audience:
+
+**Deal summary.** The asset is acquired for `r scales::comma(pricing$price_di)` EUR "droits inclus".  
+The financing structure assumes an initial LTV of `r scales::percent(cfg_finance$ltv_init, accuracy = 0.1)`, corresponding to an opening loan of `r scales::comma(cfg_finance$debt_init)` EUR and an initial equity ticket of `r scales::comma(cfg_finance$equity_init)` EUR.
+
+**Unlevered performance.** On an all-equity basis, the 5-year DCF yields an unlevered project IRR of `r scales::percent(irr_proj_ae, accuracy = 0.01)` and an NPV of `r scales::comma(npv_proj_ae, accuracy = 1)` EUR at the chosen discount rate.  
+The project is therefore marginally value-creating before leverage, with most of the value coming from the terminal resale.
+
+**Leveraged performance.**
+
+- For the **30% LTV, bullet loan** structure, the leveraged equity IRR reaches `r scales::percent(irr_eq_lev_bullet, accuracy = 0.01)`, for an equity NPV of `r scales::comma(npv_eq_lev_bullet, accuracy = 1)` EUR and an equity multiple of about `r round(em, 2)`x. Leverage thus adds a moderate but meaningful uplift to equity returns compared to the all-equity case.
+  
+- For the **70% LTV, bullet loan** structure, the leveraged equity IRR increases to `r scales::percent(irr_eq_lev_bullet_70, accuracy = 0.01)`, with an NPV of `r scales::comma(npv_eq_lev_bullet_70, accuracy = 1)` EUR. The higher leverage leads to significantly higher returns, but at the cost of increasing the minimum DSCR to `r round(min_dscr_bullet, 3)`x and the maximum forward LTV to `r scales::percent(max_ltv_bullet, accuracy = 0.1)`.
+
+- For the **70% LTV, amortising loan** structure, the leveraged equity IRR is `r scales::percent(irr_eq_lev_amort_70, accuracy = 0.01)` and the NPV is `r scales::comma(npv_eq_lev_amort_70, accuracy = 1)` EUR. The amortisation schedule leads to lower leverage, making the debt more manageable but resulting in a lower equity IRR. Minimum DSCR is `r round(min_dscr_amort, 3)`x, and maximum forward LTV is `r scales::percent(max_ltv_amort, accuracy = 0.1)`.
+
+**Credit profile.**
+
+- The **bullet debt structure** remains the most risky from a credit perspective, with the minimum DSCR dipping below typical covenants in year 5, at `r round(min_dscr_bullet, 3)`x. The maximum forward LTV also rises to `r scales::percent(max_ltv_bullet, accuracy = 0.1)`, but remains below 65%, which is acceptable for most lenders.
+
+- The **amortising structure** is slightly more conservative. The DSCR remains above 1x for the entire investment horizon, and the forward LTV is also much lower, reaching `r scales::percent(max_ltv_amort, accuracy = 0.1)`. This structure therefore offers a better balance between risk and return.
+
+**Key sensitivities and risks.** Given the relatively short hold period and the importance of the terminal value, returns are sensitive to exit yield assumptions and potential softening of market pricing at year 5. Rental cash-flows are stable under the preset, but adverse reversion at lease expiry or higher vacancy at exit would directly impact both unlevered and leveraged performance.  
+From a lender’s standpoint, the main residual risk is therefore valuation risk at exit rather than income shortfall during the life of the loan.
+
+This narrative, combined with the tables and charts above, forms a compact yet complete junior-analyst-level investment note. Because every number is directly generated from `run_case(cfg_default)`, the memo is fully reproducible and can be stress-tested by adjusting the YAML configuration or by applying scenario shocks (rental growth, exit yields, LTV, interest rates) in separate notebooks.

@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Package cre.dcf" />
+
+<meta name="date" content="2026-01-08" />
+
+<title>Glossary of CRE finance and DCF terms</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Glossary of CRE finance and DCF terms</h1>
+<h4 class="author">Package cre.dcf</h4>
+<h4 class="date">2026-01-08</h4>
+
+
+
+<div id="aim" class="section level2">
+<h2>Aim</h2>
+<p>This vignette summarises the main discounted cash flow and debt
+notions used throughout the cre.dcf package. Each term is given in
+English and French with a short operational definition.</p>
+</div>
+<div id="full-glossary" class="section level2">
+<h2>Full glossary</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>cre_glossary <span class="sc">|&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">arrange</span>(term_en) <span class="sc">|&gt;</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">select</span>(term_en, term_fr, definition_en, definition_fr, category, subcategory) <span class="sc">|&gt;</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table>
+<colgroup>
+<col width="6%" />
+<col width="7%" />
+<col width="34%" />
+<col width="45%" />
+<col width="3%" />
+<col width="3%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">term_en</th>
+<th align="left">term_fr</th>
+<th align="left">definition_en</th>
+<th align="left">definition_fr</th>
+<th align="left">category</th>
+<th align="left">subcategory</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Amortizing loan</td>
+<td align="left">Prêt amortissable</td>
+<td align="left">Debt structure where each period includes both interest
+and principal repayment, reducing the outstanding balance over time. In
+the package it typically lowers forward [[LTV]] and improves [[DSCR]]
+compared to a bullet.</td>
+<td align="left">Structure de dette dans laquelle chaque échéance
+comprend intérêts et remboursement de principal, ce qui réduit l’encours
+au fil du temps. Dans le package, elle tend à diminuer le [[LTV]]
+prospectif et à améliorer le [[DSCR]] par rapport à un prêt in
+fine.</td>
+<td align="left">debt_structure</td>
+<td align="left">amortisation_profile</td>
+</tr>
+<tr class="even">
+<td align="left">Bullet loan</td>
+<td align="left">Prêt in fine (bullet)</td>
+<td align="left">Debt structure where only interest is paid during the
+life of the loan and the principal is repaid in full at maturity. In the
+package, this structure maximises leverage and refinancing risk.</td>
+<td align="left">Structure de dette dans laquelle seuls les intérêts
+sont payés pendant la durée du prêt et le principal est remboursé en une
+fois à l’échéance. Dans le package, cette structure maximise le levier
+et le risque de refinancement.</td>
+<td align="left">debt_structure</td>
+<td align="left">amortisation_profile</td>
+</tr>
+<tr class="odd">
+<td align="left">Capital expenditure (Capex)</td>
+<td align="left">Dépenses d’investissement (Capex)</td>
+<td align="left">Non-recurring investment outlays dedicated to
+improving, refurbishing or repositioning the property. In value-added
+and opportunistic scenarios, capex profiles are often front-loaded.</td>
+<td align="left">Dépenses d’investissement non récurrentes consacrées à
+l’amélioration, la réhabilitation ou le repositionnement de l’actif.
+Dans les scénarios value-added et opportunistes, les profils de capex
+sont souvent concentrés en début de période.</td>
+<td align="left">cash_flow</td>
+<td align="left">investment</td>
+</tr>
+<tr class="even">
+<td align="left">Capitalisation rate (cap rate)</td>
+<td align="left">Taux de capitalisation (cap rate)</td>
+<td align="left">Yield used to convert a single-year [[NOI]] into a
+capital value by division (Value = NOI / cap rate). In practice, entry
+and exit yields in the package play a similar role.</td>
+<td align="left">Rendement utilisé pour convertir un [[NOI]] annuel en
+valeur de capital par division (Valeur = NOI / cap rate). En pratique,
+les taux d’entrée et de sortie du package remplissent un rôle
+similaire.</td>
+<td align="left">yield_pricing</td>
+<td align="left">valuation</td>
+</tr>
+<tr class="odd">
+<td align="left">Debt service coverage ratio (DSCR)</td>
+<td align="left">Taux de couverture du service de la dette (DSCR)</td>
+<td align="left">Ratio of net operating income to debt service (interest
+plus amortisation). Values significantly above 1.0 indicate that
+property cash flows cover contractual debt payments with margin. The
+package tracks DSCR paths and minima.</td>
+<td align="left">Rapport entre le résultat net d’exploitation (NOI) et
+le service de la dette (intérêts + amortissement). Des valeurs nettement
+supérieures à 1,0 indiquent que les flux de trésorerie de l’actif
+couvrent les échéances de dette avec marge. Le package suit les
+trajectoires de DSCR et leurs minima.</td>
+<td align="left">debt_metrics</td>
+<td align="left">covenant</td>
+</tr>
+<tr class="even">
+<td align="left">Debt yield</td>
+<td align="left">Rendement de la dette (debt yield)</td>
+<td align="left">Ratio of [[NOI]] to outstanding loan balance,
+independent of interest rate and amortisation profile. Used as a more
+conservative leverage metric in some lending practices.</td>
+<td align="left">Rapport entre le [[NOI]] et l’encours de dette,
+indépendant du taux d’intérêt et du profil d’amortissement. Utilisé
+comme métrique de levier plus prudente dans certaines pratiques de
+financement.</td>
+<td align="left">debt_metrics</td>
+<td align="left">leverage</td>
+</tr>
+<tr class="odd">
+<td align="left">Discount rate</td>
+<td align="left">Taux d’actualisation</td>
+<td align="left">Rate used to discount future cash flows to present
+value in a [[DCF]] model. In the package it can be specified directly or
+derived from a [[WACC]].</td>
+<td align="left">Taux appliqué pour actualiser les flux de trésorerie
+futurs dans un modèle [[DCF]]. Dans le package, il peut être fixé
+directement ou calculé à partir d’un [[WACC]].</td>
+<td align="left">discounted_cash_flow</td>
+<td align="left">parameter</td>
+</tr>
+<tr class="even">
+<td align="left">Discounted cash flow (DCF)</td>
+<td align="left">Actualisation des flux de trésorerie (DCF)</td>
+<td align="left">Valuation method that prices a [[commercial real
+estate]] asset as the present value of expected future cash flows,
+discounted at a rate reflecting time value of money and project
+risk.</td>
+<td align="left">Méthode de valorisation qui estime la valeur d’un actif
+[[immobilier d’entreprise]] comme la somme actualisée des flux futurs
+attendus, à un taux reflétant la valeur temps de l’argent et le risque
+du projet.</td>
+<td align="left">discounted_cash_flow</td>
+<td align="left">valuation</td>
+</tr>
+<tr class="odd">
+<td align="left">Entry yield</td>
+<td align="left">Rendement à l’acquisition (entry yield)</td>
+<td align="left">Initial yield implied by the relationship between
+acquisition price and forward or current [[NOI]]. In the package it is
+an input used, with costs, to anchor the initial pricing of the
+asset.</td>
+<td align="left">Rendement initial déduit du rapport entre le prix
+d’acquisition et le [[NOI]] courant ou anticipé. Dans le package, c’est
+un paramètre d’entrée qui, avec les coûts, ancre la valorisation
+initiale de l’actif.</td>
+<td align="left">yield_pricing</td>
+<td align="left">entry</td>
+</tr>
+<tr class="even">
+<td align="left">Exit yield</td>
+<td align="left">Rendement à la sortie (exit yield)</td>
+<td align="left">Yield applied to stabilised [[NOI]] in the terminal
+year to determine the exit value of the property (sale price before
+transaction costs). Exit yield levels and spreads are central in the
+package scenarios.</td>
+<td align="left">Taux appliqué au [[NOI]] stabilisé de la dernière année
+pour déterminer la valeur de sortie de l’actif (prix de cession avant
+frais). Le niveau et l’écart de rendement de sortie sont centraux dans
+les scénarios du package.</td>
+<td align="left">yield_pricing</td>
+<td align="left">exit</td>
+</tr>
+<tr class="odd">
+<td align="left">Financial covenant</td>
+<td align="left">Covenant financier</td>
+<td align="left">Contractual test attached to a loan, typically based on
+leverage (e.g. [[LTV]]) or coverage (e.g. [[DSCR]]), that must remain
+within predefined thresholds. The package tracks covenant breaches along
+the debt path.</td>
+<td align="left">Test contractuel associé à un prêt, généralement fondé
+sur le levier (par exemple [[LTV]]) ou la couverture (par exemple
+[[DSCR]]), qui doit rester dans des bornes prédéfinies. Le package
+comptabilise les franchissements de seuils le long de la trajectoire de
+dette.</td>
+<td align="left">debt_metrics</td>
+<td align="left">constraint</td>
+</tr>
+<tr class="even">
+<td align="left">Forward LTV</td>
+<td align="left">LTV prospectif (forward LTV)</td>
+<td align="left">Loan-to-value ratio projected over time in the model,
+for example after amortisation and changes in property value. The
+package reports a maximum forward LTV over the horizon.</td>
+<td align="left">Ratio prêt-valeur projeté dans le temps, par exemple
+après amortissement et évolution de la valeur de l’actif. Le package
+rapporte notamment un LTV prospectif maximal sur l’horizon.</td>
+<td align="left">debt_metrics</td>
+<td align="left">leverage</td>
+</tr>
+<tr class="odd">
+<td align="left">Free cash flow (FCF)</td>
+<td align="left">Flux de trésorerie libre (FCF)</td>
+<td align="left">Cash flow available to equity or to the project after
+operating income, operating expenses, capital expenditure and, when
+relevant, debt service. In the package, FCF is the basis for IRR and NPV
+calculations.</td>
+<td align="left">Flux de trésorerie disponible pour les fonds propres ou
+pour le projet après revenu d’exploitation, charges, capex et, le cas
+échéant, service de la dette. Dans le package, le FCF sert de base aux
+calculs de VAN et TRI.</td>
+<td align="left">cash_flow</td>
+<td align="left">summary</td>
+</tr>
+<tr class="even">
+<td align="left">Internal rate of return (IRR)</td>
+<td align="left">Taux de rendement interne (TRI)</td>
+<td align="left">Discount rate that sets the net present value of all
+cash flows equal to zero. Used in the package as a summary indicator of
+project IRR (all-equity) and levered equity IRR.</td>
+<td align="left">Taux d’actualisation qui annule la valeur actuelle
+nette de tous les flux (VAN = 0). Utilisé dans le package comme
+indicateur synthétique de performance du projet (TRI projet) et des
+fonds propres (TRI equity).</td>
+<td align="left">discounted_cash_flow</td>
+<td align="left">return</td>
+</tr>
+<tr class="odd">
+<td align="left">Loan maturity</td>
+<td align="left">Maturité du prêt</td>
+<td align="left">Time between loan drawdown and final contractual
+repayment. In the package it is expressed in years and interacts with
+the investment horizon and amortisation profile.</td>
+<td align="left">Durée entre le déblocage du prêt et son remboursement
+contractuel final. Dans le package, elle est exprimée en années et
+interagit avec l’horizon d’investissement et le profil
+d’amortissement.</td>
+<td align="left">debt_structure</td>
+<td align="left">tenor</td>
+</tr>
+<tr class="even">
+<td align="left">Loan-to-value ratio (LTV)</td>
+<td align="left">Ratio prêt-valeur (LTV)</td>
+<td align="left">Outstanding loan balance divided by the market value or
+acquisition price of the property. Higher LTVs mean higher leverage and
+thinner equity buffers.</td>
+<td align="left">Encours de dette rapporté à la valeur de marché ou au
+prix d’acquisition de l’actif. Un LTV élevé traduit un effet de levier
+plus important et un coussin de fonds propres plus réduit.</td>
+<td align="left">debt_metrics</td>
+<td align="left">leverage</td>
+</tr>
+<tr class="odd">
+<td align="left">Net operating income (NOI)</td>
+<td align="left">Résultat net d’exploitation (NOI)</td>
+<td align="left">Property-level income after rental revenues, vacancy
+and operating expenses, before capital expenditure, financing costs and
+taxes. In the package it drives both cash flows and [[DSCR]].</td>
+<td align="left">Revenu d’exploitation de l’actif après loyers, vacance
+et charges d’exploitation, avant capex, frais financiers et impôts. Dans
+le package, il alimente les flux de trésorerie et le calcul du
+[[DSCR]].</td>
+<td align="left">cash_flow</td>
+<td align="left">operating</td>
+</tr>
+<tr class="even">
+<td align="left">Net present value (NPV)</td>
+<td align="left">Valeur actuelle nette (VAN)</td>
+<td align="left">Sum of all cash flows discounted at a given rate. A
+positive NPV indicates that the project creates value above the required
+return, while a negative NPV indicates value destruction.</td>
+<td align="left">Somme de tous les flux de trésorerie actualisés à un
+taux donné. Une VAN positive indique que le projet crée de la valeur
+au-delà du rendement exigé, une VAN négative qu’il en détruit.</td>
+<td align="left">discounted_cash_flow</td>
+<td align="left">valuation</td>
+</tr>
+<tr class="odd">
+<td align="left">Operating expenses (Opex)</td>
+<td align="left">Charges d’exploitation (Opex)</td>
+<td align="left">Recurring expenses required to operate the property
+(taxes, maintenance, property management, utilities, etc.), usually
+modelled as a deduction from gross income to arrive at [[NOI]].</td>
+<td align="left">Dépenses récurrentes nécessaires au fonctionnement de
+l’actif (taxes, entretien, gestion, charges communes, énergie, etc.),
+généralement déduites du revenu brut pour obtenir le [[NOI]].</td>
+<td align="left">cash_flow</td>
+<td align="left">operating</td>
+</tr>
+<tr class="even">
+<td align="left">Sale proceeds</td>
+<td align="left">Produit de cession</td>
+<td align="left">Net cash inflow received when the property is sold at
+the end of the horizon, typically computed from an exit yield applied to
+stabilised [[NOI]] minus transaction costs and debt repayment.</td>
+<td align="left">Encaissement net perçu lors de la vente de l’actif en
+fin d’horizon, généralement calculé à partir d’un rendement de sortie
+appliqué au [[NOI]] stabilisé, diminué des frais de transaction et du
+remboursement de la dette.</td>
+<td align="left">cash_flow</td>
+<td align="left">terminal</td>
+</tr>
+<tr class="odd">
+<td align="left">Weighted average cost of capital (WACC)</td>
+<td align="left">Coût moyen pondéré du capital (CMPC / WACC)</td>
+<td align="left">Blended discount rate combining cost of equity and
+after-tax cost of debt, weighted by their target proportions in the
+capital structure. When disc_method = “wacc”, project cash flows are
+discounted at this rate.</td>
+<td align="left">Taux d’actualisation combinant le coût des fonds
+propres et le coût après impôt de la dette, pondérés par leurs poids
+cibles dans la structure de capital. Lorsque disc_method = “wacc”, les
+flux du projet sont actualisés à ce taux.</td>
+<td align="left">discounted_cash_flow</td>
+<td align="left">parameter</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="debt-metrics" class="section level2">
+<h2>Debt metrics</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>cre_glossary <span class="sc">|&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">filter</span>(category <span class="sc">==</span> <span class="st">&quot;debt_metrics&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="fu">select</span>(term_en, term_fr, definition_en, definition_fr) <span class="sc">|&gt;</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table>
+<colgroup>
+<col width="5%" />
+<col width="8%" />
+<col width="37%" />
+<col width="48%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">term_en</th>
+<th align="left">term_fr</th>
+<th align="left">definition_en</th>
+<th align="left">definition_fr</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Financial covenant</td>
+<td align="left">Covenant financier</td>
+<td align="left">Contractual test attached to a loan, typically based on
+leverage (e.g. [[LTV]]) or coverage (e.g. [[DSCR]]), that must remain
+within predefined thresholds. The package tracks covenant breaches along
+the debt path.</td>
+<td align="left">Test contractuel associé à un prêt, généralement fondé
+sur le levier (par exemple [[LTV]]) ou la couverture (par exemple
+[[DSCR]]), qui doit rester dans des bornes prédéfinies. Le package
+comptabilise les franchissements de seuils le long de la trajectoire de
+dette.</td>
+</tr>
+<tr class="even">
+<td align="left">Debt yield</td>
+<td align="left">Rendement de la dette (debt yield)</td>
+<td align="left">Ratio of [[NOI]] to outstanding loan balance,
+independent of interest rate and amortisation profile. Used as a more
+conservative leverage metric in some lending practices.</td>
+<td align="left">Rapport entre le [[NOI]] et l’encours de dette,
+indépendant du taux d’intérêt et du profil d’amortissement. Utilisé
+comme métrique de levier plus prudente dans certaines pratiques de
+financement.</td>
+</tr>
+<tr class="odd">
+<td align="left">Debt service coverage ratio (DSCR)</td>
+<td align="left">Taux de couverture du service de la dette (DSCR)</td>
+<td align="left">Ratio of net operating income to debt service (interest
+plus amortisation). Values significantly above 1.0 indicate that
+property cash flows cover contractual debt payments with margin. The
+package tracks DSCR paths and minima.</td>
+<td align="left">Rapport entre le résultat net d’exploitation (NOI) et
+le service de la dette (intérêts + amortissement). Des valeurs nettement
+supérieures à 1,0 indiquent que les flux de trésorerie de l’actif
+couvrent les échéances de dette avec marge. Le package suit les
+trajectoires de DSCR et leurs minima.</td>
+</tr>
+<tr class="even">
+<td align="left">Loan-to-value ratio (LTV)</td>
+<td align="left">Ratio prêt-valeur (LTV)</td>
+<td align="left">Outstanding loan balance divided by the market value or
+acquisition price of the property. Higher LTVs mean higher leverage and
+thinner equity buffers.</td>
+<td align="left">Encours de dette rapporté à la valeur de marché ou au
+prix d’acquisition de l’actif. Un LTV élevé traduit un effet de levier
+plus important et un coussin de fonds propres plus réduit.</td>
+</tr>
+<tr class="odd">
+<td align="left">Forward LTV</td>
+<td align="left">LTV prospectif (forward LTV)</td>
+<td align="left">Loan-to-value ratio projected over time in the model,
+for example after amortisation and changes in property value. The
+package reports a maximum forward LTV over the horizon.</td>
+<td align="left">Ratio prêt-valeur projeté dans le temps, par exemple
+après amortissement et évolution de la valeur de l’actif. Le package
+rapporte notamment un LTV prospectif maximal sur l’horizon.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="using-the-glossary-programmatically" class="section level2">
+<h2>Using the glossary programmatically</h2>
+<p>The glossary can be accessed directly:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">head</span>(cre_glossary)</span></code></pre></div>
+<pre><code>## # A tibble: 6 × 8
+##   term_id       term_en term_fr definition_en definition_fr category subcategory
+##   &lt;chr&gt;         &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;         &lt;chr&gt;         &lt;chr&gt;    &lt;chr&gt;      
+## 1 amortizing_l… Amorti… Prêt a… Debt structu… Structure de… debt_st… amortisati…
+## 2 bullet_loan   Bullet… Prêt i… Debt structu… Structure de… debt_st… amortisati…
+## 3 cap_rate      Capita… Taux d… Yield used t… Rendement ut… yield_p… valuation  
+## 4 capex         Capita… Dépens… Non-recurrin… Dépenses d’i… cash_fl… investment 
+## 5 covenant      Financ… Covena… Contractual … Test contrac… debt_me… constraint 
+## 6 dcf           Discou… Actual… Valuation me… Méthode de v… discoun… valuation  
+## # ℹ 1 more variable: see_also &lt;chr&gt;</code></pre>
+<p>It can also be queried inside any notebook or report:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>cre_glossary <span class="sc">|&gt;</span> <span class="fu">filter</span>(term_id <span class="sc">==</span> <span class="st">&quot;irr&quot;</span>)</span></code></pre></div>
+<pre><code>## # A tibble: 1 × 8
+##   term_id term_en       term_fr definition_en definition_fr category subcategory
+##   &lt;chr&gt;   &lt;chr&gt;         &lt;chr&gt;   &lt;chr&gt;         &lt;chr&gt;         &lt;chr&gt;    &lt;chr&gt;      
+## 1 irr     Internal rat… Taux d… Discount rat… Taux d’actua… discoun… return     
+## # ℹ 1 more variable: see_also &lt;chr&gt;</code></pre>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

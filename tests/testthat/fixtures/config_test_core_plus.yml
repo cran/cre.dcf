@@ -1,0 +1,95 @@
+# ===================== PARAMÈTRES GÉNÉRAUX =====================
+purchase_year: 2020          # année 1 du BP
+horizon_years: 5             # durée de détention (années)
+index_rate: 0.01             # indexation annuelle (ICC)
+
+entry_yield: 0.065           # cap-rate d'entrée (en décimal)
+acq_cost_rate: 0.075         # droits/frais (actif) ⇒ prix DI = HT * (1 + acq_cost_rate)
+exit_yield_spread_bps: -100  # spread de sortie vs entry_yield (en bps)
+exit_transaction_costs:
+  brokerage: 0.01
+  taxes: 0.00           # coûts de sortie (fraction du prix de vente net)
+
+ltv_base: "price_ht"         # "price_ht" | "price_di" | "value"
+capitalized_fees: true       # si true: fees capitalisés dans le principal
+arrangement_fee_pct: 0.01    # frais d'arrangement côté dette (pct du draw initial)
+
+# ===================== TAUX D'ACTUALISATION =====================
+disc_method: "wacc"          # "risk_premium" | "yield_plus_growth" | "wacc" | "wacc_capm"
+
+# WACC direct (Ke / Kd fournis)
+disc_rate_wacc:
+  KE: 0.055                  # cost of equity (décimal)
+  KD: 0.020                  # cost of debt (décimal)
+  # tax_rate: 0.35           # optionnel ; sinon fallback = scr_ratio
+
+# WACC avec Ke via CAPM (option, non utilisé si disc_method != "wacc_capm")
+disc_rate_wacc_capm:
+  risk_free: 0.03
+  beta: 1.2
+  mkt_return: 0.07           # si "mrp" non fourni, mrp = mkt_return - risk_free
+  size_illiquidity_bps: 0    # prime taille/illiquidité (en bps, optionnel)
+  KD: 0.04
+  target_ltv: 0.40           # optionnel ; sinon fallback = ltv_init
+  # tax_rate: 0.35           # optionnel ; sinon fallback = scr_ratio
+
+# Prime de risque agrégative (option)
+disc_rate_risk_premium:
+  rf: 0.03
+  liquidity_premium: 0.01
+  obsolescence_premium: 0.005
+  income_risk_premium: 0.005
+  # alpha_geo_bps: 0        # facteur géo en bps (option)
+
+# Cap-rate + croissance (option)
+disc_rate_yield_plus_growth:
+  property_yield: 0.065
+  growth: 0.01
+  # adj_obsolescence_bps: 0 # ajustement (bps), option
+
+# ===================== EXPLOITATION =====================
+opex_sqm: 60                 # opex non refacturables, €/m²/an
+
+# ===================== DETTE =====================
+ltv_init: 0.70               # ratio de financement initial (base voir ltv_base)
+rate_annual: 0.025           # taux facial annuel (décimal)
+extra_amort_pct: 0.05        # amort. annuel additionnel (bullet)
+scr_ratio: 0.35              # proxy tax (fallback pour WACC/WACC-CAPM)
+
+# ===================== BROKERAGE / LEASING =====================
+leasing_cost_pct: 0.15       # coût de commercialisation (pct du loyer facial annuel)
+
+# ===================== LOTS / BAUX =====================
+leases:
+  - unit: "U1"
+    area: 250
+    events:
+      - { start: 2020, end: 2023, rent: 200, free_months: 0, capex_sqm: 0,   vac: 0, new_lease: 0 }
+      - { start: 2023, end: 2024, rent: 200, free_months: 0, capex_sqm: 300, vac: 1, new_lease: 0 }
+      - { start: 2024, end: 2025, rent: 190, free_months: 0, capex_sqm: 0,   vac: 0, new_lease: 1 }
+
+  - unit: "U2"
+    area: 250
+    events:
+      - { start: 2020, end: 2023, rent: 200, free_months: 0, capex_sqm: 0,   vac: 0, new_lease: 0 }
+      - { start: 2023, end: 2024, rent: 200, free_months: 0, capex_sqm: 300, vac: 1, new_lease: 0 }
+      - { start: 2024, end: 2025, rent: 190, free_months: 0, capex_sqm: 0,   vac: 0, new_lease: 1 }
+
+  - unit: "U3"
+    area: 250
+    events:
+      - { start: 2020, end: 2023, rent: 200, free_months: 0, capex_sqm: 0,   vac: 0, new_lease: 0 }
+      - { start: 2023, end: 2024, rent: 200, free_months: 0, capex_sqm: 300, vac: 1, new_lease: 0 }
+      - { start: 2024, end: 2025, rent: 190, free_months: 0, capex_sqm: 0,   vac: 0, new_lease: 1 }
+
+  - unit: "U4"
+    area: 250
+    events:
+      - { start: 2020, end: 2023, rent: 200, free_months: 0, capex_sqm: 0,   vac: 0, new_lease: 0 }
+      - { start: 2023, end: 2024, rent: 200, free_months: 0, capex_sqm: 300, vac: 1, new_lease: 0 }
+      - { start: 2024, end: 2025, rent: 190, free_months: 0, capex_sqm: 0,   vac: 0, new_lease: 1 }
+
+# ===================== HURDLES (optionnels) =====================
+hurdle_equity_irr: 0.055     # cible TRI equity
+hurdle_project_irr: 0.055
+hurdle_equity_npv: 0.0

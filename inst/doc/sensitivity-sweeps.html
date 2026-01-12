@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Package cre.dcf" />
+
+
+<title>Sensitivity skeleton: discount rate and exit yield</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Sensitivity skeleton: discount rate and
+exit yield</h1>
+<h4 class="author">Package cre.dcf</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#purpose" id="toc-purpose"><span class="toc-section-number">1</span> Purpose</a></li>
+<li><a href="#baseline-configuration-and-grid-design" id="toc-baseline-configuration-and-grid-design"><span class="toc-section-number">2</span> Baseline configuration and grid
+design</a></li>
+<li><a href="#running-the-model-on-the-grid" id="toc-running-the-model-on-the-grid"><span class="toc-section-number">3</span> Running the model on the
+grid</a></li>
+<li><a href="#optional-visualisation-iso-npv-map" id="toc-optional-visualisation-iso-npv-map"><span class="toc-section-number">4</span> Optional visualisation: iso-NPV
+map</a></li>
+<li><a href="#theoretical-diagnostics-invariants-and-monotonicities" id="toc-theoretical-diagnostics-invariants-and-monotonicities"><span class="toc-section-number">5</span> Theoretical diagnostics: invariants
+and monotonicities</a></li>
+<li><a href="#interpretation" id="toc-interpretation"><span class="toc-section-number">6</span> Interpretation</a></li>
+</ul>
+</div>
+
+<div id="purpose" class="section level2" number="1">
+<h2><span class="header-section-number">1</span> Purpose</h2>
+<p>This vignette provides a reproducible skeleton for conducting local
+comparative statics on DCF outputs by perturbing configuration
+parameters and re-running run_case() on a grid. The goal is twofold:</p>
+<ul>
+<li><p>Pedagogical – to visualise how valuation metrics respond to small
+changes in key parameters (e.g., exit yield, discount rate), and to read
+iso-NPV or iso-IRR loci.</p></li>
+<li><p>Diagnostic – to verify theoretical regularities:</p>
+<ul>
+<li>Discount rate neutrality of IRR: equity IRR is computed from flows
+and therefore should be invariant to the chosen discount rate used for
+NPV computation (holding cash-flow timing constant).</li>
+<li>Monotonicity of NPV: ceteris paribus, a higher discount rate should
+decrease NPV; similarly, a higher exit yield (higher cap rate at sale)
+should reduce terminal value and typically decrease both project NPV and
+equity NPV.</li>
+</ul></li>
+</ul>
+<p>The code below is intentionally minimal-no helper functions from the
+package are required-so that it can be adapted to other parameters
+(e.g., rent growth, capex, LTV) and used as a building block for larger
+sensitivity notebooks.</p>
+</div>
+<div id="baseline-configuration-and-grid-design" class="section level2" number="2">
+<h2><span class="header-section-number">2</span> Baseline configuration
+and grid design</h2>
+<p>In classical discounted-cash-flow theory, the sensitivity of
+valuation metrics to parameter changes constitutes a local comparative
+static exercise. It allows identifying how valuation outcomes respond to
+exogenous shifts in yield or required return, under ceteris paribus
+assumptions. This procedure, widely used in real-estate investment and
+corporate finance, reveals whether model behaviour conforms to
+theoretical expectations of monotonicity, invariance, and convexity.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># 2.1 Load baseline configuration (core preset)</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>cfg_path <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;preset_default.yml&quot;</span>, <span class="at">package =</span> <span class="st">&quot;cre.dcf&quot;</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">nzchar</span>(cfg_path))</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>cfg0 <span class="ot">&lt;-</span> yaml<span class="sc">::</span><span class="fu">read_yaml</span>(cfg_path)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co"># 2.2 Derive baseline exit yield from entry_yield and spread (in bps)</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="sc">!</span><span class="fu">is.null</span>(cfg0<span class="sc">$</span>entry_yield))</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>spread_bps0 <span class="ot">&lt;-</span> cfg0<span class="sc">$</span>exit_yield_spread_bps</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">is.null</span>(spread_bps0)) spread_bps0 <span class="ot">&lt;-</span> <span class="dv">0</span><span class="dt">L</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>exit_yield_0 <span class="ot">&lt;-</span> cfg0<span class="sc">$</span>entry_yield <span class="sc">+</span> <span class="fu">as.numeric</span>(spread_bps0) <span class="sc">/</span> <span class="dv">10000</span></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co"># 2.3 Derive baseline discount rate as WACC when disc_method == &quot;wacc&quot;</span></span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="sc">!</span><span class="fu">is.null</span>(cfg0<span class="sc">$</span>disc_method))</span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a><span class="cf">if</span> (cfg0<span class="sc">$</span>disc_method <span class="sc">!=</span> <span class="st">&quot;wacc&quot;</span>) {</span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a><span class="fu">stop</span>(<span class="st">&quot;This sensitivity skeleton assumes disc_method = &#39;wacc&#39; in preset_core.yml.&quot;</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a>}</span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a>ltv0 <span class="ot">&lt;-</span> cfg0<span class="sc">$</span>ltv_init</span>
+<span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a>kd0  <span class="ot">&lt;-</span> cfg0<span class="sc">$</span>rate_annual</span>
+<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a>scr0 <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="fu">is.null</span>(cfg0<span class="sc">$</span>scr_ratio)) <span class="dv">0</span> <span class="cf">else</span> cfg0<span class="sc">$</span>scr_ratio</span>
+<span id="cb1-29"><a href="#cb1-29" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="sc">!</span><span class="fu">is.null</span>(ltv0), <span class="sc">!</span><span class="fu">is.null</span>(kd0))</span>
+<span id="cb1-31"><a href="#cb1-31" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" tabindex="-1"></a>ke0 <span class="ot">&lt;-</span> cfg0<span class="sc">$</span>disc_rate_wacc<span class="sc">$</span>KE</span>
+<span id="cb1-33"><a href="#cb1-33" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">is.null</span>(ke0)) {</span>
+<span id="cb1-34"><a href="#cb1-34" tabindex="-1"></a><span class="fu">stop</span>(<span class="st">&quot;disc_rate_wacc$KE is missing in preset_core.yml; cannot compute baseline WACC.&quot;</span>)</span>
+<span id="cb1-35"><a href="#cb1-35" tabindex="-1"></a>}</span>
+<span id="cb1-36"><a href="#cb1-36" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" tabindex="-1"></a>disc_rate_0 <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">-</span> ltv0) <span class="sc">*</span> ke0 <span class="sc">+</span> ltv0 <span class="sc">*</span> kd0 <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> scr0)</span>
+<span id="cb1-38"><a href="#cb1-38" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" tabindex="-1"></a><span class="co"># 2.4 Define a local grid around (exit_yield_0, disc_rate_0)</span></span>
+<span id="cb1-40"><a href="#cb1-40" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" tabindex="-1"></a>step_bps <span class="ot">&lt;-</span> <span class="dv">50</span><span class="dt">L</span>     <span class="co"># 50 bps increments</span></span>
+<span id="cb1-42"><a href="#cb1-42" tabindex="-1"></a>span_bps <span class="ot">&lt;-</span> <span class="dv">100</span><span class="dt">L</span>    <span class="co"># ±100 bps around baseline</span></span>
+<span id="cb1-43"><a href="#cb1-43" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" tabindex="-1"></a>seq_around <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">span_bps =</span> <span class="dv">100</span><span class="dt">L</span>, <span class="at">step_bps =</span> <span class="dv">50</span><span class="dt">L</span>) {</span>
+<span id="cb1-45"><a href="#cb1-45" tabindex="-1"></a>x <span class="sc">+</span> <span class="fu">seq</span>(<span class="sc">-</span>span_bps, span_bps, <span class="at">by =</span> step_bps) <span class="sc">/</span> <span class="dv">10000</span></span>
+<span id="cb1-46"><a href="#cb1-46" tabindex="-1"></a>}</span>
+<span id="cb1-47"><a href="#cb1-47" tabindex="-1"></a></span>
+<span id="cb1-48"><a href="#cb1-48" tabindex="-1"></a>exit_grid <span class="ot">&lt;-</span> <span class="fu">seq_around</span>(exit_yield_0, span_bps, step_bps)</span>
+<span id="cb1-49"><a href="#cb1-49" tabindex="-1"></a>disc_grid <span class="ot">&lt;-</span> <span class="fu">seq_around</span>(disc_rate_0,  span_bps, step_bps)</span>
+<span id="cb1-50"><a href="#cb1-50" tabindex="-1"></a></span>
+<span id="cb1-51"><a href="#cb1-51" tabindex="-1"></a>param_grid <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(</span>
+<span id="cb1-52"><a href="#cb1-52" tabindex="-1"></a><span class="at">exit_yield =</span> exit_grid,</span>
+<span id="cb1-53"><a href="#cb1-53" tabindex="-1"></a><span class="at">disc_rate  =</span> disc_grid,</span>
+<span id="cb1-54"><a href="#cb1-54" tabindex="-1"></a><span class="at">KEEP.OUT.ATTRS =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-55"><a href="#cb1-55" tabindex="-1"></a><span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
+<span id="cb1-56"><a href="#cb1-56" tabindex="-1"></a>)</span>
+<span id="cb1-57"><a href="#cb1-57" tabindex="-1"></a></span>
+<span id="cb1-58"><a href="#cb1-58" tabindex="-1"></a><span class="fu">head</span>(param_grid)</span></code></pre></div>
+<pre><code>##   exit_yield disc_rate
+## 1      0.040    0.0324
+## 2      0.045    0.0324
+## 3      0.050    0.0324
+## 4      0.055    0.0324
+## 5      0.060    0.0324
+## 6      0.040    0.0374</code></pre>
+<p>The grid is deliberately small (here 3×3=9 3×3=9 points) in order to
+keep the vignette computationally light while illustrating the
+comparative statics logic.</p>
+</div>
+<div id="running-the-model-on-the-grid" class="section level2" number="3">
+<h2><span class="header-section-number">3</span> Running the model on
+the grid</h2>
+<p>To vary the discount rate, we treat the target disc_rate as a WACC
+and invert the WACC formula to recover the corresponding cost of equity
+KE* K E *</p>
+<p>. The entry yield is kept fixed, and the exit yield is adjusted by
+setting exit_yield_spread_bps.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># 3.1 Helper: invert WACC to obtain KE from target discount rate</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co"># WACC(d) = (1 - LTV)*KE + LTV * KD * (1 - SCR)</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>wacc_invert_ke <span class="ot">&lt;-</span> <span class="cf">function</span>(d, ltv, kd, scr) {</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>num <span class="ot">&lt;-</span> d <span class="sc">-</span> ltv <span class="sc">*</span> kd <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> scr)</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>den <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> ltv</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>ke  <span class="ot">&lt;-</span> num <span class="sc">/</span> den</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.finite</span>(ke)) <span class="fu">stop</span>(<span class="st">&quot;Non-finite KE from WACC inversion; check inputs.&quot;</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co"># Soft clamp to [0, 1] with a warning in extreme cases</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="cf">if</span> (ke <span class="sc">&lt;</span> <span class="dv">0</span> <span class="sc">||</span> ke <span class="sc">&gt;</span> <span class="dv">1</span>) {</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="fu">warning</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Implied KE=%.4f outside [0,1]; clamped.&quot;</span>, ke))</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>}</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="fu">pmax</span>(<span class="dv">0</span>, <span class="fu">pmin</span>(<span class="dv">1</span>, ke))</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>}</span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co"># 3.2 Helper: apply (exit_yield, disc_rate) to a copy of cfg0</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>cfg_with_params <span class="ot">&lt;-</span> <span class="cf">function</span>(cfg_base, e, d) {</span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>cfg_mod <span class="ot">&lt;-</span> cfg_base</span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co"># 3.2.1 Adjust exit_yield via spread on entry_yield</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">is.null</span>(cfg_mod<span class="sc">$</span>entry_yield)) {</span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="fu">stop</span>(<span class="st">&quot;entry_yield missing in config; cannot derive exit_yield spread.&quot;</span>)</span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a>}</span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a>spread_bps <span class="ot">&lt;-</span> <span class="fu">round</span>((e <span class="sc">-</span> cfg_mod<span class="sc">$</span>entry_yield) <span class="sc">*</span> <span class="dv">10000</span>)</span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a>cfg_mod<span class="sc">$</span>exit_yield_spread_bps <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(spread_bps)</span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a></span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a><span class="co"># 3.2.2 Adjust cost of equity so that WACC equals target d</span></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a></span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a>ltv <span class="ot">&lt;-</span> cfg_mod<span class="sc">$</span>ltv_init</span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a>kd  <span class="ot">&lt;-</span> cfg_mod<span class="sc">$</span>rate_annual</span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a>scr <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="fu">is.null</span>(cfg_mod<span class="sc">$</span>scr_ratio)) <span class="dv">0</span> <span class="cf">else</span> cfg_mod<span class="sc">$</span>scr_ratio</span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a></span>
+<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a>ke_star <span class="ot">&lt;-</span> <span class="fu">wacc_invert_ke</span>(<span class="at">d =</span> d, <span class="at">ltv =</span> ltv, <span class="at">kd =</span> kd, <span class="at">scr =</span> scr)</span>
+<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a></span>
+<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a>cfg_mod<span class="sc">$</span>disc_method <span class="ot">&lt;-</span> <span class="st">&quot;wacc&quot;</span></span>
+<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">is.null</span>(cfg_mod<span class="sc">$</span>disc_rate_wacc) <span class="sc">||</span> <span class="sc">!</span><span class="fu">is.list</span>(cfg_mod<span class="sc">$</span>disc_rate_wacc)) {</span>
+<span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a>cfg_mod<span class="sc">$</span>disc_rate_wacc <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">KE =</span> ke_star, <span class="at">KD =</span> kd, <span class="at">tax_rate =</span> scr)</span>
+<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb3-45"><a href="#cb3-45" tabindex="-1"></a>cfg_mod<span class="sc">$</span>disc_rate_wacc<span class="sc">$</span>KE <span class="ot">&lt;-</span> ke_star</span>
+<span id="cb3-46"><a href="#cb3-46" tabindex="-1"></a>cfg_mod<span class="sc">$</span>disc_rate_wacc<span class="sc">$</span>KD <span class="ot">&lt;-</span> kd</span>
+<span id="cb3-47"><a href="#cb3-47" tabindex="-1"></a>}</span>
+<span id="cb3-48"><a href="#cb3-48" tabindex="-1"></a></span>
+<span id="cb3-49"><a href="#cb3-49" tabindex="-1"></a>cfg_mod</span>
+<span id="cb3-50"><a href="#cb3-50" tabindex="-1"></a>}</span>
+<span id="cb3-51"><a href="#cb3-51" tabindex="-1"></a></span>
+<span id="cb3-52"><a href="#cb3-52" tabindex="-1"></a><span class="co"># 3.3 One simulation at (exit_yield, disc_rate)</span></span>
+<span id="cb3-53"><a href="#cb3-53" tabindex="-1"></a></span>
+<span id="cb3-54"><a href="#cb3-54" tabindex="-1"></a>run_one <span class="ot">&lt;-</span> <span class="cf">function</span>(e, d) {</span>
+<span id="cb3-55"><a href="#cb3-55" tabindex="-1"></a>cfg_i <span class="ot">&lt;-</span> <span class="fu">cfg_with_params</span>(cfg0, <span class="at">e =</span> e, <span class="at">d =</span> d)</span>
+<span id="cb3-56"><a href="#cb3-56" tabindex="-1"></a>out   <span class="ot">&lt;-</span> <span class="fu">run_case</span>(cfg_i)</span>
+<span id="cb3-57"><a href="#cb3-57" tabindex="-1"></a></span>
+<span id="cb3-58"><a href="#cb3-58" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb3-59"><a href="#cb3-59" tabindex="-1"></a><span class="at">exit_yield =</span> e,</span>
+<span id="cb3-60"><a href="#cb3-60" tabindex="-1"></a><span class="at">disc_rate  =</span> d,</span>
+<span id="cb3-61"><a href="#cb3-61" tabindex="-1"></a><span class="at">irr_equity =</span> out<span class="sc">$</span>leveraged<span class="sc">$</span>irr_equity,</span>
+<span id="cb3-62"><a href="#cb3-62" tabindex="-1"></a><span class="at">npv_equity =</span> out<span class="sc">$</span>leveraged<span class="sc">$</span>npv_equity,</span>
+<span id="cb3-63"><a href="#cb3-63" tabindex="-1"></a><span class="at">irr_proj   =</span> out<span class="sc">$</span>all_equity<span class="sc">$</span>irr_project,</span>
+<span id="cb3-64"><a href="#cb3-64" tabindex="-1"></a><span class="at">npv_proj   =</span> out<span class="sc">$</span>all_equity<span class="sc">$</span>npv_project</span>
+<span id="cb3-65"><a href="#cb3-65" tabindex="-1"></a>)</span>
+<span id="cb3-66"><a href="#cb3-66" tabindex="-1"></a>}</span>
+<span id="cb3-67"><a href="#cb3-67" tabindex="-1"></a></span>
+<span id="cb3-68"><a href="#cb3-68" tabindex="-1"></a><span class="co"># 3.4 Grid sweep</span></span>
+<span id="cb3-69"><a href="#cb3-69" tabindex="-1"></a></span>
+<span id="cb3-70"><a href="#cb3-70" tabindex="-1"></a><span class="fu">message</span>(<span class="st">&quot;Running DCF grid sweep - number of simulations: &quot;</span>, <span class="fu">nrow</span>(param_grid))</span>
+<span id="cb3-71"><a href="#cb3-71" tabindex="-1"></a></span>
+<span id="cb3-72"><a href="#cb3-72" tabindex="-1"></a>res_list <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="st">&quot;list&quot;</span>, <span class="fu">nrow</span>(param_grid))</span>
+<span id="cb3-73"><a href="#cb3-73" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">nrow</span>(param_grid))) {</span>
+<span id="cb3-74"><a href="#cb3-74" tabindex="-1"></a>e <span class="ot">&lt;-</span> param_grid<span class="sc">$</span>exit_yield[i]</span>
+<span id="cb3-75"><a href="#cb3-75" tabindex="-1"></a>d <span class="ot">&lt;-</span> param_grid<span class="sc">$</span>disc_rate[i]</span>
+<span id="cb3-76"><a href="#cb3-76" tabindex="-1"></a>res_list[[i]] <span class="ot">&lt;-</span> <span class="fu">run_one</span>(e, d)</span>
+<span id="cb3-77"><a href="#cb3-77" tabindex="-1"></a>}</span>
+<span id="cb3-78"><a href="#cb3-78" tabindex="-1"></a>res <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">bind_rows</span>(res_list)</span>
+<span id="cb3-79"><a href="#cb3-79" tabindex="-1"></a></span>
+<span id="cb3-80"><a href="#cb3-80" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Sample of computed sensitivity grid (first 9 rows):</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## 
+## Sample of computed sensitivity grid (first 9 rows):</code></pre>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">print</span>(dplyr<span class="sc">::</span><span class="fu">arrange</span>(res, exit_yield, disc_rate)[<span class="dv">1</span><span class="sc">:</span><span class="fu">min</span>(<span class="dv">9</span>, <span class="fu">nrow</span>(res)), ])</span></code></pre></div>
+<pre><code>##   exit_yield disc_rate irr_equity npv_equity   irr_proj  npv_proj
+## 1      0.040    0.0324  0.1376971  1306012.3 0.10597530 1250044.9
+## 2      0.040    0.0374  0.1376971  1225298.2 0.10597530 1147867.6
+## 3      0.040    0.0424  0.1376971  1146853.8 0.10597530 1048563.7
+## 4      0.040    0.0474  0.1376971  1070604.4 0.10597530  952038.3
+## 5      0.040    0.0524  0.1376971   996477.7 0.10597530  858200.3
+## 6      0.045    0.0324  0.1049111   842424.7 0.08104276  786457.3
+## 7      0.045    0.0374  0.1049111   772775.3 0.08104276  695344.7
+## 8      0.045    0.0424  0.1049111   705080.2 0.08104276  606790.1
+## 9      0.045    0.0474  0.1049111   639275.1 0.08104276  520709.1</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Grid coverage (raw values):</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## 
+## Grid coverage (raw values):</code></pre>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;• exit_yield range: [%.4f, %.4f]</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">min</span>(res<span class="sc">$</span>exit_yield), <span class="fu">max</span>(res<span class="sc">$</span>exit_yield)))</span></code></pre></div>
+<pre><code>## • exit_yield range: [0.0400, 0.0600]</code></pre>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;• disc_rate  range: [%.4f, %.4f]</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">min</span>(res<span class="sc">$</span>disc_rate),  <span class="fu">max</span>(res<span class="sc">$</span>disc_rate)))</span></code></pre></div>
+<pre><code>## • disc_rate  range: [0.0324, 0.0524]</code></pre>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;• total simulations: %d</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">nrow</span>(res)))</span></code></pre></div>
+<pre><code>## • total simulations: 25</code></pre>
+</div>
+<div id="optional-visualisation-iso-npv-map" class="section level2" number="4">
+<h2><span class="header-section-number">4</span> Optional visualisation:
+iso-NPV map</h2>
+<p>If ggplot2 is available, a simple heatmap can be used to visualise
+the sensitivity of equity NPV across the (disc_rate,exit_yield)
+(disc_rate,exit_yield) grid.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">&quot;ggplot2&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(res, ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x =</span> disc_rate, <span class="at">y =</span> exit_yield, <span class="at">fill =</span> npv_equity)) <span class="sc">+</span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>ggplot2<span class="sc">::</span><span class="fu">geom_tile</span>() <span class="sc">+</span></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>ggplot2<span class="sc">::</span><span class="fu">geom_contour</span>(ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">z =</span> npv_equity),</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="at">bins =</span> <span class="dv">10</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="at">title =</span> <span class="st">&quot;Iso-NPV (equity) across (discount rate, exit yield)&quot;</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="at">x =</span> <span class="st">&quot;Discount rate (target WACC, decimal)&quot;</span>,</span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="at">y =</span> <span class="st">&quot;Exit yield (decimal)&quot;</span>,</span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="at">fill =</span> <span class="st">&quot;Equity NPV&quot;</span></span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a>)</span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a>}</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAIAAACb4TnXAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAgAElEQVR4nOydeXwURfr/n6runiszuUNIIJCEMxAOFRKRGxflMCgscQXcVfALiCyIioIighfK6UYRk5+uLrsih1yiq+jK6YmKGiHKEaIBct8zmaOnu6t+fzSMYzJHjpnJJPT7lT96qrqO6Z5PqruqnudBlFJQUFDwD7itO6Cg0JFRBKag4EcUgSko+BFFYAoKfkQRmIKCH1EEpqDgRzqCwI4dO4YQysnJ8XnNmZmZCKFXX321QXpubi5CaNu2bfLHnJwc9Efi4uImTpz47bffAsB7772HENq0aVPj+h988EGEUF5enrsO/Pjjj4MGDSKE+O47uSAlJWX27Nny8SeffLJq1SqvRS5dutSrVy+TyeTXjgUezxd85MiRGRkZ8rHzRfNARxCYv3n88ceLioq8nrZw4cINGzZs2LBh7dq1GRkZx48fHzFiRF5e3sSJEyMjI3fs2NG4yL59+/r379+/f3+XFRJC5s6du3r1aoz9e5u6devWqVMn+fizzz5z+b+gAQkJCbfddtuKFSv82rEA06wL7nzRPEHbP0ePHgWA7Oxsn9c8ffp0g8Gg0WimTp3qnP7jjz8CwNtvvy1/zM7OBoDPP//c+ZzPP/8cAO655x5K6bx58wDgwoULziecOHECAJ577jl3re/fvz8xMZEQ4quv0xSefPJJvV7flDN//fVXlUpVVFTk1/7U1dX5tX5nvF7wESNG3Hbbbc2qswOOYBUVFQsWLEhMTNTpdP3795d//Q7+97//jRkzJiIiomfPnnPmzKmurvZcW1RU1FNPPbVv3779+/c3qxvDhw+PiYn55ZdfAGDWrFkAsHPnTucT9u7dCwB33nmnuxpefvnlu+++GyHkSPnxxx8nT57cqVOnmJiYzMzMc+fOOZ//r3/9Kz09PSws7KabbnrzzTfvv/9+x/NMr169FixY4Hwyx3Fr166VjwcMGCA/7YwcOfK5556rr69HCG3cuHH16tUsyzpfonfeeQch9MUXXwBAYmLijTfeuGXLFg8X4a233kpLSwsLC4uOjv7Tn/705ZdfOud+8MEHo0ePDgsLGzRo0OrVqyVJktOHDh360EMPffLJJ2lpaQsXLpQTPdw4D3fc84/B6wV/7bXXbrjhhrCwsNGjRx85csT5ZMdF89JKq2Xf9jQYwW666abw8PC///3vmzZtGjVqFADs2rVLztq1axfGOD09/R//+McTTzxhMBi6d+9uMpnc1Tx9+vTExES73Z6amtq1a1ej0SinN2UEq6+v5zjulltuoZQSQhISEgYOHOh8Qq9evW644QZ3TZeVlSGEvvrqK0fKsWPH1Gr10KFDX3rppTVr1nTt2jUiIuL8+fNy7rp16wBg7NixmzZtmjt3LkJIp9M5/t327Nnz/vvvd66fZdkXX3xRPk5NTb333nsppWfOnJkzZ45Wq/3uu+9KS0u///57569JKZ02bVrXrl0d/+PXr1/fs2dPd1/hhRdeAIDMzMycnJxly5YlJSWFhoZWVVXJuf/+978RQhMmTHj11VcXLVrEsuydd94pZw0ZMuSWW26Jiop6+OGH//e//1FvN87DHfeQ5fWCP/XUUwAwbty4TZs2zZkzR6PRREVFOS6p46J5bqWjCezSpUsA8NJLL8lZtbW1/fr1W7ZsGaVUEITk5OQhQ4bwPC/nyk9xa9ascVezLDBK6ZdffokxXrRokZzuWWCSJJ07d+7222937sljjz0GAD///LP88aeffgKA9evXu2v6nXfeUalUNpvNkXL99denpaWJoih/LCkpCQ8PnzlzJqW0uro6NDQ0IyNDkiQ5d8OGDQDQXIHRRo+I3bp1c/zu6+vrtVrtww8/7Mj97LPPAOC3335z+RXS09N79erl6LA87n366aeUUqvVGh8fP3nyZIdW5dHg0qVLlNIhQ4YAwJEjR+QszzfOwx33kOX1gpeUlGi12ilTpjgu6XPPPed8SR0XzUMrVqu1owmsvLwcITR69OjGd/3UqVMA8K9//cs5MS0tbeTIke5qdgiMUvrAAw9gjE+cOEHdCKwxM2bMcNye3NxcAFi1apX8cfXq1QihwsJCd00//PDD/fr1c3wsLi4GgDfffNP5nBkzZsTFxVFKd+3aBQBffvmlI8tisbRgBKONBLZo0aLQ0FD5ly23Il8BmZqaGgDYvXu3y6/A87wgCI6P27dvB4APPviAUio/bh08eNCRW1hYmJ2dXVxcTCkdMmRI7969HVmeb5yHO+4hqzENLvg777wDAM4DWl1dnVqtbiwwD60cOXKko72DxcTEPP3005999llycvKNN974xBNPyLcHAAoKCgAgJSXF+fyUlBQ53WQyHbrK4cOHG9f8wgsvdO7ced68eaIoumzaMYu4YcOG11577cSJE++8845jPmrgwIGpqamO17A9e/YMGzasW7du7r5IaWlpVFSU4+P58+cBYM6cOc6LAdu3b6+srHR8tQEDBjjO12q1iYmJXi5WE7jjjjuMRuOxY8cAYPfu3UlJSWlpaY7c8PBwjuNKS0tdllWpVMeOHXv00UczMjL69Okzc+ZMR9aFCxcAoG/fvo6Ubt26zZ8/Py4uTv7o3HnPN87DHfeQ1ZgGFzw/Px8AUlNTHSmhoaHdu3dvXNBDKxcuXOhoAgOAlStXnjlz5vnnnw8JCdm4ceOgQYPkeWfqyjAHYywL5ty5c3+6yq233tr4zNDQ0FdeeSU3N9fdLPaMGTMeucr999/v/EOUmTVr1pkzZ3Jzc/Pz80+dOnXXXXd5+Bby85jjo0ajAYDXXnvtuz/y1VdfAQDP841rYBjGQ/1NXFsbNWpURETE+++/b7Va//vf//7lL39pcIJWq3W3Gvboo4/+6U9/+uabb6677rpVq1Z98sknjiy73e65hzqdznHs+caB+zvuOasBDS44y7Kee+WMu1bsdntHE1hNTU1eXl737t2XL19+6NChwsLCoUOHrly5khCSnJwMAGfPnnU+/8yZMz169AAA5/kGQRBcVj5t2rQpU6Y8/fTT8v/O5jJjxgyE0M6dO/fs2YMxnj59uoeTO3XqJD+AycidRwjd4ERVVVVVVRUAJCUlAYDzgjXP8w066fwzvXz5chMFxrLs5MmTDxw48NFHH5nN5gYCE0XRaDTGxsY2LlhdXb1p06ZVq1YdO3bsmWeemTlzZnx8vCO3Z8+ecHVYlikqKlqwYIH87N0AzzfOwx33kNW4lQYXvPElFQTB5X330ErPnj07msBOnDiRmpr60UcfyR87d+48dOhQjDGltG/fvomJiZs3b3bo56uvvvrqq68mTJjQ9PpfffVVhmEeeeSRFvSte/fuw4cP37Fjx549e0aPHu14HHJ3svzeJRMdHT18+PCsrKza2lo55Ycffpg0adKhQ4cAYNSoURzHye9Ucm52drbZbHYUV6vVzr/mt956y0PTDUaM22+/vbCw8Jlnnundu/fgwYOds0pKSgDA5YPuhQsXCCHOojpw4IDjOD09PTIy8pVXXnGkbN26NTs7Ozw8vHFVnm+chzvuIatxKw0u+Lhx43Q6nfMl/X//7/8ZjcbGBT20kp6e3tEmOYxGY5cuXSIjI1etWpWdnf3Xv/6VZdkFCxbIZ+7YsQMhNHz48M2bNz/11FPyU7XXafoGiVlZWfKl9DxN75LXXntNLpuTk+P5THmCTn7plzl+/Lhare7fv//atWs3bdrUvXv32NjYy5cvy7mLFy8GgPHjx7/yyisLFizQ6XTR0dGON/L7778fABYvXrx79+4lS5YwDKNWq11Ocshz62+88ca5c+fkFJPJpFarAWDlypUNOrl7926VSmU2mxv332w2x8bGduvWbePGjW+//faMGTMSEhIAYN68eSUlJZRSeQNaRkZGTk7Oo48+qlKp7r77brnskCFD7rjjDufaPNw4D3fc84/B6wWXp+nlS/rAAw9otdr+/fs3nuTw3EpHExil9PTp01OmTImNjdVqtSkpKS+88IJjepdSevDgwVGjRoWHhycnJ8+ePduxLOMSlwKTJGno0KEtE1hlZSXHcSzLVlRUeD7TbreHhYW9++67zonfffedvEAUGxs7ffp0hwYopYSQtWvXDhgwwGAwjBgx4siRI87bDurq6u69997o6GgA4DguKyurb9++LgVWWFiYnp6u0Wi2bNniqHzSpEkAcPr06QadXLJkyc033+zuK3z77bcjRozQ6/U9e/Z88MEHTSbTPffco9frHddt165dw4YN0+v1PXr0eOKJJywWi5zeWGDU443zcMc9/xi8XvBXX331+uuvly/pxx9/fP/997tcB/PQCqKKT45g5aGHHrp06dLu3btbVnzkyJHh4eHvv/++c2JNTQ3HcXq9vllVTZgwoaioqMEUnLx6npWV5fllsh3Rygvuko72DtaR+Pvf/37w4EF5It5XRERENFddly9f/vTTTxvPH3788ccqlWrq1Km+610b448LrggseOnRo8ff//73F198sa06YLPZnn/++enTp2OM77333ga5Tz/99Msvv+x5MaB94Y8LrggsqFm1apVWq22ZPdjTTz/teW+rV0RR3Lx5s9Vq3bZtW9euXZ2zLl++nJmZ6dhM3GFozQV3ifIOpqDgR5QRTEHBjygCU1DwI4rAFBT8iCIwBQU/oghMQcGPKAJTUPAjisAUFPyIC6uy9oXzxpaIiAi73e5spuGMXq+3WCwu1xAxxpGRkUajUTYEbExoaKhLUwUAUKvVBoNB3nva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" /><!-- --></p>
+<p>This visualisation is intentionally minimal; it can be elaborated
+(alternative colour scales, percentage axes, log-NPV) in dedicated
+analysis notebooks.</p>
+</div>
+<div id="theoretical-diagnostics-invariants-and-monotonicities" class="section level2" number="5">
+<h2><span class="header-section-number">5</span> Theoretical
+diagnostics: invariants and monotonicities</h2>
+<p>We now compute a set of diagnostics that compare the numerical
+behaviour of the model to the expectations of basic DCF theory.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">=== Theoretical diagnostics: invariants and monotonicities ===</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## 
+## === Theoretical diagnostics: invariants and monotonicities ===</code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="do">## 5.1 Invariance of IRR with respect to discount rate (within each exit_yield)</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="do">## ---------------------------------------------------------------------------</span></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>irr_sd_by_exit <span class="ot">&lt;-</span> res <span class="sc">|&gt;</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="fu">group_by</span>(exit_yield) <span class="sc">|&gt;</span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="fu">summarise</span>(</span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a><span class="at">irr_sd_over_disc =</span> <span class="fu">sd</span>(irr_equity, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a><span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a>)</span>
+<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a></span>
+<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a>irr_sd_median <span class="ot">&lt;-</span> <span class="fu">median</span>(irr_sd_by_exit<span class="sc">$</span>irr_sd_over_disc, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a></span>
+<span id="cb18-14"><a href="#cb18-14" tabindex="-1"></a><span class="fu">cat</span>(</span>
+<span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">IRR invariance diagnostics:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb18-16"><a href="#cb18-16" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Median SD of equity IRR across discount-rate variations (per exit_yield slice): %.3e</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb18-17"><a href="#cb18-17" tabindex="-1"></a>irr_sd_median),</span>
+<span id="cb18-18"><a href="#cb18-18" tabindex="-1"></a><span class="st">&quot;  --&gt; Near-zero dispersion indicates that IRR behaves as an internal rate of return,</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb18-19"><a href="#cb18-19" tabindex="-1"></a><span class="st">&quot;    independent of the exogenous discount rate used for NPV computation.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
+<span id="cb18-20"><a href="#cb18-20" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## 
+## IRR invariance diagnostics:
+##  • Median SD of equity IRR across discount-rate variations (per exit_yield slice): 0.000e+00
+##    --&gt; Near-zero dispersion indicates that IRR behaves as an internal rate of return,
+##      independent of the exogenous discount rate used for NPV computation.</code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="do">## 5.2 Monotonicity of equity NPV with respect to disc_rate</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a><span class="do">## --------------------------------------------------------</span></span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>npv_monotone_disc <span class="ot">&lt;-</span> res <span class="sc">|&gt;</span></span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a><span class="fu">group_by</span>(exit_yield) <span class="sc">|&gt;</span></span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a><span class="fu">arrange</span>(disc_rate, <span class="at">.by_group =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a><span class="fu">summarise</span>(</span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a><span class="at">all_non_increasing =</span> <span class="fu">all</span>(<span class="fu">diff</span>(npv_equity) <span class="sc">&lt;=</span> <span class="fl">1e-8</span>),</span>
+<span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a><span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb20-11"><a href="#cb20-11" tabindex="-1"></a>)</span>
+<span id="cb20-12"><a href="#cb20-12" tabindex="-1"></a></span>
+<span id="cb20-13"><a href="#cb20-13" tabindex="-1"></a>share_monotone_disc <span class="ot">&lt;-</span> <span class="fu">mean</span>(npv_monotone_disc<span class="sc">$</span>all_non_increasing, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb20-14"><a href="#cb20-14" tabindex="-1"></a></span>
+<span id="cb20-15"><a href="#cb20-15" tabindex="-1"></a><span class="fu">cat</span>(</span>
+<span id="cb20-16"><a href="#cb20-16" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">NPV monotonicity w.r.t discount rate:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb20-17"><a href="#cb20-17" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Share of exit_yield slices where equity NPV is non-increasing in disc_rate: %.1f%%</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb20-18"><a href="#cb20-18" tabindex="-1"></a><span class="dv">100</span> <span class="sc">*</span> share_monotone_disc),</span>
+<span id="cb20-19"><a href="#cb20-19" tabindex="-1"></a><span class="st">&quot;  --&gt; In a standard DCF, higher discount rates should decrease NPV. Deviations from</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb20-20"><a href="#cb20-20" tabindex="-1"></a><span class="st">&quot;    strict monotonicity may indicate discrete changes in cash-flow structure or</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb20-21"><a href="#cb20-21" tabindex="-1"></a><span class="st">&quot;    numerical tolerances.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
+<span id="cb20-22"><a href="#cb20-22" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## 
+## NPV monotonicity w.r.t discount rate:
+##  • Share of exit_yield slices where equity NPV is non-increasing in disc_rate: 100.0%
+##    --&gt; In a standard DCF, higher discount rates should decrease NPV. Deviations from
+##      strict monotonicity may indicate discrete changes in cash-flow structure or
+##      numerical tolerances.</code></pre>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="do">## 5.3 Monotonicity of equity NPV with respect to exit_yield</span></span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a><span class="do">## ---------------------------------------------------------</span></span>
+<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a>npv_monotone_exit <span class="ot">&lt;-</span> res <span class="sc">|&gt;</span></span>
+<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a><span class="fu">group_by</span>(disc_rate) <span class="sc">|&gt;</span></span>
+<span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a><span class="fu">arrange</span>(exit_yield, <span class="at">.by_group =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a><span class="fu">summarise</span>(</span>
+<span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a><span class="at">all_non_increasing =</span> <span class="fu">all</span>(<span class="fu">diff</span>(npv_equity) <span class="sc">&lt;=</span> <span class="fl">1e-8</span>),</span>
+<span id="cb22-10"><a href="#cb22-10" tabindex="-1"></a><span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb22-11"><a href="#cb22-11" tabindex="-1"></a>)</span>
+<span id="cb22-12"><a href="#cb22-12" tabindex="-1"></a></span>
+<span id="cb22-13"><a href="#cb22-13" tabindex="-1"></a>share_monotone_exit <span class="ot">&lt;-</span> <span class="fu">mean</span>(npv_monotone_exit<span class="sc">$</span>all_non_increasing, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb22-14"><a href="#cb22-14" tabindex="-1"></a></span>
+<span id="cb22-15"><a href="#cb22-15" tabindex="-1"></a><span class="fu">cat</span>(</span>
+<span id="cb22-16"><a href="#cb22-16" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">NPV monotonicity w.r.t exit yield:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb22-17"><a href="#cb22-17" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Share of discount-rate slices where equity NPV is non-increasing in exit_yield: %.1f%%</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb22-18"><a href="#cb22-18" tabindex="-1"></a><span class="dv">100</span> <span class="sc">*</span> share_monotone_exit),</span>
+<span id="cb22-19"><a href="#cb22-19" tabindex="-1"></a><span class="st">&quot;  --&gt; Since a higher exit yield reduces terminal value, one expects lower NPV when</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb22-20"><a href="#cb22-20" tabindex="-1"></a><span class="st">&quot;    exit_yield increases, all else equal. Non-monotonic patterns typically reflect</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb22-21"><a href="#cb22-21" tabindex="-1"></a><span class="st">&quot;    changes in covenant status or other discrete thresholds in the model.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
+<span id="cb22-22"><a href="#cb22-22" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## 
+## NPV monotonicity w.r.t exit yield:
+##  • Share of discount-rate slices where equity NPV is non-increasing in exit_yield: 100.0%
+##    --&gt; Since a higher exit yield reduces terminal value, one expects lower NPV when
+##      exit_yield increases, all else equal. Non-monotonic patterns typically reflect
+##      changes in covenant status or other discrete thresholds in the model.</code></pre>
+<p>In this vignette, these diagnostics are reported but not enforced as
+hard assertions. They are intended as a starting point for model
+calibration and for more systematic sensitivity studies rather than as
+unit tests.</p>
+</div>
+<div id="interpretation" class="section level2" number="6">
+<h2><span class="header-section-number">6</span> Interpretation</h2>
+<p>The sensitivity skeleton developed here shows how a relatively
+compact grid over (disc_rate,exit_yield) (disc_rate,exit_yield) can be
+used to:</p>
+<p>verify that the equity IRR behaves as an internal rate of return,
+largely invariant to the exogenous discount rate,</p>
+<p>check that equity NPV decreases as the discount rate or exit yield
+increases, in line with standard DCF theory,</p>
+<p>identify potential non-monotonicities that may stem from structural
+features of the model (covenants, refinancing triggers, tax effects)
+rather than from pure discounting.</p>
+<p>The same logic extends immediately to other parameters (rent
+indexation, CAPEX intensity, LTV, DSCR thresholds). By replacing
+(exit_yield, disc_rate) in the grid construction and in
+cfg_with_params(), the user can construct a wide range of local
+comparative-statics experiments rooted in a single, reproducible
+run_case() grammar.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

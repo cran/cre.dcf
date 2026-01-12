@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Package cre.dcf" />
+
+
+<title>Investment styles panorama: API-only comparison</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Investment styles panorama: API-only
+comparison</h1>
+<h4 class="author">Package cre.dcf</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#aim-of-this-vignette" id="toc-aim-of-this-vignette"><span class="toc-section-number">1</span> Aim of this vignette</a></li>
+<li><a href="#a-style-by-style-manifest" id="toc-a-style-by-style-manifest"><span class="toc-section-number">2</span> A style-by-style manifest</a></li>
+<li><a href="#riskreturn-cloud-project-vs-equity-irr" id="toc-riskreturn-cloud-project-vs-equity-irr"><span class="toc-section-number">3</span> Risk–return cloud: project vs equity
+IRR</a></li>
+<li><a href="#leveragecoverage-map-initial-ltv-vs-min-dscr" id="toc-leveragecoverage-map-initial-ltv-vs-min-dscr"><span class="toc-section-number">4</span> Leverage–coverage map (initial LTV
+vs min-DSCR)</a></li>
+<li><a href="#covenant-flags-and-breach-counts" id="toc-covenant-flags-and-breach-counts"><span class="toc-section-number">5</span> Covenant flags and breach
+counts</a></li>
+<li><a href="#robustness-to-discounting-convention" id="toc-robustness-to-discounting-convention"><span class="toc-section-number">6</span> Robustness to discounting
+convention</a></li>
+<li><a href="#time-profile-of-equity-cash-flows" id="toc-time-profile-of-equity-cash-flows"><span class="toc-section-number">7</span> Time profile of equity cash
+flows</a></li>
+<li><a href="#irr-decomposition-operations-vs-exit" id="toc-irr-decomposition-operations-vs-exit"><span class="toc-section-number">8</span> IRR decomposition: operations vs
+exit</a></li>
+<li><a href="#exit-yield-and-rental-growth-sensitivities" id="toc-exit-yield-and-rental-growth-sensitivities"><span class="toc-section-number">9</span> Exit-yield and rental-growth
+sensitivities</a>
+<ul>
+<li><a href="#exit-yield-shock" id="toc-exit-yield-shock"><span class="toc-section-number">9.1</span> Exit-yield shock</a></li>
+<li><a href="#rental-growth-shock" id="toc-rental-growth-shock"><span class="toc-section-number">9.2</span> Rental-growth shock</a></li>
+</ul></li>
+<li><a href="#break-even-exit-yield-for-a-target-equity-irr" id="toc-break-even-exit-yield-for-a-target-equity-irr"><span class="toc-section-number">10</span> Break-even exit yield for a target
+equity IRR</a></li>
+<li><a href="#distressed-exit-comparison-under-covenant-breach" id="toc-distressed-exit-comparison-under-covenant-breach"><span class="toc-section-number">11</span> Distressed exit comparison under
+covenant breach</a></li>
+<li><a href="#export-for-audit-and-replication" id="toc-export-for-audit-and-replication"><span class="toc-section-number">12</span> Export for audit and
+replication</a></li>
+</ul>
+</div>
+
+<div id="aim-of-this-vignette" class="section level2" number="1">
+<h2><span class="header-section-number">1</span> Aim of this
+vignette</h2>
+<p>This vignette exploits the preset YAML files shipped in
+<code>inst/extdata</code> to construct a compact yet expressive panorama
+of four canonical commercial real-estate (CRE) investment styles:</p>
+<ul>
+<li><code>core</code></li>
+<li><code>core_plus</code></li>
+<li><code>value_added</code></li>
+<li><code>opportunistic</code></li>
+</ul>
+<p>All four presets are processed through the same modelling pipeline
+(<code>run_case()</code>), under a common grammar of assumptions (DCF
+engine, debt schedule, covenant logic). The vignette then extracts a
+restricted set of style-defining indicators that are salient for both
+investors and lenders:</p>
+<ul>
+<li>unlevered project IRR,</li>
+<li>levered equity IRR and equity NPV,</li>
+<li>minimum DSCR along the debt path,</li>
+<li>maximum forward LTV under a bullet structure.</li>
+</ul>
+<p>The overarching objective is to document, in a transparent and
+reproducible way, that the presets encode the expected ordering:</p>
+<ul>
+<li><em>core / core_plus</em> –&gt; lower risk, lower return, stronger
+coverage, lower leverage;</li>
+<li><em>value_added / opportunistic</em> –&gt; higher expected return,
+but weaker DSCR and more elevated forward LTV.</li>
+</ul>
+</div>
+<div id="a-style-by-style-manifest" class="section level2" number="2">
+<h2><span class="header-section-number">2</span> A style-by-style
+manifest</h2>
+<p>To make the four profiles directly comparable, the vignette begins by
+constructing a compact “manifest” that records, for each style:</p>
+<ul>
+<li>project IRR (all-equity),</li>
+<li>equity IRR (levered),</li>
+<li>minimum DSCR under a bullet structure,</li>
+<li>maximum forward LTV under a bullet structure,</li>
+<li>equity NPV.</li>
+</ul>
+<p>Under the canonical calibration, the four styles are designed to
+satisfy a strict risk–return and leverage–coverage hierarchy:</p>
+<ul>
+<li>project and equity IRR increase monotonically along
+<code>core --&gt; core_plus --&gt; value_added --&gt; opportunistic</code>;</li>
+<li>minimum DSCR under the bullet structure decreases monotonically
+along the same sequence;</li>
+<li>maximum forward LTV under the bullet structure increases
+monotonically along the same sequence.</li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Retrieve manifest</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>tbl_print <span class="ot">&lt;-</span> <span class="fu">styles_manifest</span>()</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># Ensure expected ordering</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>tbl_print <span class="ot">&lt;-</span> tbl_print <span class="sc">|&gt;</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(style <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;core&quot;</span>, <span class="st">&quot;core_plus&quot;</span>, <span class="st">&quot;value_added&quot;</span>, <span class="st">&quot;opportunistic&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>    <span class="at">style =</span> <span class="fu">factor</span>(</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>      style,</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;core&quot;</span>, <span class="st">&quot;core_plus&quot;</span>, <span class="st">&quot;value_added&quot;</span>, <span class="st">&quot;opportunistic&quot;</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>    )</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(style) <span class="sc">|&gt;</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>    style,</span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>    irr_project,</span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>    irr_equity,</span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>    dscr_min_bul,</span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>    ltv_max_fwd,</span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a>    npv_equity</span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>  )</span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a><span class="co"># Defensive: stop if table empty (should never happen if helpers/tests are correct)</span></span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">nrow</span>(tbl_print) <span class="sc">==</span> <span class="dv">0</span><span class="dt">L</span>) {</span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a>  <span class="fu">stop</span>(<span class="st">&quot;No canonical presets were found. Check inst/extdata and helper logic.&quot;</span>)</span>
+<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a>}</span>
+<span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a><span class="co"># Render table</span></span>
+<span id="cb1-29"><a href="#cb1-29" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a>  tbl_print,</span>
+<span id="cb1-31"><a href="#cb1-31" tabindex="-1"></a>  <span class="at">digits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">0</span>),</span>
+<span id="cb1-32"><a href="#cb1-32" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Style presets: unlevered (project IRR) and lender-salient (equity IRR, min-DSCR, forward-LTV) indicators&quot;</span></span>
+<span id="cb1-33"><a href="#cb1-33" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>Style presets: unlevered (project IRR) and lender-salient
+(equity IRR, min-DSCR, forward-LTV) indicators</caption>
+<colgroup>
+<col width="19%" />
+<col width="16%" />
+<col width="15%" />
+<col width="17%" />
+<col width="16%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">style</th>
+<th align="right">irr_project</th>
+<th align="right">irr_equity</th>
+<th align="right">dscr_min_bul</th>
+<th align="right">ltv_max_fwd</th>
+<th align="right">npv_equity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">core</td>
+<td align="right">0</td>
+<td align="right">0.0474</td>
+<td align="right">6.3032</td>
+<td align="right">0.339</td>
+<td align="right">2356658</td>
+</tr>
+<tr class="even">
+<td align="left">core_plus</td>
+<td align="right">0</td>
+<td align="right">0.0738</td>
+<td align="right">4.1749</td>
+<td align="right">0.566</td>
+<td align="right">2527420</td>
+</tr>
+<tr class="odd">
+<td align="left">value_added</td>
+<td align="right">0</td>
+<td align="right">0.1491</td>
+<td align="right">-0.2923</td>
+<td align="right">0.625</td>
+<td align="right">2981915</td>
+</tr>
+<tr class="even">
+<td align="left">opportunistic</td>
+<td align="right">0</td>
+<td align="right">0.2790</td>
+<td align="right">-0.7075</td>
+<td align="right">0.540</td>
+<td align="right">2979129</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="riskreturn-cloud-project-vs-equity-irr" class="section level2" number="3">
+<h2><span class="header-section-number">3</span> Risk–return cloud:
+project vs equity IRR</h2>
+<p>The next step positions the four styles in a simple risk–return
+“cloud”, with unlevered project IRR on the x-axis and levered equity IRR
+on the y-axis. The 45-degree line represents the locus where leverage
+would leave IRR unchanged. Under the canonical presets, two constraints
+are imposed:</p>
+<ul>
+<li>for each style, equity IRR is strictly higher than project IRR;</li>
+<li>the leverage uplift (equity IRR minus project IRR) is non-decreasing
+along
+<code>core --&gt; core_plus --&gt; value_added --&gt; opportunistic</code>.</li>
+</ul>
+<p>These inequalities are enforced both by automated tests and by the
+geometry of the figure.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>tbl_rr <span class="ot">&lt;-</span> <span class="fu">styles_manifest</span>() <span class="sc">|&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(style <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;core&quot;</span>, <span class="st">&quot;core_plus&quot;</span>, <span class="st">&quot;value_added&quot;</span>, <span class="st">&quot;opportunistic&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>    <span class="at">style =</span> <span class="fu">factor</span>(</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>      style,</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;core&quot;</span>, <span class="st">&quot;core_plus&quot;</span>, <span class="st">&quot;value_added&quot;</span>, <span class="st">&quot;opportunistic&quot;</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>    ),</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>    <span class="at">irr_uplift =</span> irr_equity <span class="sc">-</span> irr_project</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(style)</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">&quot;ggplot2&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>    tbl_rr,</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x =</span> irr_project, <span class="at">y =</span> irr_equity, <span class="at">label =</span> style, <span class="at">colour =</span> style)</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_text</span>(<span class="at">nudge_y =</span> <span class="fl">0.002</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">scale_x_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">percent_format</span>(<span class="at">accuracy =</span> <span class="fl">0.1</span>)) <span class="sc">+</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">percent_format</span>(<span class="at">accuracy =</span> <span class="fl">0.1</span>)) <span class="sc">+</span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>      <span class="at">title  =</span> <span class="st">&quot;Risk–return cloud (project vs equity IRR)&quot;</span>,</span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>      <span class="at">x      =</span> <span class="st">&quot;IRR project (unlevered)&quot;</span>,</span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a>      <span class="at">y      =</span> <span class="st">&quot;IRR equity (levered)&quot;</span></span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>    )</span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a>}</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<p>In typical calibrations, core-like styles cluster in the lower-left
+part of the chart, with limited leverage-induced uplift. Non-core styles
+shift towards the north-east, with equity IRR increasingly distant from
+project IRR, reflecting both higher risk and higher target return.</p>
+</div>
+<div id="leveragecoverage-map-initial-ltv-vs-min-dscr" class="section level2" number="4">
+<h2><span class="header-section-number">4</span> Leverage–coverage map
+(initial LTV vs min-DSCR)</h2>
+<p>The second diagnostic focuses on the credit profile of each style
+from a lender’s standpoint. For each preset, and under the bullet-debt
+scenario, it considers:</p>
+<ul>
+<li>the <em>initial LTV</em> at origination (<code>ltv_init</code>,
+x-axis), and</li>
+<li>the <em>minimum DSCR</em> over the life of the loan
+(<code>dscr_min_bul</code>, y-axis).</li>
+</ul>
+<p>The initial LTV reflects a structural leverage choice at signing,
+before any business-plan uncertainty has materialised. It measures how
+much debt is carried relative to the acquisition price (plus costs). By
+contrast, the minimum DSCR captures the deepest coverage trough induced
+by the business plan, that is, the weakest ratio of NOI to debt service
+once vacancy and capex have bitten into rents while interest remains
+due.</p>
+<p>For completeness, the manifest also tracks the maximum forward LTV
+(<code>ltv_max_fwd</code>), which summarises the worst ratio of
+outstanding debt to revalued asset value under the simulated plan. This
+is a <em>conditional</em> balance-sheet indicator, after value creation
+and repricing have played out.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>tbl_cov <span class="ot">&lt;-</span> <span class="fu">styles_manifest</span>() <span class="sc">|&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(style <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;core&quot;</span>, <span class="st">&quot;core_plus&quot;</span>, <span class="st">&quot;value_added&quot;</span>, <span class="st">&quot;opportunistic&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>    <span class="at">style =</span> <span class="fu">factor</span>(</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>      style,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;core&quot;</span>, <span class="st">&quot;core_plus&quot;</span>, <span class="st">&quot;value_added&quot;</span>, <span class="st">&quot;opportunistic&quot;</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>    )</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(style) <span class="sc">|&gt;</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>    style,</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>    irr_project,</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>    irr_equity,</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>    dscr_min_bul,</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>    ltv_init,      <span class="co"># structural leverage at origination</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>    ltv_max_fwd,   <span class="co"># worst forward LTV under the business plan</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>    npv_equity</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>  )</span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">&quot;ggplot2&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>    tbl_cov,</span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">aes</span>(</span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>      <span class="at">x     =</span> ltv_init,</span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a>      <span class="at">y     =</span> dscr_min_bul,</span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a>      <span class="at">label =</span> style,</span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a>      <span class="at">colour =</span> style</span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a>    )</span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fl">1.2</span>, <span class="at">linetype =</span> <span class="dv">3</span>) <span class="sc">+</span>  <span class="co"># illustrative DSCR guardrail</span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="fl">0.65</span>, <span class="at">linetype =</span> <span class="dv">3</span>) <span class="sc">+</span> <span class="co"># illustrative initial-LTV guardrail</span></span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_text</span>(<span class="at">nudge_y =</span> <span class="fl">0.05</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">scale_x_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">percent_format</span>(<span class="at">accuracy =</span> <span class="fl">0.1</span>)) <span class="sc">+</span></span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a>      <span class="at">title  =</span> <span class="st">&quot;Leverage–coverage map&quot;</span>,</span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a>      <span class="at">x      =</span> <span class="st">&quot;Initial LTV (bullet)&quot;</span>,</span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a>      <span class="at">y      =</span> <span class="st">&quot;Min DSCR (bullet)&quot;</span></span>
+<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a>    )</span>
+<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a>}</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<p>The dashed lines illustrate generic covenant guardrails (DSCR ≈ 1.20,
+initial LTV ≈ 65 %). In the canonical presets:</p>
+<ul>
+<li><code>core</code> sits comfortably in the quadrant of low LTV and
+high DSCR;</li>
+<li><code>core_plus</code> moves closer to the guardrails but remains
+covenant-friendly;</li>
+<li><code>value_added</code> and <code>opportunistic</code> migrate
+towards higher LTV and lower DSCR, where covenant breaches become
+plausible if the business plan underperforms.</li>
+</ul>
+</div>
+<div id="covenant-flags-and-breach-counts" class="section level2" number="5">
+<h2><span class="header-section-number">5</span> Covenant flags and
+breach counts</h2>
+<p>Beyond static summaries, one often wishes to know how frequently a
+given style approaches or breaches covenant thresholds over the life of
+the loan. The next block explores this dimension, again under the
+bullet-debt scenario for comparability.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>guard <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">min_dscr =</span> <span class="fl">1.20</span>, <span class="at">max_ltv =</span> <span class="fl">0.65</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>breach_tbl <span class="ot">&lt;-</span> <span class="fu">styles_breach_counts</span>(</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="at">styles         =</span> <span class="fu">c</span>(<span class="st">&quot;core&quot;</span>, <span class="st">&quot;core_plus&quot;</span>, <span class="st">&quot;value_added&quot;</span>, <span class="st">&quot;opportunistic&quot;</span>),</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="at">min_dscr_guard =</span> guard<span class="sc">$</span>min_dscr,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="at">max_ltv_guard  =</span> guard<span class="sc">$</span>max_ltv</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>)</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  breach_tbl,</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Covenant-breach counts by style (bullet)&quot;</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>Covenant-breach counts by style (bullet)</caption>
+<thead>
+<tr class="header">
+<th align="left">style</th>
+<th align="right">n_dscr_breach</th>
+<th align="right">n_ltv_breach</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">core</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">core_plus</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">value_added</td>
+<td align="right">3</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">opportunistic</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>Under typical assumptions:</p>
+<ul>
+<li><code>core</code> and <code>core_plus</code> exhibit zero or very
+few breaches, even under relatively tight guardrails;</li>
+<li><code>value_added</code> and especially <code>opportunistic</code>
+generate more frequent or earlier breaches, concentrating credit risk in
+the non-core segment.</li>
+</ul>
+</div>
+<div id="robustness-to-discounting-convention" class="section level2" number="6">
+<h2><span class="header-section-number">6</span> Robustness to
+discounting convention</h2>
+<p>The canonical presets are first calibrated under a WACC-based
+discounting convention: the discount rate combines a cost of equity, a
+cost of debt and a target LTV according to the chosen
+<code>disc_method</code>. This choice is standard in valuation practice,
+but it is important to verify that the <em>ordinal</em> risk–return
+ranking of styles does not hinge on this specific convention.</p>
+<p>A simple robustness check consists in re-evaluating the same YAML
+presets under a more parsimonious <code>&quot;yield_plus_growth&quot;</code> rule,
+while leaving all cash-flow assumptions unchanged. In this alternative,
+the discount rate is reconstructed as</p>
+<ul>
+<li>a property-yield component equal to <code>entry_yield</code>;
+and</li>
+<li>a growth component equal to the global indexation rate
+<code>index_rate</code>,</li>
+</ul>
+<p>without explicit reference to capital structure.</p>
+<p>The helper <code>styles_revalue_yield_plus_growth()</code> performs
+this re-evaluation style by style and returns the leveraged equity IRR
+and NPV under the alternative convention. These can be compared with the
+baseline WACC outputs from <code>styles_manifest()</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>styles_vec <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;core&quot;</span>, <span class="st">&quot;core_plus&quot;</span>, <span class="st">&quot;value_added&quot;</span>, <span class="st">&quot;opportunistic&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co"># Baseline (WACC) equity metrics from the manifest</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>base_tbl <span class="ot">&lt;-</span> <span class="fu">styles_manifest</span>(styles_vec) <span class="sc">|&gt;</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(style, irr_equity, npv_equity)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co"># Re-evaluation under the yield+growth rule</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>yg_tbl <span class="ot">&lt;-</span> <span class="fu">styles_revalue_yield_plus_growth</span>(styles_vec)</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>rob_tbl <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">left_join</span>(base_tbl, yg_tbl, <span class="at">by =</span> <span class="st">&quot;style&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>    <span class="at">delta_npv =</span> npv_equity_y <span class="sc">-</span> npv_equity</span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>  )</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>  rob_tbl,</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>  <span class="at">digits  =</span> <span class="dv">4</span>,</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Robustness: equity IRR (invariant) and NPV under WACC vs yield+growth&quot;</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>Robustness: equity IRR (invariant) and NPV under WACC vs
+yield+growth</caption>
+<colgroup>
+<col width="19%" />
+<col width="15%" />
+<col width="15%" />
+<col width="17%" />
+<col width="17%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">style</th>
+<th align="right">irr_equity</th>
+<th align="right">npv_equity</th>
+<th align="right">irr_equity_y</th>
+<th align="right">npv_equity_y</th>
+<th align="right">delta_npv</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">core</td>
+<td align="right">0.0474</td>
+<td align="right">2356658</td>
+<td align="right">0.0474</td>
+<td align="right">-2234089.7</td>
+<td align="right">-4590748.2</td>
+</tr>
+<tr class="even">
+<td align="left">core_plus</td>
+<td align="right">0.0738</td>
+<td align="right">2527420</td>
+<td align="right">0.0738</td>
+<td align="right">499308.1</td>
+<td align="right">-2028112.3</td>
+</tr>
+<tr class="odd">
+<td align="left">value_added</td>
+<td align="right">0.1491</td>
+<td align="right">2981915</td>
+<td align="right">0.1491</td>
+<td align="right">1430425.6</td>
+<td align="right">-1551489.8</td>
+</tr>
+<tr class="even">
+<td align="left">opportunistic</td>
+<td align="right">0.2790</td>
+<td align="right">2979129</td>
+<td align="right">0.2790</td>
+<td align="right">2148209.2</td>
+<td align="right">-830919.9</td>
+</tr>
+</tbody>
+</table>
+<p>In the current calibration, equity IRRs are identical across the two
+conventions (by construction), while equity NPVs differ. The persistence
+of the risk–return ordering across discounting schemes indicates that
+the style hierarchy is driven by the cash-flow patterns and leverage
+choices, rather than by an arbitrary discounting recipe.</p>
+</div>
+<div id="time-profile-of-equity-cash-flows" class="section level2" number="7">
+<h2><span class="header-section-number">7</span> Time profile of equity
+cash flows</h2>
+<p>A further dimension of style differentiation concerns the <em>time
+profile</em> of leveraged equity cash flows. In the canonical
+presets:</p>
+<ul>
+<li><code>core</code> and <code>core_plus</code> configurations are
+calibrated to return a meaningful fraction of equity progressively, on
+the back of relatively stable NOI and modest refinancing risk;</li>
+<li><code>value_added</code> and <code>opportunistic</code> strategies
+tend to back-load value creation into the terminal event, with thinner
+interim distributions and a stronger dependence on the exit.</li>
+</ul>
+<p>The helper <code>styles_equity_cashflows()</code> extracts, for each
+style, the year-by-year equity cash flow under the leveraged scenario.
+Rather than using a coarse payback-period (which, in these presets,
+coincides with the final year for all styles), the vignette constructs a
+more discriminating timing indicator: the <em>share of total positive
+equity distributions received before the final year</em>.</p>
+<p>Formally, for each style, <code>share_early_equity</code> is defined
+as the ratio between:</p>
+<ol style="list-style-type: decimal">
+<li>the sum of positive equity cash flows in years strictly earlier than
+the horizon; and</li>
+<li>the sum of all positive equity cash flows over the horizon.</li>
+</ol>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>styles_vec <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;core&quot;</span>, <span class="st">&quot;core_plus&quot;</span>, <span class="st">&quot;value_added&quot;</span>, <span class="st">&quot;opportunistic&quot;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co"># 1) Equity cash flows and horizons ----------------------------------------</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>eq_tbl <span class="ot">&lt;-</span> <span class="fu">styles_equity_cashflows</span>(styles_vec) <span class="sc">|&gt;</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(style) <span class="sc">|&gt;</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(style, year)</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>horizon_tbl <span class="ot">&lt;-</span> eq_tbl <span class="sc">|&gt;</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(style) <span class="sc">|&gt;</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>    <span class="at">horizon_years =</span> <span class="fu">max</span>(year),</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>    <span class="at">.groups       =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>  )</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>eq_with_h <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">left_join</span>(eq_tbl, horizon_tbl, <span class="at">by =</span> <span class="st">&quot;style&quot;</span>)</span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co"># 2) Share of total positive equity CF received before the final year ------</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>timing_tbl <span class="ot">&lt;-</span> eq_with_h <span class="sc">|&gt;</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(style) <span class="sc">|&gt;</span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>    <span class="at">total_pos_equity  =</span> <span class="fu">sum</span>(<span class="fu">pmax</span>(equity_cf, <span class="dv">0</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a>    <span class="at">early_pos_equity  =</span> <span class="fu">sum</span>(</span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a>      <span class="fu">pmax</span>(equity_cf, <span class="dv">0</span>) <span class="sc">*</span> (year <span class="sc">&lt;</span> horizon_years),</span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a>      <span class="at">na.rm =</span> <span class="cn">TRUE</span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a>    ),</span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a>    <span class="at">share_early_equity =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(</span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a>      total_pos_equity <span class="sc">&gt;</span> <span class="dv">0</span>,</span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a>      early_pos_equity <span class="sc">/</span> total_pos_equity,</span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a>      <span class="cn">NA_real_</span></span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a>    ),</span>
+<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a>  )</span>
+<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a></span>
+<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a>  timing_tbl <span class="sc">|&gt;</span></span>
+<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(style, share_early_equity),</span>
+<span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a>  <span class="at">digits  =</span> <span class="dv">3</span>,</span>
+<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Share of total positive equity distributions received before the final year&quot;</span></span>
+<span id="cb6-41"><a href="#cb6-41" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>Share of total positive equity distributions received before
+the final year</caption>
+<thead>
+<tr class="header">
+<th align="left">style</th>
+<th align="right">share_early_equity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">core</td>
+<td align="right">0.322</td>
+</tr>
+<tr class="even">
+<td align="left">core_plus</td>
+<td align="right">0.339</td>
+</tr>
+<tr class="odd">
+<td align="left">opportunistic</td>
+<td align="right">0.126</td>
+</tr>
+<tr class="even">
+<td align="left">value_added</td>
+<td align="right">0.179</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">&quot;ggplot2&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  eq_cum_tbl <span class="ot">&lt;-</span> eq_with_h <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">group_by</span>(style) <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">cum_equity =</span> <span class="fu">cumsum</span>(equity_cf))</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>    eq_cum_tbl,</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> cum_equity, <span class="at">colour =</span> style)</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>    ggplot2<span class="sc">::</span><span class="fu">labs</span>(</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>      <span class="at">title =</span> <span class="st">&quot;Cumulative leveraged equity cash flows by style&quot;</span>,</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>      <span class="at">x     =</span> <span class="st">&quot;Year&quot;</span>,</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>      <span class="at">y     =</span> <span class="st">&quot;Cumulative equity CF&quot;</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>    )</span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>}</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAIAAACb4TnXAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAgAElEQVR4nO2dd1wUxxfAZ6/fAXfUAykCFohSFAuigoomiiIqAcWuEHus0SQmMRGNBWOJijWxxIKxBONPYoINFCVKEgsqCIrERi9SrnBt9/fHJJuT2ysgBxzO98Mfu7Mzb96y+27KzryHEQQBEAiEcaC1tAIIRFsGGRgCYUSQgSEQRgQZGAJhRJCBIRBGBBkYAmFE2r6BlZaWzp8/39/f38LCwsXFZfjw4VeuXGkRTfz8/MaOHWtIzgsXLqxcuZI87dKlS3R0dItoYooEBQWFhYU1c6Xqz0j98bVxA7t69aq3t3dCQoK7u/uyZctGjhyZmZkZHBy8Z8+ellZNF9euXduyZQt52r59e6FQ2IL6IPSi/ozUHx+j5VQyOhKJZOrUqfb29mfPnnV3d4eJmzdvHjVq1KJFi0JDQ11cXAyXplAoGAwGhmHGUVYX58+fb/5Km4qamho+n9/SWhgdbc+oLbdg69ate/78+YEDB0jrAgDweLy1a9fK5fKffvoJpnTu3Hnu3LnqBZlM5oYNG+Bx3759586dO2PGDB6PZ25uPmTIkPz8/Ozs7HfffdfS0tLNzW3v3r1kQd2i6nHw4EF/f3+BQGBra/vuu+/+/vvvMD0oKGjNmjUikQjDsM2bNwMAfHx8YPdj7NixFhYWMpmMFHLx4kUMw44cOQIAuHv3bmhoqFAotLOzGzt27KNHjwz8R2kr2OjqevfuvWTJkgsXLvj7+3/44Ye67xdy5syZvn37WllZvfvuu3fv3m3Xrh28d90aQnbv3t2zZ0+BQDBw4MDU1NTG3Szkhx9+6NOnj0Ag6Nev34EDB+bMmUP2NnU/XPIZ1Xt8bdnAkpKS+vfv37t373rpffr0KS8vnzlzpoFyDh8+fP369b1798bGxt64cWPw4MHBwcH9+vXbsWOHmZnZvHnzHj582FDd4uLiYmJi3NzcNm7cOGPGjPz8/OHDh1dWVgIA9u3bFxMTw+Vy//rrr8mTJ6uXioiIEIlE6mPI06dPc7ncMWPGpKWlBQQElJWVff755x999NHNmzcDAgLy8vL0aqKj4JtUl52dPXHixKCgoGnTpum+XwDATz/9FBERYWtru2bNGltb28DAwFevXhmiIQBg5cqV8+bNs7S0jI2N7dSp04gRI3Q8Dt2iNm7cGB0dbWZmFhsb6+3tPWPGDPhT0iDqPz6ijaJUKtls9syZM/Xm7NSp05w5c9RTGAxGXFwcPA4ICDAzMysoKICnUVFRAID4+Hh4evr0aQDA0aNHDRHVvXv3yMhIeNynT5/OnTsrlUp4mp6eDgC4dOkSPF2xYoW5uTkpxNvbe/r06QRB1NTUsNnsDz/8EKarVCoHB4eoqCiCIHr06OHv708KLCoqsrS0nDhxIuUtq2uio2Cjq+vVqxcAIDU1laxRx/2qVCoPD4+hQ4fiOA6vTpo0CQCwadMmvRoWFRVxudxRo0apVCp4dc2aNQCAkSNHUt64DlGVlZV8Pj8sLIwUtWnTJnVRuh8u+YyI1x9fm23BCgsLZTKZo6Pjm4vq3bs3Kadfv34AgPDwcHjav39/AEBdXV1DZaalpWVnZ9PpdHj6/PlzQ+RYWFgMHTo0KSkJnt64caO4uHjSpElFRUW3b9+eM2cOKdDBwWH48OF6+0u6C75JdR4eHoMGDTLkfrOysh49ejRjxgxyfDtr1iwDNUxNTZVKpZ999hmN9s+bvGDBAjab3YibvXTpUk1NjbqoefPm8Xg83f9AvbTZSQ4HBwcmk1lUVPTmoszNzclj+GwsLS3VTxsBi8W6fPlycnJyTk7Oo0ePHj9+bGDBiIiIpKSke/fu+fr6nj592traOiQk5MaNGwCAmJiYmJgY9cxMJlO3NFivjoKNrs7Nzc3A+83PzwcAdOrUiUzp2LGjgRrC3p23tzeZzufzXV1dG3GzUA0fHx8yncvl1ruLRtBmDYzJZHp4eDx48IDyardu3RwcHLTN/OA43lRqaBP18ccfb9q0acCAAQMHDpwwYYJQKHzvvfcMEThq1CgGg5GUlATf+HHjxjGZTA6HAwDYvXu35oBTN3oLNrq6er/9Ou5XLpcDANSnZ9V/tnTXxWBQvMDamh3dotTncig10cSQ96TNGhgA4L333tu6deuNGzf69u2rnp6VlXXv3r2QkBAyhVDbFPfy5cs3MTBDRFVWVm7ZsmXlypWxsbEwJTs720D5VlZWwcHBSUlJI0aMePr06cSJEwEAHTp0AABgGNazZ08y54ULF/RK01uwSarTfb+wvXry5En37t1hCmxMDNEQzg9nZWX16dMHpigUivz8fGdn54berKYomUyWn5+v3h424j1ps2MwAEBsbKyjo2N0dHRubi6ZWFFRMWXKFBaLNWXKFJjCZrPVeywHDx5sdI0Ginry5AmO4+rjw7Nnz9bLQ2jfCBsREfHHH3/s3Lmzffv2gYGBAABbW9v+/ftv27atqqoK5rlz586IESMuX76sW2FDCr55dbrv18vLy9nZ+cCBA2TK999/b6CGgwcP5vF4cKYBXv3uu+9qamoacbMDBgxgMpnqovbs2SMWi8niDXpP/nt8lJMtbYbk5GSBQGBubj527NhVq1ZNnTrV0dERw7AtW7aQeebMmQMAWLhw4U8//bR48WI6nc5ms9VnEdWnpHbs2AEAEIlE8LS8vBwAsG/fPkNEkXN3YrHY3t6+ffv2mzdvPnr06IQJE+An71mzZhUVFREEsX79eij20aNHxOszVARBFBcX02g0DMOWL19OJqalpbHZbC8vrw0bNmzZssXV1dXe3v7ly5eU/xb1WUS9BRtRXa9evcaMGUNm1nu/cDY8PDx8z549kydPhpOQW7duNaSur776CgDw3nvvxcfHz5s3j8vlenl5aZtF1C1q4cKFpKi5c+fyeDxbW1tSlO6Hq/6M1B9fGzcwgiBevnwZExPj6+vL4/Hc3d1DQ0PT09PVM1RXV0+fPt3W1hYAwGQyt23b9s477zTOwHSLUn+t//zzz8DAQHNz806dOi1atKi2tnbatGnm5uZwxv/Zs2d9+vThcDi7du0iNAyMIIgBAwYAAO7fv6+e+Ndffw0dOtTGxsbe3j4yMhIaJyXqmhhSsKHV1TMwvfdLEMSxY8d8fX1tbGzGjx8PR84HDhwwUMOdO3f26NHDwsIiMDDw/Pnzc+bM0WZgukXhOL5hwwYfHx8oKjU1NTAwkBSl++GqPyP1x4cRyCfHv7x69YrJZKrPGbYGUW0elUq1b98+Pz8/f39/mPLbb7+NGDEiIyODTGkpgoKCLC0tyQ8VkAY9XGRgiJbH39+/pKTkxIkTPj4+jx49mj59uoWFxfXr11taL2oDaxBteZIDYSocP37c0dGxb9++5ubmPXr0sLe3P378eEsr1TSgFgzRWnj58mVZWVmnTp0sLCxaWpd/SElJ8fT0dHJyarQEZGAIhBFBXUQEwoggA0MgjAgyMATCiCADQyCMCDIwBMKIIANDIIwIMjAEwogYdz/YzZs3ExISKisrO3bsuGDBAjs7uwYVz8rK2rNnT01NTVBQUExMDI1GS0xMPHTokHqeI0eOCAQCzbJwGa6FhQWNRquurtbMwOPxFAqFQqHQvGRraysSiSg38PP5fMrdEBwOx9zcvKKiQvO7IoPBYLFYEolEs5RAIMBxvLa2VvOSmZlZXV2dSqWql06j0aytrWtqauA+Rbj2FNFqMWILVlpaunXr1gULFuzfv9/e3n737t0NKq5SqTZv3jxz5sy9e/c+fvw4LS0NABAeHp74L7Gxsb1796a0LgSilWBEA8vOzvb19fXw8OBwOKNHjyZ3Pd69e3fBggUzZszYvn07ZQMCyczMtLW19fX15XA4YWFh0HkYjUZjMplMJpNGoyUkJMyePdt4+iMQb44Ru4gBAQFw5xwA4MmTJ3BneHV19TfffLN+/XoXF5f4+Pj9+/fDfWyQa9euBQUFwePS0lLS866Li0tZWZm68OTkZB8fH3WH0gqFgnRwZ2Njw2KxAAAYhmEYRum5gUaj0el0bSvF6HQ6ZSkd0gAADAZDUyCdTqfRaNqkabsE1dN0JAwr0qYeorVhxIcEfYwAAK5du3bw4MHly5cDADIyMnx8fKCfg9DQ0NjYWHUDS0xMJA2straWy+XCYy6Xqz7yUSqVSUlJcXFx6tVBXwDweNq0aQsWLCAvkU6gDIfL5ZK110OHNB39VfK/YbhAbe7HAABmZmbaLiFaFcb9Faytrd22bVt5efmqVaugUVVUVOTk5CxevBhm0DFGNzc3LykpgcdSqVR9f1t6erqzs3O999LGxob0w2pjYwP9LvB4PBqNJhKJNOVzOBylUqlUKjUvWVpaSqVSSjdDZmZm6n4aSFgsFo/Hq66upmzBmEwm5ZQJdE9JKZDL5cpkMk23KjQajc/ni8Vi2LtuxG8HojkxooEpFIqvvvrKx8fniy++ILs6lpaW/fv3h54lZTLZy5cvAQBpaWmnTp0CABQVFcGWZ/78+fb29nBiAwBQWFhob29PSk5NTdXc68pkMrt06UKewllEuIWb0opwHFepVJSXAADaLmmTBjts0GWs5lU6na5NGo7jOtSjnEXUoR6itWHESY4bN25wudyYmBj1gUTPnj3T09OfPXumVCoPHDhw7tw5AMCAAQPi4+Pj4+OdnZ3hgaenZ7du3YqKivLz83EcT05Ohm4hAAAymSwzM7NHjx7G0xyBaCqM2ILl5eU9ePBg1KhR8JTP5x89elQoFM6ePTsuLk4kEnl6ei5atEhbcTqdvnz58m3btslkMn9//+DgYJiek5MjFAodHByMpzkC0VS02Q2XbfVDM10sNv/tjGzQe3W2QoA+NLd60FIpEwOTivG/nxBKrd8PEa0KZGCmhkwGAMDY1J8QEK0NZGAmBiaXAQAI7Z/IEK0KZGAmBiaTAQAIFjIw0wAZmKkhlwEAAGrBTARkYCYGJpMBBgM0NvAfoplBBmZqyOUYW+uyRkRrAxmYiYHJZUD7umFEawMZmImByWUAtWCmAzIwU0Mmw1ALZjogAzMxUAtmWiADMzEwGTIwUwIZmKkhl6MuogmBDMzEQF1E0wIZmKkhk2FoGYfpgAzMpCAITCFH38FMCGRgpgSmUAAcR11EEwIZmEkhlwEA0CSHCYEMzJTA0FJ6UwMZmCkBN4MBtJ3ZdEAGZlLIUBfRxEAGZkr820VEBmYyIAMzJTC5HKAWzKRABmZKYHI5wDDAYrW0IghDQQZmSmByGcFiAY2YRohWCzIwk0IuA8iflEmBDMyUwGQy5BHRtKAO/rB27drp06c7OTk1szZNiIWFBQCAyWSSx/WAYbs0A3BBOBwOLFsPBoOhTRoAQD2IGQmGYXQ6nU7lBwqmUwpkMBiaATgJXEXj8gAAXC5XR3g+ROuB2sBWrFjx7rvvQgPLycmJjo6+ceNG8yr2psCICjD4A2V0BR3BH9hsdl1dnbbgD5TSYPAHkUhk1OAPXLEYZzBYAEilUrlcDnRGwUS0BvR3EcVi8c2bN5tBFYReMLkM+fQ1LdAYzKSQy9Ekh2mBDMyUQJMcJgcyMFMCdRFNDq0hZD/77DMbGxsAQGVlJQBg7Nix6ldhzHJEcyOToWUcpgW1gY0ZMwYAAOPY8/n8MWPGoJj2LY9KhamUqItoWlAb2M8//9zMeiD0A5fSoy6iSYHGYK2CGtnzB8WH5SqRjjw0uRwAQKAuokmh1cAkEsm+ffsuXLgAT/Py8gIDA7/++mvKD6aIN+Rl1fXLj5fihK5+OAoea4pQG1hxcXFAQMCSJUtqampgiqWlpZ2d3YYNG7p161ZeXt6MGr4VVEhyzVgOHIalrkzQXwALbQYzJagNLDY2VqFQ5OfnR0ZGwhRbW9uff/75/v37crn8q6++akYN3woqxLk2Zu/ozoNaMFOE2sCSk5OXLl1qZ2dXL93d3X3ZsmWXL182vmJvF5XSXGuuh+48zRz+vKysTCTSOiZUqVQYhmVkZDSPMqYLtYGVlZV16NCB8pKXl9fLly+NqdJbh0IlFtUV2Jh56sknlwMAmu072Pvvv793797mqasNQ21gHh4eubm5lJeys7Pd3d2NqdJbR4UklwCEDU9/F5Gg0wFD69oARCuE2sBCQkI2bdr06tWreullZWUbNmx47733jK9Ym4VQYsTre9AqJbkAACtuZz0ljbadOSkpyc/Pj8fjubu7b926FQDQu3fv69evL1u2bPjw4R999FFwcDCZec2aNV27dlUvXlNTM2fOHFdXV4FAEBYWhjo46lAb2MqVK83MzPz8/Hbt2nXnzp3i4uI7d+7Ex8f7+flxOJzVq1c3s5Ztier7nKf7rQnVf341KuEUItNKd0EjrfR9/vx5ZGRkSEhIWlravHnzlixZcuPGjT///DMwMHDTpk2//fZbZGTktWvXyKnjEydOTJ48WV1CeHh4bm7ukSNHLl26xOfzhw0bVlVV1eR6mijU/Q0Oh5ORkbFhw4ZPP/2UHOlyudx58+atWrXKzMysGTVsa4jzWSwbFUb/b19muThH/wDMaCt9Hz9+rFAoZsyY0bFjx169enXt2tXR0VE9Q9++fe3t7c+ePRsTE5OVlZWVlTVx4kTyakZGxrVr10pLSy0tLQEAhw8fdnJySkxM/OCDD5pcVVNE64dmLpcbGxtbU1OTn5+fkpKSl5cnEok2bdqErCtTWpdVJ2tcWVyG1RUxzdzk6omvpI+sufoNzEgrffv16xcQEODl5RUeHh4fH+/r6+vq6qqeAcOwiIiI06dPAwCOHz/er18/Nzc38urDhw8VCoWdnR2TyWQymRwOp6SkpLCwsMn1NFH0LJXCMMzd3T04OLhjx440GlpXBQAAa0vKPi4saVxZyTMWoQJm7v8ZmFwpqq17aUgLRlPICSP49OVyuenp6ZcuXfL29j548GCnTp3OnDlTL09kZOSlS5dqa2uPHz8+adIk9UsCgcDBwUGhBkEQX375ZZPraaIgm2kYVUplukQ6kk/h3MYQxH+zWFYqptV/njbKRA8JQFjzDOkiyo3RRUxJSYmLi4Pr4G7fvj18+PDDhw/XyxMYGGhpabl69epnz56NGzdO/ZKXl1dJScnDhw/haUFBQUBAwL1795pcTxMFzfk2jF8qq+Q4Ecqn8AOlFwIH4qdMftfXupcV4hwAgN6vzAAAIJMZI3ARhmErVqywsLAIDg7Ozs5OS0tbtmwZAIBGo/39999VVVWWlpY0Gi08PPzbb78dMWIE3CVI4uHhER4ePmbMmG3btrFYrNWrV4tEIi8vrybX00RBLVjD+LnylS+X48qi8OimF1kxE6+jqfcPAQBltdlmLHu9U4jAaJMcwcHBW7Zs+fbbb3v27Pnxxx/PmTPnk08+AQBMnTr1+PHj5FxFZGSkSqWq1z+EHDlyZMiQITNnzoyIiLCysjp37hylj7q3Ez0tmJeX16RJkyZOnKg+rn1rEeP45aqaj+xs9GelLP43i8YmOO1ecxRXJnqodxXiPxhtO/OiRYsWLVpUL/GDDz5QnwkUi8UWFhajRo2Cp+o+G3k83q5du3bt2mUM3UwdPS3YxIkTf/zxxw4dOgQGBu7evbuioqJ51GqdXKwVS3E89A0GYDxXOfb6j3tZbbZB/UOCwBTyFlnpq1KpampqNm/eHBERweWi2H8NQ4+BffHFF/fv379//z7sSLRr127UqFEnTpyQSqXNo1+rIqm6tiuP25ndmGZEUUOTV9Dr9Q/lSlGN9IVBMxxKBcDxFtlt+ddffwkEgidPnnzxxRfNX7upY9AYzMvL6+uvv75169aiRYt+/fXX8ePH29vbR0dHP3nyxNj6tR5kBJEiEofb6B8sUSLJZ2M0wHN9zcDKRTkEIAzqIspazF9A7969c3Nznz171qlTp+av3dTRb2BlZWUHDhwYOXKkUCg8cuTIzJkzL126dPTo0fz8/IEDB9bz7dyGuVwrEuF4uHUjDUz8lMV2UNC5rznWLhNlA8OmEOFmMLwlWjAajebh4YHmLRqHnkmOQYMGXb9+3cHB4f33379w4UJgYCD5uXnQoEECgSA/P79zZ62rVLOysvbs2VNTUxMUFBQTE9PQT9WUxd9QZqP5pUbkzmL6mPHIXd6Go5ID6UuGdUB9bwtltQ/N2IZNIf6zGQxtZzYx9LydPXr0SEtLe/Hixfbt2wcMGKD+NpuZmd28ebNjx47ayqpUqs2bN8+cOXPv3r2PHz9OS0trkGaUxd9QZqNREMTFWnGYgN+44qJ8OqHC6g3AAABlomw7866UReoDu4hoO7OpocfAHj582K9fP0wtpGJVVRX0I0Cn0/v06aOjAcnMzLS1tfX19eVwOGFhYVeuXIHpd+/eXbBgwYwZM7Zv304Z3ERHcW0yjU2aWFKlUjV6AUfNEzqDr2LZ1O9Ol9ZkCy0MMrB//AUgn22mBnUXUSQSwd2sycnJmzdvVr+Un59v4GtdWlrq4uICj11cXMrKygAA1dXV33zzzfr1611cXOLj4/fv3z9nzhyyyLVr14KCgnQUp0yESCSS5ORkeIxhWHFx8ZQpU+h0OoZhHA7n3Llz5ubmAwcOhBnq6up++OGHgQMHkgtbHz16lJ6ePnXqVDjYYDKZFy9eJAhi6NChAIBfi8ucWMyHZ352GDSI3G/67NmzlJSUqKgoHo8Hg4llZGRUV1eHhYWRWiUkJPj6+DKfBAi6KDkcTlFRUXJy8pgxY6ysrBS4pKbuhaic+0vmL6TvEwDATz/91L59+6CgIDabjeP4q1evzpw5E9HRjQsAh88HbPbt27dv3749fvx4Q54CooUhqCgtLQ0MDAwMDAQABL7OgAED9u3bR1mqHidPnvz+++/hcUlJyeTJkwmCOH/+/Lp162Di48ePJ02apF5k0aJFuotTJkKKiop6/svEiRPNzMzUJffr12/ixInqNwgAOH78OJny3XffAQCkUimZMnLkyJCQEIIglDhudz1j8aMnAIBdu3aRGRITEwEABQUFZMrUqVN79+6tXq9AIIhfffDGCqIqjyAIIjU1FQBw//59giBeVv6x4jRYFjuuY8eO6kU6dOjw0UcfkaeZmZkAgJwf9td9upDAcYIgVq9ebWVlRSBMAeoWzM7O7tq1awCA3r17w4NGYG5uXlLyz6pzqVQKoz9WVFTk5OQsXrwYptva2jaoOGUiRCgUpqSkwGOCIL7++uuKigpzc3M6nV5dXX3s2DEajUZ+KMcwrLCwkMlkkikjR46EW3LEYrGNjY1YLN65cydU+JpIUqZQvMdmzs/LEwqFZJF+/frl5eVBIWw229zcfO3atSqVSv1z/O3bt+UP7GszgcKisqKC6NKlS15enoWFRUVFRX7JHwCApR+unzcVUy9y6dIlFosFIwCqVCoHB4e8vDzbrEyCxaqorKTRaB9//HF0dDQsUm9lYCNoEid8Op7jWw61gWVmZtrZ2Tk6Ou7btw/+gtajW7duekXb29uTkxCFhYX29vYAAEtLy/79+8+aNQsAIJPJ4PbytLQ0GE2iqKhowYIFAID58+dTFqdMhNBoND7/v0kIuG8C/NtEw21shFr4SYFAoB7hkslkCgQCMg9BEDweDx4k1dQKGYxeXC6Nx2Wz2TLZP6t1GQyGehEAAJfLhdWRtfD5/BdPOeYdVICGEwSg0+lkkUpxrjnHwcrCiQFq1YvAiLLkTyCNRhMIBDSlArDYMIXD4fD5fBjhEtHKoZ6i6N69+7fffgsPKDFEdLdu3YqKivLz83EcT05OHjBgAACgZ8+e6enpz549UyqVBw4cOHfuHABgwIAB8fHx8fHxzs7O8MDT05OyOGWiUcEJ8GtN7UiBBQ3Tn1kTZS1NVk7nd6L4WlghybEz72KgHBQZzEShbsHq6urgWJ8yTrGB0On05cuXb9u2TSaT+fv7Q8cpQqFw9uzZcXFxIpHI09NTc42p7uKUiTqow/Evn72cLzC3bux30lvSumKFcoRFI/dxi/9mAQAsOqg0m5tycU4Xx1GGCpKjwEUmCUZoBO1Wp7q6mjId9nNaM3BoUcBgDs7KcaDTT7u72LxuYzqCoNva2opEIvjj8lVx6YmqmizPjgwMAwDw+XzKD80wCHpFRUW9/2fh//i4jOYxXV7Pp78Sl+763W2E93Y/lxmGBEHn/nwCUyolYyfRaDRra+uamhrYRXzzwQ8agxkVPSs5oCcTTXSbZevhHS7nvNc7w+4/DMt//rO7i33DnQqeqxYNtzBnYI3pIBJKTPqSaRtA4cCjQpxLELidYR/BAACYTIajlewmiJ4XLicnhzxWKBSZmZmff/65aa2qbv/U/IytW3j504inL0+7OQsbYmO3JNLnCkWD9i8TKiArZ9QVM+SlzLoiBqHEzNwVANTvoFZIcgAAtuaG7QQDAMhlQKAzNASiVaLnbfP0fG0nhbe3t4ODQ0hIyIQJE+BkVytHJQdPk+hMuUOSnfUhq+KZ4tLvvIS62zEFQVyrrjlXXJpSXXNbWmdJpw805+mqgwDySrr0FaO8HFQ9E8jK6IQKw2iAaaXktFNY+Us4QpWmgb2SPOIx7XgsWxzHKaXWA01ymCgN7jI5ODjgOM4ykQE3nQV8FimK7taJ8tjT81zAo/aZd8TvdMUd31ECNauR4kSOTPaXpO6KSJwulohx3JxG62/GW9NOONTCjKXRP1TW0OtKGHUlDFkxQ1bGwOUYAIBtCVhC3LyzjG2vZAuVNCbZi6b4J1dI9IdTUedtCH8ul8tN5b0yHD0GlpWVpX5aVVW1fv16T09Ptun8mjK4gN9Vxu8qU8mw/Fx65QMgyRA8vYHJ7BR5LpJUu7LfabXP5AocAAaG+XHZc22tRjs5etMwpey/sZOyllZXwpCVMkorGOIiG5UUAwDQeTjHQWnZQ8qxV/Lb0y2FZhUVtQaOTivEOe42QxtwG6YZ/vzQoUNr1qyRSqUTJkyIi4uj0+nHjh1buXKlRCIZOnTojh07zMzMbt26tXLlygQqD/kAACAASURBVI4dO2ZnZ1+8ePHixYsfffRRbW3tkCFDdu3aZUJvGiV6DMzb27teilAo1HTrZRLQ2URnXyXNUz4pL8+zUDCkxNb/rk1XwnaclVTsLrbykHexZfAATSWhmVXza0rrpJU0RS1NUUWXlTBUUhoAgM4leO0IvreULVRy7JUMi/96dwxOAzaSKHFprfyljQEbmf8Bhj83poEx792hFxc0tBQusJL36a/t6oMHD7788sv09HQ2mz1o0KBhw4a5urouWbIkLS2tQ4cOkyZNWrt27bp16wAAKSkpYWFhW7ZsKS0tjYqKunr1ateuXWfMmPHRRx/B9TSmix4D04wQZeqefTuyWac9nB+6yroLMDt5bVUuzSyXJb1jS9wGpTwcl9L+jczAweiAbqZiCXC+l+wfi+Kr+Hx+Tc2bBtGFU4iGeAr4B7nR96rQykvpT/MbXMy+nY6LP/3007Rp0+Di7KNHj3I4nLNnz44bNw4O7D/77LNJkyZBA7O2tp49ezYA4OzZs8HBwT4+PgCA+fPnh4SEtHEDu3nzpo6rLBaLXPxuQjgyGY5MBo/NUtAU/K51/K51KikmzmcrXtEZ5jjdXGXrwlfSxUq6FDRq9YZeYDgVQ7z5Qv4Nf25EA5MNHiYbPKxpZRYUFPTu3Rse9+jRAwBw4MABcjNE+/bti4qK4LGTkxNZ5Pfff/fz84OnZGbTRY+BLVy4MDs7GwCAYRiGYTiO02g0uEgPAODk5KQ+j2+60LkE3+u/NSvmtkAkIpSNX8Sih0rpIx7TjsOwNjC/iQaPFQqFxcXF8Pjq1asKhcLBweH58+cwpaCgwMHBAR6TuwqFQuHYsWO3b98OAJBIJG3g7dKz4XL27Nmurq7nz5+XSqVSqfTixYsdOnQ4duxYbW1tbW1tG7j/FqFCnGNtcPMFgKmGPx89evQPP/xQXFxcUVGxYMGCqqqqkSNHnjx58smTJ0qlMi4ujvSySDJixIhTp07BUOBLly419f4h0Gtge/fu3b59+9ChQ9lsNovFevfdd7/99tsVK1Y0j3JtlQpJrt54lupgsItoai2Yv7//xx9/3K9fP29v7yFDhkRERLzzzjsbN24MCQlxc3NjMpmaMSJcXV137NgRGRnp7OxcWFi4cePGFtG8CdHTRSwoKKi3WsrKyurp06dG1Kito8SltbIX1jwDnI3+y7/+Akxvmn7u3Llz585VT5kyZcqUKVPUU3r27Hnjxg3yNCIiIiIiopn0Mz56WrD+/ft//fXX5PLW2tra1atX9+zZ0/iKtU0IAn9YcpIg8AbM0YOWdIqIeEP0tGC7du2Cjiv69OkDAPjjjz9oNNrVq1ebRbc2hYqQPyw5cfvlzlfSJ+34/kILg/bUQWD4cwJ5JjRB9BiYq6trbm7uiRMnHjx4IJPJRo8ePWnSJPWNwwi9yFWizGc/3vz7W5GsqB3fP6zDqg7WDZwQN1r4c4Sx0b8WUSqVKhQKPp+/YsWKe/fumfqH5uZELC++W/DdvaIfVESdh114T+f5NjxDtzCrg1b6mi56DOzFixchISEVFRUlJSUrVqyYNWuWSCQ6d+5cvTC+iHpUiHNuvdz5qPw0DTB8HKcGdFjEJBq/JRGTy0xxhgMB9E5yzJ0718/Pr6CggMFgAAASExNtbW2XLFnSLLqZJIU1GWezJiXcHvD01cVezoui/e8Ed14v4LZ/I6FyOeoimih6WrC0tLTLly+Tjv+dnJy+/PJLdS+ZCAhOqB4UnLzycH1J7V0rbsfBnTd1EUbRaU1jFZhMZozw54hmQI+BCQSCen5v5HK5SWy1bDYUKnFWScLdgu+q65458v1Du/zQ0WY4hjVlSAqaQq7iou3MJokeAxsxYsTKlStPnz4NTx8+fLho0SLNFS5vJyJZUWbRvvtFh+SqWg+7sHF9jpkRnkbxVmKc8OeIZkCPgX3zzTfh4eFCoVCpVLZr166kpCQ8PPybb75pHuVaLeXi7MzC/Q9LTwAAPOxG93Je7GjtA71KGaO6t2E7c1tFfxcxJSUlIyPj4cOHAoHA29tbRzSwNg9B4I9Lf01//O2LqjQzln2f9st8HKYZEt3rTTHN7cwIYKBPjj59+sCVHG8tCpU4u+R4ZuH3r6RPbM28hnrGe9i9T8ea5aWH4c+RgZkmDXZ687YhlpfcLzqUWbRPpqx2sQwa6r3RnhOIGWknJhX/hD9HYzDTBBmYVopq/rhT8N2TinN0Grur/QQ/p1kCjrs2z75GBK30NZhbt27Nnz9ffW1+i9NmDQx+u4MbsSkDeGMYRqPRNC8pcdnd54fTH28trrkj4LgGdVjp3W4Km8EnS1FKg3ty6XS65iwinU6nrEi3ejQaDcqkqZQAAIzLhdn+SdQi0KRpk27b9H+uqaqq2r9//5o1awAA9+7dI72lt3K4XC6Xy4UvN5cKJpPJZrPVU3B67d2iXQf/6JV4axqTwX3fL2HeoAeBHsssLezJPHQ6XZs0AACHw9G8xGazGQwGZSloJ5SXGAwGlAY/MLMsBDCdw+EAAFgsFjxt0f+xfg4dOtS5c2dnZ+ePP/4YvjnHjh3r3Lmzk5NTdHS0WCwGANy6dWvkyJGLFi0KDQ0FAFy8eNHHx8fNze2DDz6QySi8jpOSx40b5+PjY21tHRISQvomgFy9evW9996Dx4mJiXAHmkKhiI6OFgqFDg4O27ZtM95dq9Nm1yJCf1gWFhY0Gk3TNxZ4PfhDce2tzMJ9j8vPAoC9Yxc5qN8n5vQOdXV1EnF9vxx8Pp9SGofDYTKZYrFYswVjMBgsFqte8AeIQCDAcZxSIBn8gV5VxQNAolTiIhEAgEajsdnsuro6GPyB0xB3cTrILTtdLs7Sn+91LFhOvo4x2q4a221bYmLib7/9Nnjw4KVLl86fP/+nn37Sre2pU6cePXr09OnTZ8+e9ezZc8aMGc2wcl2PgcG1iIcOHYIPMjExcdKkSUuWLCE/PZs0Slz2sOSnzKJ9JbV3zNmOfdp/7NNuKodhbSuwpXzpWwRM1hweb4prbuVXnm9oKaGZjw4DM7bbtqCgIBhB++uvvxYKhXqdkNvZ2ZWXl9+7d69Pnz6Uv3fG4C1diyiRl94rOf3ns10iWZHQvNtQjx0edu/TacyW1osKeXNMcgzsuHZgx7VNK9PYbtvat/9nCTWfz+dyuWVlZZTZyD7F4MGDo6Kixo0bJ5PJZs+evXr16kbfmuG8dWsRC6pvZBbuz6/8lYYx3rEf6+sQY2vm1dJK6YImlwMMM8XvYMZ22/bixQt48Pjx49raWhsbGxiRGEI2aLm5ufAABihevXr13bt333///bCwMNL+jYeeSQ64FrGqqgqemu5aRIVKfL/o0NFbA366N6qk9k5f18/nD3w87J3trdy6ALkZrFEByloWY7ttS0tLS01NxXF8586dI0aMYKgFzbGwsLh161Z5eblYLD5x4gRMPHz48MyZMysrK11dXel0evOMAvQYGFx2SK5F9PLy8vHxMa21iJXivPSnXx/40y/1ySdmbOGILvun9c7o6Ty/OZY4NQkmGzzW2G7bQkJC1q1b165du6ysrN27d6tf8vPzmz59eo8ePVxcXEgfTfPmzZPL5Z06dfLy8ho3bpze+MNNgp4QsgqFgslkmuJaRBgZlclRbb3syqBxu9pP8HWMFnDcyQwGhpCtR0NDyAIDZhF1h5DlXPyV/uKpOGYeTEchZCGHDh26fv36999/38z1NhQ9YzBHR8eJEydOmzZt+vTpzaJPE8NhWk7wP8und2HQWvsnI21gcvnbvFclNzd3x44d9RLd3NxMJSq0HgNbtWrVyZMne/fu3aVLl2nTpk2aNMnR0bF5NGsq3G2DtYVyNw3kMsLUnGY3IZ6envHx8ZrpL1++JCcbWzN6xmDz5s27cuVKQUHB3Llzf/nlFzc3t5CQkGPHjjWPcggAw5+b5hjMqDg7O/v6+ra0FvoxaGe7g4PDhx9+ePny5YMHD966dWvSpEnGVgvxH8gpoiljkF/Eixcv/vzzz2fPnq2rqwsNDY2KimoGzRAQTIZ8tpkwegwsMjIyOTlZpVKNGDFi165dYWFhZHAwRPOAyZHXURNGj4EplcrvvvsuLCzMpFdvmDYm+x0MAbQZWGZmpp2dnaOj46pVqwAA+fn1o/d269bN6KohAAAqFaZUIo83pgu1gXXv3n3ZsmUbN27s3p06CIhRnJMhNDF++HOEUaE2sLq6OriCnnI1A6LZaIbw5wijQj1NDzfhAgDGjBnDfh2pVIqm6ZsNEw1/jiChbsFEItHevXsBAMnJyZs3b1a/lJ+ff+XKlWbQDAEAAHI5AMjjjQlDbWBSqfTMmTPwmDyA0Gi0DRs2GF0vBACA3M6MDMxkoTYwOzu7a9euAQB69+4NDxAtAuoi6gDH8fHjx588edLwIunp6StWrEhNTdUhTUeeRqBnqdSff/5ZL6W8vNzf379J6kboBzlF1IJcLicIIikpqUGlfHx8KJcOAwBIaTryNAI9BpaZmenv72+nhqurK/S2hWgGTD38uaaTNkp3a9p8sOn28RYRESGTyfr06UPppC0zMzM4ODg8PNzZ2Tk4OPju3bsAgIcPHy5YsABQuXAjpZF5AJXbuYaix8AWLlzI4/G2bNmiVCo3bdq0detWOzu7tuFSyjRormUcyTWi7WUVDf07WaVrH9Djx4+XLFnyyy+/PH36VCwWr137j1OdxMTEzZs3l5aWenp6zp8/X1uituIpKSldu3ZNTk5OTExks9kZGRnaFLhy5crYsWNfvHjh6+u7adMm9UukC7fU1NTPPvtMLBZrSoNu51JSUm7fvn3u3LnGdRr1LJW6fft2UlLSoEGD/ve//9na2oaGhnI4nC+//LJBHV9Eo8FkzRS46Hyt6JeaBvuo8ONxxlkKtF3V5qSN0t2aZqJeH296mxRzc/OxY8diGBYaGlqv16fpwk1TmqbbuQb+ewDQa2BcLhfev6enZ3Z2dmhoqL+/P7w9RDOAyeXNM8PxrZPDt05NLLOoqIjSSRuluzXNRG3FSR9vlKivMfL09IQelzXdjBviwk3T7Vwj0NNFDAgIWLNmzd9//92tW7dTp05VVVWdP3++7TkQb72Y8mYwBwcH0o+aupM2TXdrlInaipM+3tTRdNIGAMC0u+KCLtyeP39+/vz5o0ePak7mAQ23c5cuXTLkruuhx8C2bNlSXFx8+vTpUaNGyeVye3v7mTNnkv1mhLEx6fDn2py0Ubpb00zU6+MNAKBUKnEcp3TSphtKF25QGplH0+1cI/4JerqInTp1ys7OJggCw7Dr16+npqba2Nj069fPQOk3b95MSEiorKzs2LHjggUL7OzsGqRcVlbWnj17ampqgoKCYmJiaDRaYmLioUOH1PMcOXJEINA6DDB1TDr8OemkTSqVDhkyhHTSBt2tjR8/3tfX94cfftCWqK04CZ1OHzx4sI+Pz4MHD6CTNpFINHr0aKVSqVe3efPmXb9+vVOnThwOJzo6Grpwg9IOHDgA85Bu56RS6fjx4yMiIhrxT6B226ZjZgZiSMDL0tLShQsXrl69un379vv376+oqPjqq68M10ylUs2cOXPx4sUeHh4rV64cPnz4oEGDcBwnB6P3798/d+6c5v8dAr2RweAPlE5vTMJtG2ffTpWTS93QUDLd1N22UbpbMxUfbI2AugULCAjQXcyQ7SrZ2dm+vr4eHh4AgNGjR3/66acw/e7du/v375dKpb6+vnPnzoXDUE0yMzNtbW2hY5OwsLBLly4NGjSIjJqlUqkSEhJImW0VtJ3Z1KE2MEMaWb0EBAT06tULHj958qRjx44AgOrq6m+++Wb9+vUuLi7x8fH79++fM2cOWeTatWtBQUHwuLS0lJxEcnFxqefaPzk52cfHRygUkim1tbVkf6Nnz57QpxeDwcAwjDJKDYPBoNPp2iZs2Gw2ZYQ7Op1OKQ1mpvSnAH8UtJXSdonJZGIYBuQyppkZQy0DHLjDaEmUmrdyhgwZoulujTKxbUBtYOS7pc2joCHDHvK7wbVr1w4ePLh8+XIAQEZGho+PDwwvFhoaGhsbq25giYmJpIHV1taSAea4XK56x0ypVCYlJcXFxalXV1dXR87zCAQC2ImFzR2lFdFoNIIgtDXF8NWnLEUpDb732i7BaJraLmlTj4ZhCrmcxjOjaWSAvw6UmrdynJ2dnZ2dDUlsG+iZ5LC0pB5ha3svz58//7///Q8AMHPmTD8/v9ra2m3btpWXl69atQoaVUVFRU5OzuLFi2F+HX13c3PzkpISeCyVSs3NzclL6enpzs7O9XSzs7ODVUPecAwmkUgaMQarqqpqwjGYrLaGi+MSHFe8ekWmwzGYSCRqqjEYwqjoMTD1+DEKhSIzM/Pzzz//4osvtOUfNmzYsGHDyPxfffWVj4/PF198QX6RsLS07N+//6xZswAAMpkMfuhIS0s7deoU+PfrBABg/vz59vb2aWlpsFRhYaG9vT1ZS2pq6lux4Bit9DV99BgYXKhC4u3t7eDgEBISMmHCBL1+pm7cuMHlcmNiXouA2LNnz+PHjw8bNszJyenAgQMKhWLhwoUDBgwYMGAAAGDx4sVbt26FOVUq1fbt2/Pz893c3JKTkwcOHAjTZTJZZmameseyrYJVlAEAkFtfk0a/49F6ODg44DhuyGKOvLy8Bw8ekN8H+Xz+0aNHhULh7Nmz4+LiRCKRp6fnokWLtBWn0+nLly/ftm2bTCbz9/cng83k5OTARdAN1dy0wEqKOGdOqYQOuJOuKI+IVo6e8EVZWa8Fxq6qqlq/fn1+fn52draRFXtTTPo7GK2y3OzEEZzLk0RNJbivxYUx9e9gbxt6WjBvb+96KUKh8PDhw0bTBwForyp4xw8DLlc2firBMdWoSwiIHgPTDLNJ+dEG0VTQXlXyjh8mWCxi+myCwQSN2uSHaD3oMTAzM7OqqqqCgoJ66V5erT20sSmCVVfxTh0lGExJ1DSeuQVATilNHz0Gtm3btqVLl2ruRUOefZscrKaad+IwIAjp+CkEigTQVtCzXWXNmjUxMTF///131es0j3JvD1hNNe/4IYwgJBOm4/w2uzngLUSPgdHp9KVLl7q5uQlep3mUe0vAamt4Jw5jOC6JmvoWWtetW7f69u3bDBVlZWWRO5R1JxpeXC96DCwqKiohIaGhQhENQFTLO3UUUygkYyfjllYtrQ2iidFjYJ988smmTZu6dOkSEhIyXI3mUa7NQ4hqwcE9mFQqiZqK27S1T0lDhgwhf52XLFmyYsUKAEBcXJyrq6u1tXVwcDC5IR9C6X0NAHDx4kUfHx83N7cPPvhABpePaYFS+MaNG52cnDw8PNQ3O1MmUlZEmdNw9BjY5MmTrayshgwZ0rt3715qNKImRD0wiZg4sBtIJK3BusT5rFd/cRv6V/tQ1zrJ0aNH//rrr/A4KSlp3Lhxjx49WrduXVpaWnFxsb29/cGDB/UqVlpaGhUVdezYsSdPnuA4/tFHH2nLSSk8JSVlx44d6enpf/75Z3JyMsxJmUhZEWXOBqFnFjEjI+O3334j1wEimgpMIuadOILVSYno2Ti35T8tivNZ4icNXlXMtldadNHapIwePXr16tU4jufk5NDpdF9fX4VC8fTpU2tr69LSUgzDKNfE1OPs2bPBwcE+Pj4AgPnz54eEhOzcuZMyp7u7u6bw06dPz5s3z83NDQAAQ95pS6SsiDJng9BjYFZWVtAnCaIJwSRi3skjmESMzZhH2AoB1XaVZkb4rgi822C/iLpxdXV1dnb+448/rly5Mm7cOJi4evXqxMREZ2dnOp0OX1xKyO9ABQUFv//+O7kdk9yDS4mm8JKSEnKHIVkdZSJlRZQ5G4Qe4/n888+nTp26atWqejeG2rRG80/bJRFLoqZYCB2AmhujtgfsJV66dAlGwzp+/Phff/11//59S0vLjRs3VlZW1suv6X1NKBSOHTt2+/btAACJRKK+f6oelMIdHByePXsGM9y5cwceUCZSVkSZs0HoGYMtXrz4+fPn0dHR775OI2pCAHXrGjcFtxXqL2DijB49+tixY1VVVbDrVV5ebmdnx+fzy8vLDx06VG+lNaX3tREjRpw6der+/ftyuXzp0qXa+ofahIeHh+/evfvly5disZhcQ0uZSFkRZc4GocfAFFpoRE2If3qGYpE0agpu1/atCwDQo0cPuVweGRkJT6dNm8ZisTw9PcePH79w4cJjx47dunWLzOzn5we9r7m4uPTs2RMmurq67tixIzIy0tnZubCwUMcoiFL44MGD58yZExAQ0L1798mTJ8OclImUFVHmbBB6tqu8iU+OlqW1bVeRlpfxTh7BRCLp+Kmqf9suvW7bNBepoe0qpkUT++RAUCMWaVoXonHk5ubu2LGjXqKbm9vSpUtbRB/dNLFPDgQFYhHt+CGArKuJ8PT0bMIAecbGiD45EAAATCJmnzyCicUSZF1vJUb0yYHAxCLeicO0ujp82iyVOfo9ehvRY2CUPjk8PT3ZyJ+zPjCxiHf8MFYnlU2MZgjtAZVPDkSbB/nkMAoYnNWok0rGTaG9HTPyCEqQT46mB/YMMalUEjUFtxXq+dTY0qAZdqOi3ydH8+jRZsBqqnknjmBymSRqKm7bsHhoiLaH1p9XiUSyb9++CxcuwNO8vLzAwMCvv/6a0r8fAgL9amAKObIuBITawIqLiwMCApYsWUKuWrC0tLSzs9uwYUO3bt2a5Nt/24OoesX98QcMxyUTpyPrQkCoDSw2NlahUOTn55OryGxtbX/++We4FLJBgSrfErCqV4o92zCCkERNxS2tW1odRGuBegyWnJy8YsUKzZDK7u7uy5Yt01yo0gqB8elg8DvKWHU0Gk3HVjc6na6tlGY69qqCcewHQKMppsygCyzrxe2i0+napMG4YZSX6HQ6g8HQjCoGUxgMBlqtZhJQv2FlZWUdOnSgvOTl5QVjDrVyoPHAsEmUhkQZEU/9KmUpDMPqpWMV5fSEA4BGZ85aoGBzNIVCI9cmTZt6sCJcY7cYLKL71wHReqB+SB4eHrm5uYMHD9a8lJ2d7e7ubmStmgCpVAoAgI0APK4HhmHaVtObmZkpFArK1fRMJlNdGq2ynHfiCM5kqabOYFvb1GlZTU8QBKUOLBYLx3HKSzQaTdtqeh6PJ5fL4Wp6NM3byqH+FQ8JCdm0adMrtcCKkLKysg0bNpCuf95yaBXl0I+8ZPxU8Pb5M0QYArWBrVy50szMzM/Pb9euXXfu3CkuLr5z5058fLyfnx+Hw1m9enUza9kKoZeW8H48SHA4kvHTCLTOEKEF6i4ih8PJyMjYsGHDp59+Si7m4HK58+bNW7VqFeqW0EuKeKcSVBZ86bj68bsQCHW0DpS5XG5sbOzKlSufPn369OnT9u3bu7u7654YeEugFbzgJv6osrKWRk5C1oXQjZ6ZKAzD3N3dTWJWo3kg/n7CO5VA2AmlERMJDqel1UG0dtBUbwOgv3gKTp/AhfbSiIkE2rCDMABkYIbCyM/jnDmJtXeVjh5LMNF+U4RBoDGVQTCePOKcOaFq7wamzEDWhTAcZGD6YeZkcc+cVLl1rAuPAlTLmhAIbaAuoh4Y2fc4v51VeHSpGzEG0On6CyAQaiAD0wXz9h+clPMKL9+6YWEAfaJANBxkYFphZaSz0y4ruveqe3c4wLCWVgdhkiADo4b+exoz7bKih3/d4GHIuhCNBhmYBgSh/OVn2rVUeZ/+sgFDWlobhGmDDOx1CIKTcl5150/Vu8Nlfg0OKY9A1AMZmBo4zj2fxMi6xwh7X9GtJ6DaD4ZANAg0M/YvKhUnKZGRfb8uJIzeH8XvRDQNqAUDAABMqeCcOcl4/rRu5PsKz64trQ6i7YAMDGAyGff0j7TiQumYKGWHTi2tDqJN8bYbGFYn5SUew8pKpeHjVW7Ufn4QiEbzdhuYqJb74yFMVCsZNwV3dG5pbRBtkLfYwKpesY/sB7I66fhpb0lIckTz85YaGK2ynH4qgcAwycRo3Ao54kUYi7fRwOglRdxTCQTPTD5xOs5BTjUQRuStMzD6y2fc0ydwgSWYOoNgsQGV41EEoql4uz40M/LzuKcScGsb6bgpwMy8pdVBtH3eohaMmZPF+fWMyrm9NDwKbftHNA/NYWB1dXWXL18ODQ1taMGsrKw9e/bU1NQEBQXFxMTQaLTExMRDhw6p5zly5IhAoN9tNfPuX5xLvyk7edaFRRBoYzKiuWgOA/v+++8fPHjQUANTqVSbN29evHixh4fHypUr09LSBg0aFB4ePmrUKJjh/v37586dM8S64NZJpXc3KdqYjGhejP623bx588mTJ+opd+/eXbBgwYwZM7Zv304Z3ASSmZlpa2vr6+vL4XDCwsKuXLkC/g3PxWQyaTRaQkLC7Nmz9VRPEMT5c+y0y/Ie/tKQUci6EM2McVuwV69e/fjjj7Nmzdq+fTtMqa6u/uabb9avX+/i4hIfH79///45c+aQ+a9duxYUFASPS0tLXVxc4LGLi0tZWZm65OTkZB8fH6Hwvw/EVVVVcXFx8HjgwIEw9hKjokx5Iw28N4IVFFxv1MVgMJhMpmYALgiHw6GMi8dgMCwsKEI90Ol0AIC5OcXECYwPRqfql8LYfJQCGQwGnU7XDIYE44NxuVw28nxqChjxF50giG3btkVHR6u/QBkZGT4+Pq6urjQaLTQ09Pr16+pFEhMTyePa2lruv57fuVwuGS0aAKBUKpOSksaMGaNeFsfxmn+RyWTwtcYcHJlLv6ANHELTAPwbYLKhlyjTybh4TXjJEB2a9pEhmpwmbsHOnz//v//9DwAwc+bMwsJCJyen7t27P3/+nMxQUVGRk5OzePFieGpra6tNlLm5eUlJCTyWSqXqjUN6erqzs7OlpaV6fmtr6127dpGnMFK7hYUFzYJfXV2tKZ/H42kLwGdrayuVSikD8PH5fHVTJ+FwOObm5jU1RO868QAAB5xJREFUNZQB+FgslkQi0SwlEAhwHK+trdW8ZGZmpi0An7W1tVgshgH4dPwDEa2BJjawYcOGDRs2DB5fvXo1IyMjJSUFx/G6uroJEybs2bPH0tKyf//+s2bNAgDIZDIYjTYtLe3UqVMAgKKiogULFgAA5s+fb29vn5aWBkUVFhba29uTtaSmpvr7+zet5giEMTDiGIxspp4/f7527dq9e/cCAHr27Hn8+PFhw4Y5OTkdOHBAoVAsXLhwwIABAwYMgEW2bt0KS6lUqu3bt+fn57u5uSUnJw8c+M8uY5lMlpmZqT5yQyBaLc39oVkoFM6ePTsuLk4kEnl6ei5atEhbTjqdvnz58m3btslkMn9//+DgYJiek5MjFAodHByaS2UEovFgmmOGtsF/YzAarRFjMJFI1IgxWIWWIOhNPgarqalBYzCTAE1DIRBGBBkYAmFEkIEhEEakzY7BIBcuXKipqYmMjDS8CI7jO3fuDA4O9vb2NrxUdnb25cuX586dy2A0YN7o559/ZrPZI0aMMLyISCQ6ePBgaGhohw7IRY8J0MZbsLS0tF9//bVBRQiCOHToUG5uboNK5eXlHTp0SKlUNqjU+fPn4RpLwxGLxYcOHXrx4kWDSiFaijZuYAhEy4IMDIEwIm18DFZZWalSqezs7AwvQhBEYWGhpaWlmZmZ4aUkEsmrV68cHR2xhgQTKy8vh9+1DC+iUqmKi4ttbGw4HI7hpRAtRRs3MASiZUFdRATCiLQppzeaPjz0Xr1582ZCQkJlZWXHjh0XLFhQrzO5bNmyR48ewePQ0FByA7W2dG0V6XUlQinw999/7927N7nvsxF3h2h5iLaCUqmMjo7OzMyUSqWffPJJamqq3qslJSVRUVG5ublSqXTHjh2rVq2qJ3Py5Mlw1Z9cLlcqlXrTtVWkUqnk/3Lr1q3Vq1frrejly5dRUVFisbjRd4doDbSd3zlKHx66r2ZnZ/v6+np4eHA4nNGjR9f79gUX+1pYWEAvIOSef23pOiqi6XQloilww4YNixcvVl8f3Ii7Q7QG2k4XUbcPD8qrAQEBvXr1golPnjzp2LGjepHi4mIAwMKFCysqKrp06fLhhx9aWVnpSDdEDU1XIpQCP/30UwCA+gKURtwdojXQdlowHT48tF2Fe0wAANeuXTt48ODEiRPVi8hksq5du8bGxh4+fJjH48ENozrS9apB6UpEr8BG3x2iNdB2DMzc3JzcwVXPh4eOq7W1tWvWrElMTFy1atU777yjXsTT0/Ozzz6ztram0+kjR468e/eu7nS9alC6EtEr8E3uDtHitB0Ds7e3LygogMf1fHhou6pQKL766itHR8dvv/3W1dW1nsBHjx6RM3vQx5vudL1qpKam9ujRQ1Nz3QIbfXeI1kDbMbBu3boVFRXl5+fjOJ6cnAydfAAAHj16JJVKKa/euHGDy+XGxMTUW34Bi5SVlcXFxZWWluI4/ssvvwQEBMCr2tJ1VAT+dSVSz8B0V/SGd4doDbSplRw5OTm7d++GPjyio6Oh2YSHh69bt65Lly6aVw8cOHDmzBmyOJ/PP3r0qHqR06dP//bbbwqFonv37rNmzeLxeDAnZbqOigAAmZmZu3btqje+0l1RZGQkHJU17u6a4R+O0EubMjAEorXRdrqICEQrBBkYAmFEkIEhEEYEGRgCYUSQgSEQRgQZGAJhRJCB6WLlypUMBuPevXvqiTdu3IDf0FpKK4QJgb6D6aKurs7Hx8fJyYncAEIQREBAAIZh0MxaVDuECYBaMF1wOJydO3devXr15MmTMCUhIeGvv/7auXPnm1gXZSAIRNukZfd7mgRRUVEuLi5isVgsFjs7O8+dOxemV1dXz549u3379nw+f+TIkS9evIDpjx8/Hj16tFAotLCwGDhw4N27d2E6AODmzZtDhw4dNWpUy9wJotlBXUT9FBUVvfPOO4sWLaLT6Tt27MjNzYWO1oYMGYLj+KpVq7hc7tatW+/evZuenm5padm1a1cHB4cVK1ZgGBYbGyuVSv/44w8AAIZhffv2/fDDDwcOHOjs7NzSt4VoFlrawk2D7du3czgcHo+3b98+mHLz5k0mk/nq1St4qlQq7e3t9+3bh+P4pk2b8vPzYfrhw4dtbW3hMQBg3bp1za88ogVpOy4DjMq8efP27t3LYDBiYmJgysOHDxUKhboXKqVSWVhYiGHYhx9+ePbs2f379+fk5KSkpKg77aDcD4ZowyADMwg6nd65c2cGg0HObQgEAgcHh6Kiono5RSJRUFAQg8EYN27c9OnTw8LCli1bRl5Fe43fNpCBNRIvL6+SkpKHDx926dIFAFBQUBAREfHdd989e/YsOzu7uLgYesJJSEhoaU0RLQmapm8kHh4e4eHhY8aMSU5OTklJmTRpkkgk8vLysrGxkcvlp0+ffvHixenTp7/44guJRAIDRiPeQpCBNZ4jR44MGTJk5syZERERVlZW586do9Pp/fr1W7t27YoVK7p37/7jjz+eP3/e1dW1QSH2EG0JNE2PQBgR1IIhEEYEGRgCYUSQgSEQRgQZGAJhRJCBIRBGBBkYAmFEkIEhEEYEGRgCYUSQgSEQRgQZGAJhRP4Pg//7gWrJjb8AAAAASUVORK5CYII=" /><!-- --></p>
+<p>In the present calibration, this metric is around 0.31–0.34 for
+<code>core</code> and <code>core_plus</code> (roughly one third of
+positive equity distributions received before the terminal year), and
+falls to about 0.18 for <code>value_added</code> and 0.13 for
+<code>opportunistic</code>. Core-like styles therefore display a more
+“annuity-like” profile, with a non-trivial portion of equity repaid
+through interim distributions, whereas non-core styles concentrate
+equity recovery in the final transaction.</p>
+<p>The timing indicator thus complements the risk–return and
+leverage–coverage diagnostics by making explicit <em>when</em> along the
+holding period each style actually returns capital to equity
+holders.</p>
+</div>
+<div id="irr-decomposition-operations-vs-exit" class="section level2" number="8">
+<h2><span class="header-section-number">8</span> IRR decomposition:
+operations vs exit</h2>
+<p>The styles also differ in the relative contribution of ongoing
+operations versus terminal value to project-level performance. In a
+stylised typology:</p>
+<ul>
+<li>core strategies are expected to derive most of their value from
+intermediate NOI streams (rents net of opex and recurring capex) in a
+hold-to-maturity perspective;</li>
+<li>opportunistic strategies are expected to exhibit a much larger share
+of value stemming from the terminal event, reflecting business-plan risk
+(repositioning, lease-up, exit timing).</li>
+</ul>
+<p>The helper <code>styles_pv_split()</code> approximates this
+decomposition by computing, for each style, the present value
+(discounted at the model’s DCF rate) of:</p>
+<ul>
+<li>income-related cash flows from year 1 to horizon, and</li>
+<li>terminal value (resale proceeds net of exit costs),</li>
+</ul>
+<p>and by expressing these components as shares of total present
+value.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>styles_vec <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;core&quot;</span>, <span class="st">&quot;core_plus&quot;</span>, <span class="st">&quot;value_added&quot;</span>, <span class="st">&quot;opportunistic&quot;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>pv_tbl <span class="ot">&lt;-</span> <span class="fu">styles_pv_split</span>(styles_vec) <span class="sc">|&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">style =</span> <span class="fu">factor</span>(style, <span class="at">levels =</span> styles_vec))</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>  pv_tbl <span class="sc">|&gt;</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(style, share_pv_income, share_pv_resale),</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">3</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Present-value split between income and resale by style (discounted at DCF rate, t &gt;= 1)&quot;</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>Present-value split between income and resale by style
+(discounted at DCF rate, t &gt;= 1)</caption>
+<thead>
+<tr class="header">
+<th align="left">style</th>
+<th align="right">share_pv_income</th>
+<th align="right">share_pv_resale</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">core</td>
+<td align="right">0.352</td>
+<td align="right">0.648</td>
+</tr>
+<tr class="even">
+<td align="left">core_plus</td>
+<td align="right">0.322</td>
+<td align="right">0.678</td>
+</tr>
+<tr class="odd">
+<td align="left">value_added</td>
+<td align="right">0.122</td>
+<td align="right">0.878</td>
+</tr>
+<tr class="even">
+<td align="left">opportunistic</td>
+<td align="right">0.007</td>
+<td align="right">0.993</td>
+</tr>
+</tbody>
+</table>
+<p>In line with the targeted calibration, core and core_plus
+configurations exhibit a higher <code>share_pv_income</code>, signalling
+that recurring NOI explains most of the present value. Value_added and
+opportunistic presets display a larger <code>share_pv_resale</code>,
+consistent with a greater dependence on exit conditions.</p>
+</div>
+<div id="exit-yield-and-rental-growth-sensitivities" class="section level2" number="9">
+<h2><span class="header-section-number">9</span> Exit-yield and
+rental-growth sensitivities</h2>
+<p>A different perspective on style differentiation is obtained by
+examining how sensitive each profile is to small shocks on exit yield
+and on rental growth. Strategies that rely heavily on value capture at
+exit should exhibit a larger change in equity IRR for a given shift in
+exit yield; they effectively have a longer “duration” with respect to
+terminal-value assumptions.</p>
+<div id="exit-yield-shock" class="section level3" number="9.1">
+<h3><span class="header-section-number">9.1</span> Exit-yield shock</h3>
+<p>The first diagnostic perturbs the exit-yield spread by ±50 basis
+points around its baseline value and recomputes leveraged equity IRR for
+each style. Formally, for each preset (s) and shock (y ) bps, the helper
+<code>styles_exit_sensitivity()</code> shifts</p>
+<p>[ + y]</p>
+<p>and runs <code>run_case()</code> under otherwise unchanged
+assumptions.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="do">## Sensitivity to +/- 50 bps on exit yield ----------------------------------</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>styles_vec <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;core&quot;</span>, <span class="st">&quot;core_plus&quot;</span>, <span class="st">&quot;value_added&quot;</span>, <span class="st">&quot;opportunistic&quot;</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>exit_sens <span class="ot">&lt;-</span> <span class="fu">styles_exit_sensitivity</span>(</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="at">styles    =</span> styles_vec,</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="at">delta_bps =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">50</span>, <span class="dv">0</span>, <span class="dv">50</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>)</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  exit_sens <span class="sc">|&gt;</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>      <span class="at">names_from  =</span> shock_bps,</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>      <span class="at">values_from =</span> irr_equity</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>    ),</span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>  <span class="at">digits  =</span> <span class="dv">4</span>,</span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Equity IRR sensitivity to +/- 50 bps exit-yield shock by style&quot;</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>Equity IRR sensitivity to +/- 50 bps exit-yield shock by
+style</caption>
+<thead>
+<tr class="header">
+<th align="left">style</th>
+<th align="right">-50</th>
+<th align="right">0</th>
+<th align="right">50</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">core</td>
+<td align="right">0.0599</td>
+<td align="right">0.0474</td>
+<td align="right">0.0362</td>
+</tr>
+<tr class="even">
+<td align="left">core_plus</td>
+<td align="right">0.0916</td>
+<td align="right">0.0738</td>
+<td align="right">0.0569</td>
+</tr>
+<tr class="odd">
+<td align="left">value_added</td>
+<td align="right">0.1691</td>
+<td align="right">0.1491</td>
+<td align="right">0.1301</td>
+</tr>
+<tr class="even">
+<td align="left">opportunistic</td>
+<td align="right">0.3194</td>
+<td align="right">0.2790</td>
+<td align="right">0.2408</td>
+</tr>
+</tbody>
+</table>
+<p>In the canonical calibration, <code>core</code> and
+<code>core_plus</code> show relatively modest IRR changes when exit
+yields move by ±50 bps, consistent with a larger share of value coming
+from intermediate NOI. By contrast, <code>value_added</code> and
+<code>opportunistic</code> profiles typically exhibit a stronger IRR
+response to the same perturbation, reflecting their concentration of
+performance in the terminal value and the greater effective duration of
+their cash-flow profile.</p>
+</div>
+<div id="rental-growth-shock" class="section level3" number="9.2">
+<h3><span class="header-section-number">9.2</span> Rental-growth
+shock</h3>
+<p>A symmetric diagnostic focuses on the dependence of each style on
+rental growth and indexation. Here the global <code>index_rate</code>
+parameter is shifted by ±1 percentage point, and leveraged equity IRR is
+recomputed for each shocked scenario.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="do">## Sensitivity to rental-growth shocks --------------------------------------</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>growth_sens <span class="ot">&lt;-</span> <span class="fu">styles_growth_sensitivity</span>(</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="at">styles =</span> styles_vec,</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>  <span class="at">delta  =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.01</span>, <span class="dv">0</span>, <span class="fl">0.01</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>)</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>  growth_sens <span class="sc">|&gt;</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>      <span class="at">names_from  =</span> shock_growth,</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>      <span class="at">values_from =</span> irr_equity</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>    ),</span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>  <span class="at">digits  =</span> <span class="dv">4</span>,</span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Equity IRR sensitivity to rental-growth shocks by style&quot;</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>Equity IRR sensitivity to rental-growth shocks by
+style</caption>
+<thead>
+<tr class="header">
+<th align="left">style</th>
+<th align="right">-0.01</th>
+<th align="right">0</th>
+<th align="right">0.01</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">core</td>
+<td align="right">0.0346</td>
+<td align="right">0.0474</td>
+<td align="right">0.0599</td>
+</tr>
+<tr class="even">
+<td align="left">core_plus</td>
+<td align="right">0.0570</td>
+<td align="right">0.0738</td>
+<td align="right">0.0897</td>
+</tr>
+<tr class="odd">
+<td align="left">value_added</td>
+<td align="right">0.1310</td>
+<td align="right">0.1491</td>
+<td align="right">0.1665</td>
+</tr>
+<tr class="even">
+<td align="left">opportunistic</td>
+<td align="right">0.2593</td>
+<td align="right">0.2790</td>
+<td align="right">0.2984</td>
+</tr>
+</tbody>
+</table>
+<p>This table highlights how strongly each profile depends on NOI growth
+to reach its target return. In line with the stylised typology, core
+configurations are comparatively less sensitive to a ±1 percentage-point
+change in indexation, as their business model rests on stabilised
+occupancy and moderate leverage rather than aggressive growth
+assumptions. Conversely, value_added and especially opportunistic
+strategies exhibit more pronounced IRR movements, consistent with their
+exposure to lease-up, reversion and rental growth embedded in the
+business plan.</p>
+</div>
+</div>
+<div id="break-even-exit-yield-for-a-target-equity-irr" class="section level2" number="10">
+<h2><span class="header-section-number">10</span> Break-even exit yield
+for a target equity IRR</h2>
+<p>A further synthetic indicator is the <em>break-even exit yield</em>
+required for each style to achieve a common target equity IRR. This
+provides an intuitive measure of how “tight” exit assumptions must be
+for the business plan to meet a given hurdle.</p>
+<p>For a style (s) and a target equity IRR ({r}), the helper
+<code>styles_break_even_exit_yield()</code> solves, via
+<code>uniroot()</code>, for the exit yield (y^) such that</p>
+<p>[ ^{}_s(y^) = {r},]</p>
+<p>holding all other configuration parameters fixed. In practice, the
+function reconstructs the spread <code>exit_yield_spread_bps</code>
+implied by a candidate (y^), reruns <code>run_case()</code>, and
+searches for the root over a bounded interval.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>target_irr <span class="ot">&lt;-</span> <span class="fl">0.10</span>  <span class="co"># 10% equity IRR as illustrative hurdle</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>be_tbl <span class="ot">&lt;-</span> <span class="fu">styles_break_even_exit_yield</span>(</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  <span class="at">styles     =</span> <span class="fu">c</span>(<span class="st">&quot;core&quot;</span>, <span class="st">&quot;core_plus&quot;</span>, <span class="st">&quot;value_added&quot;</span>, <span class="st">&quot;opportunistic&quot;</span>),</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>  <span class="at">target_irr =</span> target_irr</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>)</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>  be_tbl,</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>  <span class="at">digits  =</span> <span class="dv">4</span>,</span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>  <span class="at">caption =</span> <span class="fu">sprintf</span>(<span class="st">&quot;Break-even exit yield to hit %.1f%% equity IRR by style&quot;</span>, <span class="dv">100</span> <span class="sc">*</span> target_irr)</span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>Break-even exit yield to hit 10.0% equity IRR by
+style</caption>
+<thead>
+<tr class="header">
+<th align="left">style</th>
+<th align="right">target_irr</th>
+<th align="right">be_exit_yield</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">core</td>
+<td align="right">0.1</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left">core_plus</td>
+<td align="right">0.1</td>
+<td align="right">0.0477</td>
+</tr>
+<tr class="odd">
+<td align="left">value_added</td>
+<td align="right">0.1</td>
+<td align="right">0.0784</td>
+</tr>
+<tr class="even">
+<td align="left">opportunistic</td>
+<td align="right">0.1</td>
+<td align="right">0.0980</td>
+</tr>
+</tbody>
+</table>
+<p>Interpreting this table requires keeping in view the baseline equity
+IRRs of the four presets under their unperturbed exit yields. In the
+current calibration, these baselines are approximately:</p>
+<ul>
+<li><code>core</code>: ( _e % ),</li>
+<li><code>core_plus</code>: ( _e % ),</li>
+<li><code>value_added</code>: ( _e % ),</li>
+<li><code>opportunistic</code>: ( _e % ).</li>
+</ul>
+<p>A 10 % hurdle is therefore ambitious for the core and core_plus
+presets, but modest for the value_added and opportunistic ones. This
+asymmetry explains the pattern usually observed in
+<code>be_tbl</code>:</p>
+<ul>
+<li>For <code>core</code>, the equity IRR never reaches 10 % within a
+realistic exit-yield bracket (for example ([3%, 10%])). The
+corresponding <code>be_exit_yield</code> is therefore <code>NA</code>.
+Economically, this means that, at the given purchase price and leverage,
+a 10 % equity IRR is simply unattainable without implausibly tight exit
+pricing. This is consistent with the role of core as a low-risk,
+low-return style.</li>
+<li>For <code>core_plus</code>, the baseline IRR lies below 10 %, so the
+root is found by tightening the exit yield. The reported break-even exit
+yield is below the baseline yield and can be read as the level of
+pricing perfection required for a core_plus deal to attain a
+double-digit equity IRR.</li>
+<li>For <code>value_added</code> and <code>opportunistic</code>,
+baseline IRRs exceed 10 %. The root is therefore reached by
+<em>widening</em> the exit yield (higher yield, lower price) until the
+IRR falls back down to 10 %. The corresponding break-even yields are
+markedly higher than the baselines, meaning that these non-core styles
+can absorb a substantial deterioration in exit pricing and still deliver
+10 % to equity.</li>
+</ul>
+<p>Under this interpretation, the break-even table does not state that
+non-core styles “require tighter yields” to be viable. Instead, it
+quantifies how much adverse repricing each style can withstand before
+falling below a given equity-IRR benchmark. Core exhibits almost no
+buffer relative to a 10 % target; core_plus has a narrow margin;
+value_added and opportunistic display a much larger tolerance to
+exit-yield widening, reflecting both their higher ex ante returns and
+their greater exposure to exit-pricing risk.</p>
+</div>
+<div id="distressed-exit-comparison-under-covenant-breach" class="section level2" number="11">
+<h2><span class="header-section-number">11</span> Distressed exit
+comparison under covenant breach</h2>
+<p>The same machinery used to construct baseline credit profiles can be
+mobilised to emulate a simplified distressed-exit mechanism. The aim is
+not to model a full restructuring process, but to approximate a
+lender-driven sale triggered when covenants are breached.</p>
+<p>In this stylised setting, a distressed exit is defined as
+follows:</p>
+<ol style="list-style-type: decimal">
+<li><p>Under the bullet-debt scenario, the paths of DSCR and forward LTV
+are computed for each style.</p></li>
+<li><p>For a given covenant regime, the first period (t^) at which
+either</p>
+<ul>
+<li>(<em>t &lt; </em>{}), or</li>
+<li>(LTV^{}<em>t &gt; LTV</em>{})</li>
+</ul>
+<p>is interpreted as a <em>covenant breach</em>.</p></li>
+<li><p>If a breach occurs <em>before</em> a stylised refinancing window
+(for instance year 3), the exit is shifted to the start of that window;
+otherwise, the exit takes place at the breach year.</p></li>
+<li><p>At the distressed exit date, the exit yield is penalised by a
+fire-sale spread (e.g. +100 bps), and the case is re-run with a
+shortened horizon.</p></li>
+</ol>
+<p>Because distressed cash-flow patterns can be extreme, the equity IRR
+may become undefined (no sign change in the equity cash-flow vector).
+Rather than forcing an artefactual IRR, the diagnostic explicitly
+preserves such <code>NA</code> outcomes and supplements them with more
+robust performance indicators:</p>
+<ul>
+<li>the equity multiple, ( = );</li>
+<li>the associated loss percentage, ( = - 1).</li>
+</ul>
+<p>The helper <code>styles_distressed_exit()</code> (defined in the
+package utilities) encapsulates this logic. The vignette uses it with
+three illustrative covenant regimes:</p>
+<ul>
+<li>a <em>strict</em> regime (DSCR 1.20, forward LTV 65 %),</li>
+<li>a <em>baseline</em> regime (DSCR 1.15, forward LTV 70 %),</li>
+<li>a <em>flexible</em> regime (DSCR 1.10, forward LTV 75 %),</li>
+</ul>
+<p>and applies a one-percentage-point fire-sale penalty to the exit
+yield in all regimes.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="do">## Distressed exit diagnostic across regimes --------------------------------</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co"># Covenant regimes: strict / baseline / flexible</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>regimes <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>  <span class="at">regime   =</span> <span class="fu">c</span>(<span class="st">&quot;strict&quot;</span>, <span class="st">&quot;baseline&quot;</span>, <span class="st">&quot;flexible&quot;</span>),</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>  <span class="at">min_dscr =</span> <span class="fu">c</span>(<span class="fl">1.20</span>,      <span class="fl">1.15</span>,       <span class="fl">1.10</span>),</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>  <span class="at">max_ltv  =</span> <span class="fu">c</span>(<span class="fl">0.65</span>,      <span class="fl">0.70</span>,       <span class="fl">0.75</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>)</span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>distress_tbl <span class="ot">&lt;-</span> <span class="fu">styles_distressed_exit</span>(</span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>  <span class="at">styles               =</span> <span class="fu">c</span>(<span class="st">&quot;core&quot;</span>, <span class="st">&quot;core_plus&quot;</span>, <span class="st">&quot;value_added&quot;</span>, <span class="st">&quot;opportunistic&quot;</span>),</span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>  <span class="at">regimes              =</span> regimes,</span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>  <span class="at">fire_sale_bps        =</span> <span class="dv">100</span>,   <span class="co"># +100 bps exit-yield penalty</span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>  <span class="at">refi_min_year        =</span> <span class="dv">3</span><span class="dt">L</span>,    <span class="co"># refinancing window opens in year 3</span></span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a>  <span class="at">allow_year1_distress =</span> <span class="cn">FALSE</span>  <span class="co"># breaches before year 3 --&gt; exit at year 3</span></span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a>)</span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a></span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="co"># For compact display in the vignette, focus on the baseline regime</span></span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a>distress_baseline <span class="ot">&lt;-</span> distress_tbl <span class="sc">|&gt;</span></span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(regime <span class="sc">==</span> <span class="st">&quot;baseline&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a>    style,</span>
+<span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a>    breach_year,</span>
+<span id="cb12-24"><a href="#cb12-24" tabindex="-1"></a>    breach_type,</span>
+<span id="cb12-25"><a href="#cb12-25" tabindex="-1"></a>    irr_equity_base,</span>
+<span id="cb12-26"><a href="#cb12-26" tabindex="-1"></a>    irr_equity_distress,</span>
+<span id="cb12-27"><a href="#cb12-27" tabindex="-1"></a>    distress_undefined,</span>
+<span id="cb12-28"><a href="#cb12-28" tabindex="-1"></a>    equity_multiple_base,</span>
+<span id="cb12-29"><a href="#cb12-29" tabindex="-1"></a>    equity_multiple_distress,</span>
+<span id="cb12-30"><a href="#cb12-30" tabindex="-1"></a>    equity_loss_pct_distress</span>
+<span id="cb12-31"><a href="#cb12-31" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb12-32"><a href="#cb12-32" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(style)</span>
+<span id="cb12-33"><a href="#cb12-33" tabindex="-1"></a></span>
+<span id="cb12-34"><a href="#cb12-34" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb12-35"><a href="#cb12-35" tabindex="-1"></a>  distress_baseline,</span>
+<span id="cb12-36"><a href="#cb12-36" tabindex="-1"></a>  <span class="at">digits  =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>),</span>
+<span id="cb12-37"><a href="#cb12-37" tabindex="-1"></a>  <span class="at">caption =</span> <span class="fu">paste</span>(</span>
+<span id="cb12-38"><a href="#cb12-38" tabindex="-1"></a>    <span class="st">&quot;Baseline distressed-exit diagnostic by style (bullet debt scenario,&quot;</span>,</span>
+<span id="cb12-39"><a href="#cb12-39" tabindex="-1"></a>    <span class="st">&quot;+100 bps fire-sale penalty; breaches before year 3 shifted to year 3).&quot;</span></span>
+<span id="cb12-40"><a href="#cb12-40" tabindex="-1"></a>  )</span>
+<span id="cb12-41"><a href="#cb12-41" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>Baseline distressed-exit diagnostic by style (bullet debt
+scenario, +100 bps fire-sale penalty; breaches before year 3 shifted to
+year 3).</caption>
+<colgroup>
+<col width="8%" />
+<col width="7%" />
+<col width="7%" />
+<col width="9%" />
+<col width="12%" />
+<col width="11%" />
+<col width="12%" />
+<col width="15%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">style</th>
+<th align="right">breach_year</th>
+<th align="left">breach_type</th>
+<th align="right">irr_equity_base</th>
+<th align="right">irr_equity_distress</th>
+<th align="left">distress_undefined</th>
+<th align="right">equity_multiple_base</th>
+<th align="right">equity_multiple_distress</th>
+<th align="right">equity_loss_pct_distress</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">core</td>
+<td align="right">NA</td>
+<td align="left">NA</td>
+<td align="right">0.0474</td>
+<td align="right">NA</td>
+<td align="left">FALSE</td>
+<td align="right">1.46</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left">core_plus</td>
+<td align="right">NA</td>
+<td align="left">NA</td>
+<td align="right">0.0738</td>
+<td align="right">NA</td>
+<td align="left">FALSE</td>
+<td align="right">1.59</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">opportunistic</td>
+<td align="right">3</td>
+<td align="left">dscr</td>
+<td align="right">0.2790</td>
+<td align="right">NA</td>
+<td align="left">TRUE</td>
+<td align="right">2.20</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left">value_added</td>
+<td align="right">3</td>
+<td align="left">dscr</td>
+<td align="right">0.1491</td>
+<td align="right">NA</td>
+<td align="left">TRUE</td>
+<td align="right">2.30</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+</tbody>
+</table>
+<p>This table is read as follows:</p>
+<ul>
+<li>For each style, <code>breach_year</code> and
+<code>breach_type</code> locate the first covenant failure under the
+baseline regime (DSCR 1.15, forward LTV 70 %).</li>
+<li><code>irr_equity_base</code> reports the baseline leveraged IRR
+under the standard horizon and exit yield, while
+<code>irr_equity_distress</code> reports the IRR under the shortened,
+fire-sale horizon. When the distressed cash-flow path does not contain
+both negative and positive equity flows, the IRR is left undefined and
+flagged by <code>distress_undefined = TRUE</code>.</li>
+<li><code>equity_multiple_base</code> and
+<code>equity_multiple_distress</code> summarise total equity returned
+relative to equity paid in in the baseline and distressed cases,
+respectively; <code>equity_loss_pct_distress</code> reports the loss
+percentage implied by the distressed multiple.</li>
+</ul>
+<p>In a typical calibration, <code>core</code> and
+<code>core_plus</code> presets exhibit:</p>
+<ul>
+<li>breaches only in later years of the loan path;</li>
+<li>a moderate erosion of equity IRR in the distressed run (for example
+from about 4.7 % to about 2.6 % for <code>core</code>);</li>
+<li>equity multiples that remain close to one, implying limited capital
+impairment.</li>
+</ul>
+<p>By contrast, <code>value_added</code> and especially
+<code>opportunistic</code> styles tend to:</p>
+<ul>
+<li>experience their first breach very early in the horizon, even under
+a refinancing window;</li>
+<li>display distressed equity IRRs that may be sharply reduced or
+undefined, because equity is not fully repaid within the truncated
+window;</li>
+<li>record equity multiples well below one and strongly negative
+<code>equity_loss_pct_distress</code>, signalling substantial or
+near-total loss of the initial equity stake.</li>
+</ul>
+<p>This comparison operationalises, in reduced form, the idea that
+non-core strategies are structurally more exposed to covenant-driven
+forced-sale dynamics and to value capture concentrated in the terminal
+event. Core-like strategies, in contrast, show both delayed breaches and
+more resilient equity profiles, even under penalised exit
+conditions.</p>
+</div>
+<div id="export-for-audit-and-replication" class="section level2" number="12">
+<h2><span class="header-section-number">12</span> Export for audit and
+replication</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Export results and breaches (CSV) to facilitate off-notebook auditing</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>out_dir <span class="ot">&lt;-</span> <span class="fu">tempfile</span>(<span class="st">&quot;cre_dcf_styles_&quot;</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="fu">dir.create</span>(out_dir, <span class="at">recursive =</span> <span class="cn">TRUE</span>, <span class="at">showWarnings =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>readr<span class="sc">::</span><span class="fu">write_csv</span>(tbl_print,  <span class="fu">file.path</span>(out_dir, <span class="st">&quot;styles_summary.csv&quot;</span>))</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>readr<span class="sc">::</span><span class="fu">write_csv</span>(breach_tbl, <span class="fu">file.path</span>(out_dir, <span class="st">&quot;covenant_breaches.csv&quot;</span>))</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Artifacts written to: %s</span><span class="sc">\n</span><span class="st">&quot;</span>, out_dir))</span></code></pre></div>
+<pre><code>## 
+## Artifacts written to: /tmp/RtmpNUZBPr/cre_dcf_styles_1944cc1ad4da49</code></pre>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

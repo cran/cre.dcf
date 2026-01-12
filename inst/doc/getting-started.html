@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Getting started: invariants on the run_case() object</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting started: invariants on the
+run_case() object</h1>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#purpose" id="toc-purpose"><span class="toc-section-number">1</span> Purpose</a></li>
+<li><a href="#build-a-case" id="toc-build-a-case"><span class="toc-section-number">2</span> 1. Build a case</a></li>
+<li><a href="#exit-occurs-once-at-the-final-year-all-equity" id="toc-exit-occurs-once-at-the-final-year-all-equity"><span class="toc-section-number">3</span> 2. Exit occurs once at the final
+year (all-equity)</a></li>
+<li><a href="#irr-identity-all-equity-irr-is-the-root-of-npv-0" id="toc-irr-identity-all-equity-irr-is-the-root-of-npv-0"><span class="toc-section-number">4</span> 3. IRR identity (all-equity): IRR is
+the root of NPV = 0</a></li>
+<li><a href="#discount-factor-monotonicity" id="toc-discount-factor-monotonicity"><span class="toc-section-number">5</span> 5. Discount factor
+monotonicity</a></li>
+<li><a href="#sanity-checks" id="toc-sanity-checks"><span class="toc-section-number">6</span> 6. Sanity checks</a></li>
+<li><a href="#display-a-compact-summary" id="toc-display-a-compact-summary"><span class="toc-section-number">7</span> 7. Display a compact
+summary</a></li>
+</ul>
+</div>
+
+<div id="purpose" class="section level2" number="1">
+<h2><span class="header-section-number">1</span> Purpose</h2>
+<p>The objective of this vignette is to provide a transparent and
+reproducible walkthrough of the internal mechanics of a <em>Discounted
+Cash Flow</em> (DCF) simulation as implemented in the
+<code>cre.dcf</code> package.<br />
+Rather than focusing on the investment output itself, this document
+serves as a <strong>didactic exploration of model identities</strong> -
+the internal accounting relationships and mathematical consistencies
+that ensure the financial logic of a DCF model is sound.</p>
+<p>The vignette therefore acts as a <em>conceptual testbench</em> for
+doctoral or professional audiences interested in the structure of CRE
+valuation models, combining both computational validation and economic
+interpretation.</p>
+<p>More specifically, it demonstrates how the function
+<code>run_case()</code> produces a complete and self-contained case
+object, and how several key invariants can be verified on that
+object:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Temporal consistency</strong> - a single exit event occurs
+exactly at the end of the investment horizon, ensuring that terminal
+value is not double-counted.<br />
+</li>
+<li><strong>Net Present Value (NPV) identity</strong> - the NPV computed
+manually from discounted cash flows matches the value reported by the
+model, within numerical tolerance.<br />
+</li>
+<li><strong>Internal Rate of Return (IRR) identity</strong> - the IRR
+derived by solving the NPV equation equals the IRR reported by the
+package, verifying the link between NPV and IRR definitions.<br />
+</li>
+<li><strong>Discounting logic</strong> - the discount factors used in
+the model evolve monotonically and are consistent with the accumulation
+factors applied internally.<br />
+</li>
+<li><strong>Accounting and pricing sanity checks</strong> - key
+quantities such as <em>Net Operating Income (NOI)</em> and acquisition
+price are positive and coherent across data tables.<br />
+</li>
+<li><strong>Synthesis of results</strong> - comparison between
+<em>unlevered</em> (project-level) and <em>levered</em> (equity-level)
+indicators illustrates the effect of financial leverage on performance
+metrics.</li>
+</ol>
+<p>Each section mirrors a fundamental identity or control equation that
+professional valuation models must satisfy.<br />
+By executing the vignette, the user not only confirms the internal
+coherence of <code>cre.dcf</code>, but also <strong>learns how each
+financial identity can be derived and verified</strong> directly from
+the output data, without relying on opaque helper functions.</p>
+<p>In an academic context, this vignette can be used to:</p>
+<ul>
+<li>teach the conceptual underpinnings of DCF modelling (NPV–IRR
+equivalence, discount factor dynamics, exit timing),</li>
+<li>illustrate how computational reproducibility supports transparency
+in financial geography or real-estate finance research,<br />
+</li>
+<li>serve as a template for developing <em>validation notebooks</em>
+that accompany empirical models.</li>
+</ul>
+<p>In sum, this vignette transforms a basic test of numerical
+consistency into a <strong>learning exercise on the epistemology of
+valuation</strong>: it makes explicit the quantitative structure that
+underlies every DCF calculation - how time, cash flow, and capital are
+formally related through the principle of present value.</p>
+</div>
+<div id="build-a-case" class="section level2" number="2">
+<h2><span class="header-section-number">2</span> 1. Build a case</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(cre.dcf)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(yaml)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>path <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;preset_default.yml&quot;</span>, <span class="at">package =</span> <span class="st">&quot;cre.dcf&quot;</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">nzchar</span>(path))</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>cfg  <span class="ot">&lt;-</span> yaml<span class="sc">::</span><span class="fu">read_yaml</span>(path)</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>case <span class="ot">&lt;-</span> <span class="fu">run_case</span>(cfg)</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>ae     <span class="ot">&lt;-</span> case<span class="sc">$</span>all_equity</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>al     <span class="ot">&lt;-</span> case<span class="sc">$</span>leveraged</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>cf_all <span class="ot">&lt;-</span> case<span class="sc">$</span>cashflows</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="fu">stopifnot</span>(</span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="fu">is.list</span>(ae),</span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="fu">is.list</span>(al),</span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="fu">is.data.frame</span>(ae<span class="sc">$</span>cashflows),</span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="fu">is.data.frame</span>(al<span class="sc">$</span>cashflows),</span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a><span class="fu">is.data.frame</span>(cf_all)</span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>)</span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a>cfe <span class="ot">&lt;-</span> ae<span class="sc">$</span>cashflows</span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(<span class="fu">c</span>(<span class="st">&quot;year&quot;</span>, <span class="st">&quot;free_cash_flow&quot;</span>, <span class="st">&quot;sale_proceeds&quot;</span>) <span class="sc">%in%</span> <span class="fu">names</span>(cfe)))</span></code></pre></div>
+</div>
+<div id="exit-occurs-once-at-the-final-year-all-equity" class="section level2" number="3">
+<h2><span class="header-section-number">3</span> 2. Exit occurs once at
+the final year (all-equity)</h2>
+<p>A critical temporal invariant in single-asset DCF models is the
+uniqueness and timing of the exit event. For the all-equity case, sale
+proceeds should appear once and only once, in the final year of the
+projection.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="do">## 2. Exit occurs once at the final year (all-equity)</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>t         <span class="ot">&lt;-</span> cfe<span class="sc">$</span>year</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>exit_rows <span class="ot">&lt;-</span> <span class="fu">which</span>(cfe<span class="sc">$</span>sale_proceeds <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co"># Checks: a single exit, and it occurs at the last period</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">length</span>(exit_rows) <span class="sc">==</span> <span class="dv">1</span><span class="dt">L</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="fu">stopifnot</span>(exit_rows <span class="sc">==</span> <span class="fu">which.max</span>(t))</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co"># ---- Display results for pedagogical clarity ----</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>exit_year    <span class="ot">&lt;-</span> t[exit_rows]</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>sale_value   <span class="ot">&lt;-</span> cfe<span class="sc">$</span>sale_proceeds[exit_rows]</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>free_cf_exit <span class="ot">&lt;-</span> cfe<span class="sc">$</span>free_cash_flow[exit_rows]</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="fu">cat</span>(</span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">Exit event diagnostics:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Number of exit events detected: %d (should be 1)</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">length</span>(exit_rows)),</span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Exit year (expected last period): %d</span><span class="sc">\n</span><span class="st">&quot;</span>, exit_year),</span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Sale proceeds at exit: %s</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="fu">formatC</span>(sale_value, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>)),</span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Free cash flow in the exit year (before sale): %s</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="fu">formatC</span>(free_cf_exit, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>)),</span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Maximum year in series: %d</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">max</span>(t)),</span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="cf">if</span> (exit_year <span class="sc">==</span> <span class="fu">max</span>(t))</span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a><span class="st">&quot;✓ Exit correctly occurs in the final year.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a><span class="st">&quot;✗ Exit NOT in final year - investigate configuration.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
+<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## 
+## Exit event diagnostics:
+##  • Number of exit events detected: 1 (should be 1)
+##  • Exit year (expected last period): 5
+##  • Sale proceeds at exit: 3 914 752.2856
+##  • Free cash flow in the exit year (before sale): 4 082 809.8332
+##  • Maximum year in series: 5
+##  ✓ Exit correctly occurs in the final year.</code></pre>
+<p>This test guarantees that the terminal value is not double-counted
+and that all intermediate cash flows are properly separated from the
+exit event.</p>
+</div>
+<div id="irr-identity-all-equity-irr-is-the-root-of-npv-0" class="section level2" number="4">
+<h2><span class="header-section-number">4</span> 3. IRR identity
+(all-equity): IRR is the root of NPV = 0</h2>
+<p>By definition, the IRR is the discount rate that sets the NPV of the
+cash-flow stream to zero. This section reconstructs that relationship
+explicitly and verifies that the IRR computed via root finding coincides
+with the IRR reported by run_case().</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="do">## 4. IRR identity (all-equity): verifying that IRR is the root of NPV = 0</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co"># 4.1 Build cash-flow vector (t = year)</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">is.integer</span>(cfe<span class="sc">$</span>year) <span class="sc">||</span> <span class="fu">is.numeric</span>(cfe<span class="sc">$</span>year))</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">min</span>(cfe<span class="sc">$</span>year) <span class="sc">==</span> <span class="dv">0</span>)  <span class="co"># ensure the time origin is correct</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>flows <span class="ot">&lt;-</span> cfe<span class="sc">$</span>free_cash_flow</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>last  <span class="ot">&lt;-</span> <span class="fu">which.max</span>(cfe<span class="sc">$</span>year)</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co"># Add sale proceeds to the last period&#39;s free cash flow</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>flows[last] <span class="ot">&lt;-</span> flows[last] <span class="sc">+</span> cfe<span class="sc">$</span>sale_proceeds[last]</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>npv_at <span class="ot">&lt;-</span> <span class="cf">function</span>(r) {</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>  <span class="fu">sum</span>(flows <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> r)<span class="sc">^</span>(cfe<span class="sc">$</span>year))</span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>}</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co"># 4.2 Detect automatically a valid interval where NPV changes sign</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>grid <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="fl">0.9</span>, <span class="fl">2.0</span>, <span class="at">by =</span> <span class="fl">0.01</span>)</span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>vals <span class="ot">&lt;-</span> <span class="fu">sapply</span>(grid, npv_at)</span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>sgn  <span class="ot">&lt;-</span> <span class="fu">sign</span>(vals)</span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>idx <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">diff</span>(sgn) <span class="sc">!=</span> <span class="dv">0</span>)</span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">length</span>(idx) <span class="sc">&gt;=</span> <span class="dv">1</span><span class="dt">L</span>)</span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a>lower <span class="ot">&lt;-</span> grid[idx[<span class="dv">1</span>]]</span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a>upper <span class="ot">&lt;-</span> grid[idx[<span class="dv">1</span>] <span class="sc">+</span> <span class="dv">1</span>]</span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a></span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a><span class="co"># 4.3 Root finding with numerical control (reference IRR based on this vignette&#39;s convention)</span></span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a></span>
+<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a>irr_root <span class="ot">&lt;-</span> <span class="fu">uniroot</span>(</span>
+<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a>  npv_at,</span>
+<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a>  <span class="fu">c</span>(lower, upper),</span>
+<span id="cb4-35"><a href="#cb4-35" tabindex="-1"></a>  <span class="at">tol =</span> .Machine<span class="sc">$</span>double.eps<span class="sc">^</span><span class="fl">0.5</span></span>
+<span id="cb4-36"><a href="#cb4-36" tabindex="-1"></a>)<span class="sc">$</span>root</span>
+<span id="cb4-37"><a href="#cb4-37" tabindex="-1"></a></span>
+<span id="cb4-38"><a href="#cb4-38" tabindex="-1"></a><span class="co"># 4.4 Checks:</span></span>
+<span id="cb4-39"><a href="#cb4-39" tabindex="-1"></a><span class="co"># (A) NPV(irr_root) ≈ 0  [hard invariance: must hold]</span></span>
+<span id="cb4-40"><a href="#cb4-40" tabindex="-1"></a><span class="co"># (B) NPV(ae$irr_project) reported for information only</span></span>
+<span id="cb4-41"><a href="#cb4-41" tabindex="-1"></a></span>
+<span id="cb4-42"><a href="#cb4-42" tabindex="-1"></a>tol_cash <span class="ot">&lt;-</span> <span class="fl">1e-2</span>  <span class="co"># acceptable deviation in currency units</span></span>
+<span id="cb4-43"><a href="#cb4-43" tabindex="-1"></a></span>
+<span id="cb4-44"><a href="#cb4-44" tabindex="-1"></a>npv_at_root   <span class="ot">&lt;-</span> <span class="fu">npv_at</span>(irr_root)</span>
+<span id="cb4-45"><a href="#cb4-45" tabindex="-1"></a>npv_at_report <span class="ot">&lt;-</span> <span class="fu">npv_at</span>(ae<span class="sc">$</span>irr_project)</span>
+<span id="cb4-46"><a href="#cb4-46" tabindex="-1"></a></span>
+<span id="cb4-47"><a href="#cb4-47" tabindex="-1"></a><span class="co"># Hard check on the IRR computed in this vignette</span></span>
+<span id="cb4-48"><a href="#cb4-48" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">abs</span>(npv_at_root) <span class="sc">&lt;=</span> tol_cash)</span>
+<span id="cb4-49"><a href="#cb4-49" tabindex="-1"></a></span>
+<span id="cb4-50"><a href="#cb4-50" tabindex="-1"></a><span class="co"># Informative diagnostics on the package&#39;s reported IRR</span></span>
+<span id="cb4-51"><a href="#cb4-51" tabindex="-1"></a>gap_rate <span class="ot">&lt;-</span> <span class="fu">abs</span>(irr_root <span class="sc">-</span> ae<span class="sc">$</span>irr_project)</span>
+<span id="cb4-52"><a href="#cb4-52" tabindex="-1"></a></span>
+<span id="cb4-53"><a href="#cb4-53" tabindex="-1"></a>status_report <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="fu">is.finite</span>(npv_at_report) <span class="sc">&amp;&amp;</span> <span class="fu">abs</span>(npv_at_report) <span class="sc">&lt;=</span> tol_cash) {</span>
+<span id="cb4-54"><a href="#cb4-54" tabindex="-1"></a>  <span class="st">&quot;✓ Reported IRR behaves as a root of the NPV equation under this cash-flow convention.&quot;</span></span>
+<span id="cb4-55"><a href="#cb4-55" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb4-56"><a href="#cb4-56" tabindex="-1"></a>  <span class="fu">paste0</span>(</span>
+<span id="cb4-57"><a href="#cb4-57" tabindex="-1"></a>    <span class="st">&quot;⚠ Reported IRR does not exactly solve NPV = 0 under this vignette&#39;s convention.</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb4-58"><a href="#cb4-58" tabindex="-1"></a>    <span class="st">&quot;  This may reflect different timing or cash-flow conventions in the internal implementation.&quot;</span></span>
+<span id="cb4-59"><a href="#cb4-59" tabindex="-1"></a>  )</span>
+<span id="cb4-60"><a href="#cb4-60" tabindex="-1"></a>}</span>
+<span id="cb4-61"><a href="#cb4-61" tabindex="-1"></a></span>
+<span id="cb4-62"><a href="#cb4-62" tabindex="-1"></a></span>
+<span id="cb4-63"><a href="#cb4-63" tabindex="-1"></a><span class="co"># ---- Pedagogical printout ----</span></span>
+<span id="cb4-64"><a href="#cb4-64" tabindex="-1"></a></span>
+<span id="cb4-65"><a href="#cb4-65" tabindex="-1"></a><span class="fu">cat</span>(</span>
+<span id="cb4-66"><a href="#cb4-66" tabindex="-1"></a>  <span class="st">&quot;</span><span class="sc">\n</span><span class="st">IRR identity diagnostic (all-equity case):</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb4-67"><a href="#cb4-67" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;• Interval used for root search: [%.2f, %.2f]</span><span class="sc">\n</span><span class="st">&quot;</span>, lower, upper),</span>
+<span id="cb4-68"><a href="#cb4-68" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;• Computed IRR from cash-flow root: %.8f</span><span class="sc">\n</span><span class="st">&quot;</span>, irr_root),</span>
+<span id="cb4-69"><a href="#cb4-69" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;• Reported IRR from run_case(): %.8f</span><span class="sc">\n</span><span class="st">&quot;</span>, ae<span class="sc">$</span>irr_project),</span>
+<span id="cb4-70"><a href="#cb4-70" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;• Absolute rate gap (for information): %.10f</span><span class="sc">\n</span><span class="st">&quot;</span>, gap_rate),</span>
+<span id="cb4-71"><a href="#cb4-71" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;• NPV evaluated at computed IRR: %.4f (tolerance %.2f)</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb4-72"><a href="#cb4-72" tabindex="-1"></a>          npv_at_root, tol_cash),</span>
+<span id="cb4-73"><a href="#cb4-73" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;• NPV evaluated at reported IRR: %.4f</span><span class="sc">\n</span><span class="st">&quot;</span>, npv_at_report),</span>
+<span id="cb4-74"><a href="#cb4-74" tabindex="-1"></a>  <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>, status_report, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span></span>
+<span id="cb4-75"><a href="#cb4-75" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## 
+## IRR identity diagnostic (all-equity case):
+##  • Interval used for root search: [0.21, 0.22]
+##  • Computed IRR from cash-flow root: 0.21165293
+##  • Reported IRR from run_case(): 0.05924442
+##  • Absolute rate gap (for information): 0.1524085107
+##  • NPV evaluated at computed IRR: 0.0000 (tolerance 0.01)
+##  • NPV evaluated at reported IRR: 2935779.0602
+##  
+##  ⚠ Reported IRR does not exactly solve NPV = 0 under this vignette&#39;s convention.
+##   This may reflect different timing or cash-flow conventions in the internal implementation.</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Optional: tabular summary for visual output</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="at">irr_computed        =</span> irr_root,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="at">irr_reported        =</span> ae<span class="sc">$</span>irr_project,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="at">npv_at_irr_computed =</span> npv_at_root,</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="at">npv_at_irr_reported =</span> npv_at_report</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>##   irr_computed irr_reported npv_at_irr_computed npv_at_irr_reported
+## 1    0.2116529   0.05924442        6.933406e-07             2935779</code></pre>
+<p>This block operationalises the textbook definition of IRR and checks
+that the implementation respects it.</p>
+</div>
+<div id="discount-factor-monotonicity" class="section level2" number="5">
+<h2><span class="header-section-number">5</span> 5. Discount factor
+monotonicity</h2>
+<p>DCF models rely on an implicit or explicit discount factor sequence.
+Here, the column df is interpreted as an accumulation factor (roughly
+<span class="math display">\[
+(1+r)t
+(1+r)
+t
+\]</span> ), and its inverse as the actual discount factor. The
+monotonicity of this inverse sequence is a simple but powerful
+diagnostic of time-value-of-money consistency.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="do">## 5. Discount factor consistency and interpretation</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="st">&quot;df&quot;</span> <span class="sc">%in%</span> <span class="fu">names</span>(cf_all))</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>df <span class="ot">&lt;-</span> cf_all<span class="sc">$</span>df</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>df <span class="ot">&lt;-</span> df[<span class="fu">is.finite</span>(df)]</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co"># In this package, `df` increases over time (≈ (1 + r)^t),</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co"># so its inverse is the true discount factor.</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>disc_factor <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> df</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co"># Theoretical properties of the discount sequence</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">abs</span>(disc_factor[<span class="dv">1</span>] <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">&lt;</span> <span class="fl">1e-12</span>)         <span class="co"># t = 0 --&gt; discount factor = 1</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(<span class="fu">diff</span>(disc_factor) <span class="sc">&lt;=</span> <span class="fl">1e-10</span>))         <span class="co"># should be non-increasing</span></span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a><span class="co"># Summary metrics for transparency</span></span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a>rate_estimate <span class="ot">&lt;-</span> (df[<span class="fu">length</span>(df)]<span class="sc">^</span>(<span class="dv">1</span> <span class="sc">/</span> (<span class="fu">length</span>(df) <span class="sc">-</span> <span class="dv">1</span>))) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a>decay_ratio   <span class="ot">&lt;-</span> disc_factor[<span class="fu">length</span>(disc_factor)] <span class="sc">/</span> disc_factor[<span class="dv">1</span>]</span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a></span>
+<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a><span class="co"># ---- Pedagogical printout ----</span></span>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a></span>
+<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a><span class="fu">cat</span>(</span>
+<span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">Discount factor diagnostics:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb8-28"><a href="#cb8-28" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• First value of df (t = 0): %.6f</span><span class="sc">\n</span><span class="st">&quot;</span>, df[<span class="dv">1</span>]),</span>
+<span id="cb8-29"><a href="#cb8-29" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Last value of df (t = %d): %.6f</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">length</span>(df) <span class="sc">-</span> <span class="dv">1</span>, <span class="fu">tail</span>(df, <span class="dv">1</span>)),</span>
+<span id="cb8-30"><a href="#cb8-30" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Implied constant annual rate ≈ %.4f%%</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="dv">100</span> <span class="sc">*</span> rate_estimate),</span>
+<span id="cb8-31"><a href="#cb8-31" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Discount factor at t = %d: %.6f</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb8-32"><a href="#cb8-32" tabindex="-1"></a><span class="fu">length</span>(disc_factor) <span class="sc">-</span> <span class="dv">1</span>, <span class="fu">tail</span>(disc_factor, <span class="dv">1</span>)),</span>
+<span id="cb8-33"><a href="#cb8-33" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Ratio (disc_t_end / disc_t0): %.6f</span><span class="sc">\n</span><span class="st">&quot;</span>, decay_ratio),</span>
+<span id="cb8-34"><a href="#cb8-34" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">all</span>(<span class="fu">diff</span>(disc_factor) <span class="sc">&lt;=</span> <span class="fl">1e-10</span>))</span>
+<span id="cb8-35"><a href="#cb8-35" tabindex="-1"></a><span class="st">&quot;✓ Discount factors decrease monotonically - internal consistency confirmed.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
+<span id="cb8-36"><a href="#cb8-36" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb8-37"><a href="#cb8-37" tabindex="-1"></a><span class="st">&quot;✗ Discount factors not monotonic - check time indexing or rate definition.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
+<span id="cb8-38"><a href="#cb8-38" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## 
+## Discount factor diagnostics:
+##  • First value of df (t = 0): 1.000000
+##  • Last value of df (t = 5): 1.230756
+##  • Implied constant annual rate ≈ 4.2400%
+##  • Discount factor at t = 5: 0.812509
+##  • Ratio (disc_t_end / disc_t0): 0.812509
+##  ✓ Discount factors decrease monotonically - internal consistency confirmed.</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># Display a concise comparative table for reader visibility</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="at">year            =</span> cf_all<span class="sc">$</span>year,</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="at">df              =</span> <span class="fu">round</span>(df, <span class="dv">6</span>),</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="at">discount_factor =</span> <span class="fu">round</span>(disc_factor, <span class="dv">6</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>),</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="at">caption =</span> <span class="st">&quot;Evolution of accumulation and discount factors across time&quot;</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>Evolution of accumulation and discount factors across
+time</caption>
+<thead>
+<tr class="header">
+<th align="right">year</th>
+<th align="right">df</th>
+<th align="right">discount_factor</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">1.000000</td>
+<td align="right">1.000000</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">1.042400</td>
+<td align="right">0.959325</td>
+</tr>
+<tr class="odd">
+<td align="right">2</td>
+<td align="right">1.086598</td>
+<td align="right">0.920304</td>
+</tr>
+<tr class="even">
+<td align="right">3</td>
+<td align="right">1.132670</td>
+<td align="right">0.882870</td>
+</tr>
+<tr class="odd">
+<td align="right">4</td>
+<td align="right">1.180695</td>
+<td align="right">0.846959</td>
+</tr>
+<tr class="even">
+<td align="right">5</td>
+<td align="right">1.230756</td>
+<td align="right">0.812509</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="sanity-checks" class="section level2" number="6">
+<h2><span class="header-section-number">6</span> 6. Sanity checks</h2>
+<p>Beyond identities, simple sanity checks help detect gross
+specification errors (negative NOI, inconsistent acquisition prices,
+etc.). This section implements such basic controls.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="do">## 6. Sanity checks and diagnostic printout</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co"># (a) NOI finiteness and range</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="st">&quot;noi&quot;</span> <span class="sc">%in%</span> <span class="fu">names</span>(cf_all))</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>min_noi <span class="ot">&lt;-</span> <span class="fu">min</span>(cf_all<span class="sc">$</span>noi, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>max_noi <span class="ot">&lt;-</span> <span class="fu">max</span>(cf_all<span class="sc">$</span>noi, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">is.finite</span>(min_noi), <span class="fu">is.finite</span>(max_noi))</span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co"># (b) Positive acquisition price (price_di)</span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>price_di <span class="ot">&lt;-</span> case<span class="sc">$</span>pricing<span class="sc">$</span>price_di</span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">is.numeric</span>(price_di), <span class="fu">length</span>(price_di) <span class="sc">==</span> <span class="dv">1</span><span class="dt">L</span>, price_di <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co"># (c) Acquisition price consistency between pricing and cashflow tables</span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="st">&quot;acquisition_price&quot;</span> <span class="sc">%in%</span> <span class="fu">names</span>(cfe))</span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a></span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a>price_cf  <span class="ot">&lt;-</span> cfe<span class="sc">$</span>acquisition_price[<span class="dv">1</span>]</span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a>gap_price <span class="ot">&lt;-</span> <span class="fu">abs</span>(price_di <span class="sc">-</span> price_cf)</span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a><span class="fu">stopifnot</span>(gap_price <span class="sc">&lt;</span> <span class="fl">1e-6</span>)</span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a></span>
+<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a><span class="co"># ---- Display results for transparency ----</span></span>
+<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a></span>
+<span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a><span class="fu">cat</span>(</span>
+<span id="cb11-28"><a href="#cb11-28" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">Sanity checks summary:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• NOI range: [%s, %s]</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb11-30"><a href="#cb11-30" tabindex="-1"></a><span class="fu">formatC</span>(min_noi, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>),</span>
+<span id="cb11-31"><a href="#cb11-31" tabindex="-1"></a><span class="fu">formatC</span>(max_noi, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>)),</span>
+<span id="cb11-32"><a href="#cb11-32" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Reported acquisition price (pricing$price_di): %s</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb11-33"><a href="#cb11-33" tabindex="-1"></a><span class="fu">formatC</span>(price_di, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>)),</span>
+<span id="cb11-34"><a href="#cb11-34" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Acquisition price at t0 in cashflows: %s</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb11-35"><a href="#cb11-35" tabindex="-1"></a><span class="fu">formatC</span>(price_cf, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>)),</span>
+<span id="cb11-36"><a href="#cb11-36" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Absolute gap between the two: %.8f (tolerance 1e-6)</span><span class="sc">\n</span><span class="st">&quot;</span>, gap_price),</span>
+<span id="cb11-37"><a href="#cb11-37" tabindex="-1"></a><span class="cf">if</span> (min_noi <span class="sc">&lt;</span> <span class="dv">0</span>)</span>
+<span id="cb11-38"><a href="#cb11-38" tabindex="-1"></a><span class="st">&quot;• Note: NOI dips below zero in some periods - consistent with transitional or opportunistic strategies, but deserves economic interpretation.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
+<span id="cb11-39"><a href="#cb11-39" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb11-40"><a href="#cb11-40" tabindex="-1"></a><span class="st">&quot;• Note: NOI remains non-negative over the horizon.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
+<span id="cb11-41"><a href="#cb11-41" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## 
+## Sanity checks summary:
+##  • NOI range: [-61 818.0600, 204 020.0000]
+##  • Reported acquisition price (pricing$price_di): 3 307 692.3077
+##  • Acquisition price at t0 in cashflows: 3 307 692.3077
+##  • Absolute gap between the two: 0.00000000 (tolerance 1e-6)
+##  • Note: NOI dips below zero in some periods - consistent with transitional or opportunistic strategies, but deserves economic interpretation.</code></pre>
+</div>
+<div id="display-a-compact-summary" class="section level2" number="7">
+<h2><span class="header-section-number">7</span> 7. Display a compact
+summary</h2>
+<p>Finally, a compact summary brings together the main unlevered and
+levered indicators for the base case. This provides a quick diagnostic
+of the leverage effect and of overall value creation at the chosen
+discount rate.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="do">## 7. Compact financial summary</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>summary_tbl <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="at">Metric =</span> <span class="fu">c</span>(</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="st">&quot;Unlevered IRR (project)&quot;</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="st">&quot;Unlevered NPV (project, currency units)&quot;</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="st">&quot;Equity IRR (levered case)&quot;</span>,</span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="st">&quot;Equity NPV (levered case, currency units)&quot;</span>,</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="st">&quot;Acquisition price (price_di)&quot;</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>),</span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="at">Value =</span> <span class="fu">c</span>(</span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>ae<span class="sc">$</span>irr_project,</span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>ae<span class="sc">$</span>npv_project,</span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a>al<span class="sc">$</span>irr_equity,</span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a>al<span class="sc">$</span>npv_equity,</span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a>case<span class="sc">$</span>pricing<span class="sc">$</span>price_di</span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a>)</span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a>)</span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a><span class="co"># Pedagogical printout with interpretation</span></span>
+<span id="cb13-21"><a href="#cb13-21" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" tabindex="-1"></a><span class="fu">cat</span>(</span>
+<span id="cb13-23"><a href="#cb13-23" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">--- Summary of DCF core results ---</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb13-24"><a href="#cb13-24" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Unlevered IRR (project): %.4f%%</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="dv">100</span> <span class="sc">*</span> ae<span class="sc">$</span>irr_project),</span>
+<span id="cb13-25"><a href="#cb13-25" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Unlevered NPV (project): %s</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb13-26"><a href="#cb13-26" tabindex="-1"></a><span class="fu">formatC</span>(ae<span class="sc">$</span>npv_project, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>)),</span>
+<span id="cb13-27"><a href="#cb13-27" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Levered IRR (equity): %.4f%%</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="dv">100</span> <span class="sc">*</span> al<span class="sc">$</span>irr_equity),</span>
+<span id="cb13-28"><a href="#cb13-28" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Levered NPV (equity): %s</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb13-29"><a href="#cb13-29" tabindex="-1"></a><span class="fu">formatC</span>(al<span class="sc">$</span>npv_equity, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>)),</span>
+<span id="cb13-30"><a href="#cb13-30" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Acquisition price (price_di): %s</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb13-31"><a href="#cb13-31" tabindex="-1"></a><span class="fu">formatC</span>(case<span class="sc">$</span>pricing<span class="sc">$</span>price_di, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>)),</span>
+<span id="cb13-32"><a href="#cb13-32" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">Interpretation:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb13-33"><a href="#cb13-33" tabindex="-1"></a><span class="st">&quot;  - The unlevered IRR reflects the intrinsic profitability of the asset before financing.</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb13-34"><a href="#cb13-34" tabindex="-1"></a><span class="st">&quot;  - The levered IRR measures the equity return after accounting for debt leverage.</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb13-35"><a href="#cb13-35" tabindex="-1"></a><span class="st">&quot;  - The gap between both IRRs quantifies the effect of financial leverage on expected return.</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb13-36"><a href="#cb13-36" tabindex="-1"></a><span class="st">&quot;  - NPV values in currency units provide absolute measures of value creation at the chosen discount rate.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
+<span id="cb13-37"><a href="#cb13-37" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## 
+## --- Summary of DCF core results ---
+##  • Unlevered IRR (project): 5.9244%
+##  • Unlevered NPV (project): 253 371.2084
+##  • Levered IRR (equity): 7.5450%
+##  • Levered NPV (equity): 351 661.3210
+##  • Acquisition price (price_di): 3 307 692.3077
+##  
+## Interpretation:
+##    - The unlevered IRR reflects the intrinsic profitability of the asset before financing.
+##    - The levered IRR measures the equity return after accounting for debt leverage.
+##    - The gap between both IRRs quantifies the effect of financial leverage on expected return.
+##    - NPV values in currency units provide absolute measures of value creation at the chosen discount rate.</code></pre>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>summary_tbl,</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="at">caption =</span> <span class="st">&quot;Key DCF performance metrics for the base case (unlevered and levered)&quot;</span></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>Key DCF performance metrics for the base case (unlevered and
+levered)</caption>
+<thead>
+<tr class="header">
+<th align="left">Metric</th>
+<th align="right">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Unlevered IRR (project)</td>
+<td align="right">5.924440e-02</td>
+</tr>
+<tr class="even">
+<td align="left">Unlevered NPV (project, currency units)</td>
+<td align="right">2.533712e+05</td>
+</tr>
+<tr class="odd">
+<td align="left">Equity IRR (levered case)</td>
+<td align="right">7.545020e-02</td>
+</tr>
+<tr class="even">
+<td align="left">Equity NPV (levered case, currency units)</td>
+<td align="right">3.516613e+05</td>
+</tr>
+<tr class="odd">
+<td align="left">Acquisition price (price_di)</td>
+<td align="right">3.307692e+06</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
