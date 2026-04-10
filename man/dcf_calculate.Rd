@@ -15,7 +15,8 @@ dcf_calculate(
   index_rent = 0,
   vacancy = 0,
   opex = 0,
-  noi = NULL
+  noi = NULL,
+  terminal_growth = NULL
 )
 }
 \arguments{
@@ -43,8 +44,17 @@ Used only in top-down mode. Default is 0.}
 
 \item{opex}{Numeric scalar or numeric vector of length \code{N}. Operating expenses (non-recoverable). Default is 0.}
 
-\item{noi}{Numeric scalar or numeric vector of length \code{N}, optional. Exogenous NOI path (for example
-computed from leases). When non-\code{NULL}, it replaces the internal NOI calculation.}
+\item{noi}{Numeric scalar or numeric vector of length \code{N}, optional.
+Exogenous operating income path (for example computed from leases). When
+non-\code{NULL}, it replaces the internal income calculation and is treated
+as the NOI path from which explicit \code{gei}, \code{noi}, and
+\code{pbtcf} columns are derived.}
+
+\item{terminal_growth}{Optional numeric scalar. Growth rate used to forwardize
+the stabilised terminal NOI by one year for resale valuation. When
+\code{NULL}, the function infers a conservative growth rate from the latest
+clean NOI observations, falling back to zero when no robust inference is
+available.}
 }
 \value{
 A list with:
@@ -59,7 +69,9 @@ A list with:
 Builds an indexed annual pro forma over years 0..N, a terminal value, and
 unlevered valuation metrics including net present value (NPV) and internal
 rate of return (IRR) for a directly held commercial real estate (CRE) asset,
-without debt. The income base is net operating income (NOI).
+without debt. The annual operating chain is made explicit through gross
+effective income (GEI), net operating income (NOI), and property before-tax
+cash flow (PBTCF).
 }
 \details{
 Time convention: \code{year = 0..N}. The acquisition is booked at \code{year = 0}
@@ -73,7 +85,10 @@ Two construction modes are available for the NOI path:
 \item \strong{Top-down mode} (default): when \code{noi} is \code{NULL}, the NOI
 path is derived from the entry yield and acquisition price:
 \code{NOI[1] = entry_yield * acq_price}, then indexed with \code{index_rent}
-and adjusted by \code{vacancy}.
+and adjusted by \code{vacancy}. In this mode, \code{gei} is reconstructed
+as \code{noi + opex} so that the cap-rate convention remains anchored on
+\code{NOI1}, which is the textbook convention used in direct capitalization
+and terminal-value estimation.
 \item \strong{Bottom-up mode}: when \code{noi} is supplied (scalar or vector), it
 is recycled to length \code{N} and used as the \code{NOI[1..N]} path. In this
 case, \code{entry_yield}, \code{index_rent}, and \code{vacancy} are not used to

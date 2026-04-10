@@ -197,7 +197,7 @@ safe_div <- function(num, den) {
 #'
 #' @return Tibble with columns:
 #'   scenario, irr_equity, npv_equity, irr_project, npv_project,
-#'   min_dscr, max_ltv_forward.
+#'   min_dscr, max_ltv_forward, ops_share, tv_share.
 #'
 #' @keywords internal
 summarize_case <- function(tag, lev_obj, rat_tbl, maturity) {
@@ -260,7 +260,9 @@ summarize_case <- function(tag, lev_obj, rat_tbl, maturity) {
     irr_project     = lev_obj$irr_project,
     npv_project     = lev_obj$npv_project,
     min_dscr        = min_dscr_val,
-    max_ltv_forward = max_ltv
+    max_ltv_forward = max_ltv,
+    ops_share       = lev_obj$ops_share %||% NA_real_,
+    tv_share        = lev_obj$tv_share %||% NA_real_
   )
 }
 
@@ -321,12 +323,12 @@ equity_multiple_safe <- function(cf_equity) {
 }
 
 
-#' Compute the style-by-style manifest for canonical presets
+#' Compute the style-by-style manifest for preset scenarios
 #'
-#' This helper runs the four canonical style presets
+#' This helper runs the four preset style scenarios
 #' (\code{"core"}, \code{"core_plus"}, \code{"value_added"}, \code{"opportunistic"})
 #' through [[run_case()]] and extracts a compact set of indicators that are
-#' salient for both investors and lenders:
+#' useful for both investors and lenders:
 #'
 #' - project IRR (all-equity),
 #' - equity IRR (levered),
@@ -335,17 +337,22 @@ equity_multiple_safe <- function(cf_equity) {
 #' - maximum forward LTV under a bullet structure,
 #' - equity NPV.
 #'
-#' The result is a tibble that can be reused both in vignettes and in automated
-#' tests to ensure that the canonical presets preserve the intended
-#' risk–return and leverage–coverage hierarchies.
+#' The result is a tibble that can be reused in vignettes and automated tests
+#' to check that the presets preserve the intended risk-return and
+#' leverage-coverage hierarchies. The initial LTV is the structural leverage
+#' choice at origination. By contrast, \code{ltv_max_fwd} is a conditional
+#' stress indicator computed along the simulated business plan; for transitional
+#' or lease-up strategies it may therefore be non-monotonic across styles even
+#' when the overall risk ordering remains economically coherent.
 #'
 #' @param styles Character vector of style names to include.
-#'   Defaults to the four canonical presets:
+#'   Defaults to the four preset scenarios:
 #'   \code{c("core", "core_plus", "value_added", "opportunistic")}.
 #'
 #' @return A tibble with one row per style and the columns:
 #'   \code{style}, \code{class}, \code{irr_project}, \code{irr_equity},
-#'   \code{dscr_min_bul}, \code{ltv_init}, \code{ltv_max_fwd}, \code{npv_equity}.
+#'   \code{dscr_min_bul}, \code{ltv_init}, \code{ltv_max_fwd},
+#'   \code{ops_share}, \code{tv_share}, and \code{npv_equity}.
 #' @export
 styles_manifest <- function(
     styles = c("core", "core_plus", "value_added", "opportunistic")
@@ -377,6 +384,8 @@ styles_manifest <- function(
         )
       }
 
+      stab_year <- cfg$stabilization_year %||% 1L
+
       # 2) Run case through engine
       case <- run_case(cfg)
 
@@ -390,15 +399,32 @@ styles_manifest <- function(
         )
       }
 
+      # 3) Stabilized DSCR: min DSCR from stabilization_year onward,
+      #    excluding the balloon year (maturity) where DSCR is mechanically low.
+      horizon <- cfg$horizon_years %||% 10L
+      ratios <- case$comparison$details$debt_bullet$ratios
+      dscr_stab <- NA_real_
+      if (!is.null(ratios) && "dscr" %in% names(ratios) && "year" %in% names(ratios)) {
+        stab_dscr_vec <- ratios$dscr[ratios$year >= stab_year & ratios$year < horizon]
+        stab_dscr_vec <- stab_dscr_vec[is.finite(stab_dscr_vec)]
+        if (length(stab_dscr_vec) > 0L) {
+          dscr_stab <- min(stab_dscr_vec)
+        }
+      }
+
       tibble::tibble(
-        style        = s,
-        class        = cfg$class %||% NA_character_,
-        irr_project  = row_bul$irr_project,
-        irr_equity   = row_bul$irr_equity,
-        dscr_min_bul = row_bul$min_dscr,
-        ltv_init     = ltv_init,
-        ltv_max_fwd  = row_bul$max_ltv_forward,
-        npv_equity   = row_bul$npv_equity
+        style              = s,
+        class              = cfg$class %||% NA_character_,
+        irr_project        = row_bul$irr_project,
+        irr_equity         = row_bul$irr_equity,
+        dscr_min_bul       = row_bul$min_dscr,
+        dscr_min_stabilized = dscr_stab,
+        stabilization_year = as.integer(stab_year),
+        ltv_init           = ltv_init,
+        ltv_max_fwd        = row_bul$max_ltv_forward,
+        ops_share          = row_bul$ops_share,
+        tv_share           = row_bul$tv_share,
+        npv_equity         = row_bul$npv_equity
       )
     }
   )
@@ -406,10 +432,10 @@ styles_manifest <- function(
 
 
 
-#' Load a canonical style preset from YAML
+#' Load a preset style YAML file
 #'
-#' This loader follows *exactly* the same logic as the vignette:
-#' it only reads YAMLs from inst/extdata inside the installed package.
+#' This loader reads preset YAML files from `inst/extdata` inside the installed
+#' package.
 #'
 #' @keywords internal
 load_style_preset <- function(style) {
@@ -792,10 +818,10 @@ styles_exit_sensitivity <- function(
 #' This helper perturbs the global `index_rate` parameter of each style preset
 #' by a given grid of additive shocks and recomputes the leveraged equity IRR.
 #'
-#' It therefore measures how dependent each style is on rental_growth
-#' (via indexation and lease renewals) to reach its target equity_IRR.
-#' In canonical calibrations, core strategies tend to be less sensitive than
-#' value_added or opportunistic profiles, which rely more heavily on
+#' It therefore measures how dependent each style is on rental growth
+#' (via indexation and lease renewals) to reach its target equity IRR.
+#' In typical preset calibrations, core strategies tend to be less sensitive
+#' than value_added or opportunistic profiles, which rely more heavily on
 #' growth and lease-up.
 #'
 #' @param styles Character vector of style identifiers.
@@ -854,9 +880,9 @@ styles_growth_sensitivity <- function(
 #'   equity IRR and `target_irr`,
 #' - bracketing the root over a user-specified interval.
 #'
-#' The lower the break-even exit yield, the tighter the exit_pricing
-#' assumption that must be met to reach the hurdle, and the more the style
-#' depends on favourable market_conditions at sale.
+#' The lower the break-even exit yield, the tighter the exit pricing
+#' assumption needed to reach the hurdle, and the more the style depends on
+#' favourable market conditions at sale.
 #'
 #' @param styles Character vector of style identifiers.
 #' @param target_irr Numeric, target leveraged equity IRR to hit (in decimal).
@@ -910,10 +936,10 @@ styles_break_even_exit_yield <- function(
   })
 }
 
-#' Distressed exit diagnostic across CRE investment styles
+#' Distressed exit summary across CRE investment styles
 #'
 #' This helper applies a simple lender-driven distressed-exit rule to a set of
-#' canonical style presets. For each style and covenant regime, it:
+#' preset style scenarios. For each style and covenant regime, it:
 #'   1. Runs the baseline case via [run_case()].
 #'   2. Identifies the first covenant breach under the bullet-debt scenario
 #'      (DSCR and forward LTV).
@@ -939,12 +965,26 @@ styles_break_even_exit_yield <- function(
 #' @param allow_year1_distress Logical. If `TRUE`, distress can occur in year 1.
 #'   If `FALSE`, breaches in years `< refi_min_year` are shifted to
 #'   `refi_min_year` (refinancing window logic).
+#' @param underwriting_mode Character scalar. Either `"transition"` or
+#'   `"stabilized"`. In `"transition"` mode (default), covenant testing starts
+#'   at `stabilization_year` when the preset defines one, which is useful for
+#'   lease-up or refurbishment business plans. In `"stabilized"` mode, covenant
+#'   testing starts in year 1, which is more conservative and closer to a
+#'   standard stabilized-income loan reading.
+#' @param exit_shock_bps Numeric scalar. Additive shock (in basis points)
+#'   applied to the preset's `exit_yield_spread_bps` before running the case
+#'   and detecting breaches. This simulates a market repricing environment.
+#'   Default `0` (no shock).
+#' @param growth_shock Numeric scalar. Additive shock applied to the preset's
+#'   `index_rate` before running the case. This simulates a rental growth
+#'   slowdown. Default `0` (no shock).
 #' @param ext_dir Optional directory where style presets (YAML) are stored.
 #'   Defaults to the package `inst/extdata` folder.
 #'
 #' @return A tibble with one row per combination of style and regime, and the
 #'   columns:
 #'   - `style`, `regime`, `min_dscr`, `max_ltv`,
+#'   - `underwriting_mode`, `covenant_start_year`,
 #'   - `breach_year`, `breach_type`,
 #'   - `irr_equity_base`, `irr_equity_distress`,
 #'   - `distress_undefined` (logical),
@@ -958,8 +998,13 @@ styles_distressed_exit <- function(
     fire_sale_bps      = 100,
     refi_min_year      = 3L,
     allow_year1_distress = TRUE,
+    underwriting_mode  = c("transition", "stabilized"),
+    exit_shock_bps     = 0,
+    growth_shock       = 0,
     ext_dir            = system.file("extdata", package = "cre.dcf")
 ) {
+  underwriting_mode <- match.arg(underwriting_mode)
+
   if (!nzchar(ext_dir)) {
     stop("inst/extdata not found. Load the package with devtools::load_all() or install it.")
   }
@@ -969,9 +1014,10 @@ styles_distressed_exit <- function(
   }
 
   # Small internal helper: first breach (DSCR or forward LTV) under bullet
-  find_first_breach <- function(case_obj, min_dscr, max_ltv) {
+  # stab_year: earliest year from which breaches are meaningful (skips ramp-up)
+  find_first_breach <- function(case_obj, min_dscr, max_ltv, stab_year = 1L) {
     ratios <- case_obj$comparison$details$debt_bullet$ratios |>
-      dplyr::filter(.data$year >= 1L)
+      dplyr::filter(.data$year >= stab_year)
 
     breach_dscr_idx <- which(ratios$dscr < min_dscr)
     breach_ltv_idx  <- which(ratios$ltv_forward > max_ltv)
@@ -1026,9 +1072,26 @@ styles_distressed_exit <- function(
       }
 
       cfg_base <- yaml::read_yaml(cfg_path)
+      stab_year <- cfg_base$stabilization_year %||% 1L
+      covenant_start_year <- if (identical(underwriting_mode, "transition")) {
+        stab_year
+      } else {
+        1L
+      }
+
+      # Apply market shock to the base configuration before breach detection.
+      # This ensures that breaches are identified under stressed conditions,
+      # not just under the unstressed baseline.
+      if (exit_shock_bps != 0) {
+        cfg_base$exit_yield_spread_bps <- (cfg_base$exit_yield_spread_bps %||% 0) + exit_shock_bps
+      }
+      if (growth_shock != 0) {
+        cfg_base$index_rate <- max(0, (cfg_base$index_rate %||% 0) + growth_shock)
+      }
+
       case_base <- run_case(cfg_base)
 
-      # Base equity IRR and CFs
+      # Base equity IRR and CFs (under market shock, before fire-sale)
       irr_base <- case_base$leveraged$irr_equity
       cf_base  <- case_base$leveraged$cashflows
       eq_cf_b  <- cf_base$equity_cf
@@ -1039,8 +1102,9 @@ styles_distressed_exit <- function(
       cf_proj   <- case_base$all_equity$cashflows
       sale_base <- dplyr::last(cf_proj$sale_proceeds)
 
-      # 2) Identify first breach under bullet -
-      br <- find_first_breach(case_base, min_dscr = min_dscr, max_ltv = max_ltv)
+      # 2) Identify first breach under bullet (from stabilization onward) -
+      br <- find_first_breach(case_base, min_dscr = min_dscr, max_ltv = max_ltv,
+                              stab_year = covenant_start_year)
       breach_year <- br$year
       breach_type <- br$type
 
@@ -1049,6 +1113,8 @@ styles_distressed_exit <- function(
         return(
           tibble::tibble(
             style                   = style,
+            underwriting_mode       = underwriting_mode,
+            covenant_start_year     = covenant_start_year,
             breach_year             = NA_integer_,
             breach_type             = NA_character_,
             irr_equity_base         = irr_base,
@@ -1078,6 +1144,8 @@ styles_distressed_exit <- function(
         return(
           tibble::tibble(
             style                   = style,
+            underwriting_mode       = underwriting_mode,
+            covenant_start_year     = covenant_start_year,
             breach_year             = NA_integer_,
             breach_type             = NA_character_,
             irr_equity_base         = irr_base,
@@ -1109,6 +1177,8 @@ styles_distressed_exit <- function(
         return(
           tibble::tibble(
             style                   = style,
+            underwriting_mode       = underwriting_mode,
+            covenant_start_year     = covenant_start_year,
             breach_year             = distress_year,
             breach_type             = breach_type,
             irr_equity_base         = irr_base,
@@ -1139,6 +1209,8 @@ styles_distressed_exit <- function(
 
       tibble::tibble(
         style                    = style,
+        underwriting_mode        = underwriting_mode,
+        covenant_start_year      = covenant_start_year,
         breach_year              = distress_year,
         breach_type              = breach_type,
         irr_equity_base          = irr_base,

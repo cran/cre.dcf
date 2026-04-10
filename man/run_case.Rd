@@ -7,7 +7,7 @@
 run_case(
   config = NULL,
   config_file = NULL,
-  debt_type = c("bullet", "amort"),
+  debt_type = NULL,
   ltv_base = c("price_di", "price_ht", "value")
 )
 }
@@ -18,8 +18,9 @@ run_case(
 \code{config} and \code{config_file} are \code{NULL}, defaults to the package
 example at \code{inst/extdata/config.yml}.}
 
-\item{debt_type}{Debt schedule type to use (\code{"bullet"} or \code{"amort"}).
-This parameter overrides any implicit type inferred in normalization.}
+\item{debt_type}{Optional debt schedule type to use (\code{"bullet"} or
+\code{"amort"}). When \code{NULL} (default), the normalized type inferred
+from the configuration is used. A non-\code{NULL} value overrides it.}
 
 \item{ltv_base}{Base for loan-to-value (LTV) and initial principal. One of
 \code{"price_di"}, \code{"price_ht"}, or \code{"value"}.}

@@ -126,15 +126,14 @@ cat("\n✓ Error successfully detected: invalid type for 'purchase_year' was blo
 
 ```
 
-## Interpretation and theoretical significance
+## Interpretation
 
-Rigorous configuration validation is not a mere programming convenience; it reflects a scientific norm of model governance.
-In computational finance and quantitative geography alike, parameter schemas play a role analogous to measurement protocols in laboratory sciences: they codify the expected dimensionality and semantic type of each variable.
+Configuration validation is more than a coding convenience. It helps keep runs comparable and makes input errors visible early.
 
-In the context of a discounted-cash-flow engine such as cre.dcf, this mechanism ensures:
+In `cre.dcf`, this helps ensure:
 
-- Epistemic reproducibility – identical YAML input always yields an equivalent model object.
+- reproducibility: the same YAML input yields the same type of model object;
 
-- Comparability across simulations – variations in outputs stem solely from deliberate parameter changes, not from hidden type coercions.
+- comparability across simulations: output changes come from explicit parameter changes, not silent coercions;
 
-- Auditability – external reviewers can trace parameter validity without inspecting internal code.
+- auditability: reviewers can check input validity without reading the engine internals.

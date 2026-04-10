@@ -178,7 +178,7 @@ fill = "Equity NPV"
 
 
 ## -----------------------------------------------------------------------------
-cat("\n=== Theoretical diagnostics: invariants and monotonicities ===\n")
+cat("\n=== Grid checks ===\n")
 
 ## 5.1 Invariance of IRR with respect to discount rate (within each exit_yield)
 
@@ -194,11 +194,10 @@ irr_sd_over_disc = sd(irr_equity, na.rm = TRUE),
 irr_sd_median <- median(irr_sd_by_exit$irr_sd_over_disc, na.rm = TRUE)
 
 cat(
-"\nIRR invariance diagnostics:\n",
+"\nIRR check:\n",
 sprintf("• Median SD of equity IRR across discount-rate variations (per exit_yield slice): %.3e\n",
 irr_sd_median),
-"  --> Near-zero dispersion indicates that IRR behaves as an internal rate of return,\n",
-"    independent of the exogenous discount rate used for NPV computation.\n"
+"  --> Near-zero dispersion means IRR is not being driven by the discount rate used for NPV.\n"
 )
 
 ## 5.2 Monotonicity of equity NPV with respect to disc_rate
@@ -216,12 +215,10 @@ all_non_increasing = all(diff(npv_equity) <= 1e-8),
 share_monotone_disc <- mean(npv_monotone_disc$all_non_increasing, na.rm = TRUE)
 
 cat(
-"\nNPV monotonicity w.r.t discount rate:\n",
+"\nNPV check vs discount rate:\n",
 sprintf("• Share of exit_yield slices where equity NPV is non-increasing in disc_rate: %.1f%%\n",
 100 * share_monotone_disc),
-"  --> In a standard DCF, higher discount rates should decrease NPV. Deviations from\n",
-"    strict monotonicity may indicate discrete changes in cash-flow structure or\n",
-"    numerical tolerances.\n"
+"  --> In a standard DCF, higher discount rates should reduce NPV.\n"
 )
 
 ## 5.3 Monotonicity of equity NPV with respect to exit_yield
@@ -239,12 +236,10 @@ all_non_increasing = all(diff(npv_equity) <= 1e-8),
 share_monotone_exit <- mean(npv_monotone_exit$all_non_increasing, na.rm = TRUE)
 
 cat(
-"\nNPV monotonicity w.r.t exit yield:\n",
+"\nNPV check vs exit yield:\n",
 sprintf("• Share of discount-rate slices where equity NPV is non-increasing in exit_yield: %.1f%%\n",
 100 * share_monotone_exit),
-"  --> Since a higher exit yield reduces terminal value, one expects lower NPV when\n",
-"    exit_yield increases, all else equal. Non-monotonic patterns typically reflect\n",
-"    changes in covenant status or other discrete thresholds in the model.\n"
+"  --> A higher exit yield reduces terminal value, so NPV should usually go down.\n"
 )
 
 

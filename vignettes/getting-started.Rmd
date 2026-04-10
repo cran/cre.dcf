@@ -1,11 +1,11 @@
 ---
-title: "Getting started: invariants on the run_case() object"
+title: "Getting started: checking a run_case() object"
 output:
   rmarkdown::html_vignette:
     toc: true
     number_sections: true
 vignette: >
-  %\VignetteIndexEntry{Getting started: invariants on the run_case() object}
+  %\VignetteIndexEntry{Getting started: checking a run_case() object}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -16,12 +16,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 ## Purpose
 
-The objective of this vignette is to provide a transparent and reproducible walkthrough of the internal mechanics of a *Discounted Cash Flow* (DCF) simulation as implemented in the `cre.dcf` package.  
-Rather than focusing on the investment output itself, this document serves as a **didactic exploration of model identities** - the internal accounting relationships and mathematical consistencies that ensure the financial logic of a DCF model is sound.
-
-The vignette therefore acts as a *conceptual testbench* for doctoral or professional audiences interested in the structure of CRE valuation models, combining both computational validation and economic interpretation.  
-
-More specifically, it demonstrates how the function `run_case()` produces a complete and self-contained case object, and how several key invariants can be verified on that object:
+This vignette shows a few simple checks on a `run_case()` result:
 
 1. **Temporal consistency** - a single exit event occurs exactly at the end of the investment horizon, ensuring that terminal value is not double-counted.  
 2. **Net Present Value (NPV) identity** - the NPV computed manually from discounted cash flows matches the value reported by the model, within numerical tolerance.  
@@ -30,16 +25,7 @@ More specifically, it demonstrates how the function `run_case()` produces a comp
 5. **Accounting and pricing sanity checks** - key quantities such as *Net Operating Income (NOI)* and acquisition price are positive and coherent across data tables.  
 6. **Synthesis of results** - comparison between *unlevered* (project-level) and *levered* (equity-level) indicators illustrates the effect of financial leverage on performance metrics.
 
-Each section mirrors a fundamental identity or control equation that professional valuation models must satisfy.  
-By executing the vignette, the user not only confirms the internal coherence of `cre.dcf`, but also **learns how each financial identity can be derived and verified** directly from the output data, without relying on opaque helper functions.
-
-In an academic context, this vignette can be used to:
-
-- teach the conceptual underpinnings of DCF modelling (NPV–IRR equivalence, discount factor dynamics, exit timing),
-- illustrate how computational reproducibility supports transparency in financial geography or real-estate finance research,  
-- serve as a template for developing *validation notebooks* that accompany empirical models.
-
-In sum, this vignette transforms a basic test of numerical consistency into a **learning exercise on the epistemology of valuation**: it makes explicit the quantitative structure that underlies every DCF calculation - how time, cash flow, and capital are formally related through the principle of present value.
+Each section uses the tables returned by `run_case()`.
 
 ## 1. Build a case
 
@@ -74,7 +60,7 @@ stopifnot(all(c("year", "free_cash_flow", "sale_proceeds") %in% names(cfe)))
 
 ## 2. Exit occurs once at the final year (all-equity)
 
-A critical temporal invariant in single-asset DCF models is the uniqueness and timing of the exit event.
+A basic check in a single-asset DCF is that the exit happens once, at the end of the hold.
 For the all-equity case, sale proceeds should appear once and only once, in the final year of the projection.
 
 ```{r}
@@ -88,14 +74,14 @@ exit_rows <- which(cfe$sale_proceeds > 0)
 stopifnot(length(exit_rows) == 1L)
 stopifnot(exit_rows == which.max(t))
 
-# ---- Display results for pedagogical clarity ----
+# ---- Show the result ----
 
 exit_year    <- t[exit_rows]
 sale_value   <- cfe$sale_proceeds[exit_rows]
 free_cf_exit <- cfe$free_cash_flow[exit_rows]
 
 cat(
-"\nExit event diagnostics:\n",
+"\nExit check:\n",
 sprintf("• Number of exit events detected: %d (should be 1)\n", length(exit_rows)),
 sprintf("• Exit year (expected last period): %d\n", exit_year),
 sprintf("• Sale proceeds at exit: %s\n",
@@ -111,12 +97,12 @@ else
 
 ```
 
-This test guarantees that the terminal value is not double-counted and that all intermediate cash flows are properly separated from the exit event.
+This confirms that the terminal value is booked once and only once.
 
 ## 3. IRR identity (all-equity): IRR is the root of NPV = 0
 
 By definition, the IRR is the discount rate that sets the NPV of the cash-flow stream to zero.
-This section reconstructs that relationship explicitly and verifies that the IRR computed via root finding coincides with the IRR reported by run_case().
+This section rebuilds that relationship directly from the all-equity cash-flow table.
 
 ```{r}
 ## 4. IRR identity (all-equity): verifying that IRR is the root of NPV = 0
@@ -129,8 +115,7 @@ stopifnot(min(cfe$year) == 0)  # ensure the time origin is correct
 flows <- cfe$free_cash_flow
 last  <- which.max(cfe$year)
 
-# Add sale proceeds to the last period's free cash flow
-flows[last] <- flows[last] + cfe$sale_proceeds[last]
+# `free_cash_flow` already includes the terminal sale in the last period
 
 npv_at <- function(r) {
   sum(flows / (1 + r)^(cfe$year))
@@ -148,7 +133,7 @@ stopifnot(length(idx) >= 1L)
 lower <- grid[idx[1]]
 upper <- grid[idx[1] + 1]
 
-# 4.3 Root finding with numerical control (reference IRR based on this vignette's convention)
+# 4.3 Root finding with numerical control
 
 irr_root <- uniroot(
   npv_at,
@@ -157,42 +142,30 @@ irr_root <- uniroot(
 )$root
 
 # 4.4 Checks:
-# (A) NPV(irr_root) ≈ 0  [hard invariance: must hold]
-# (B) NPV(ae$irr_project) reported for information only
+# (A) Reported IRR must solve the NPV equation
+# (B) The root found here should be close in rate terms
 
 tol_cash <- 1e-2  # acceptable deviation in currency units
 
 npv_at_root   <- npv_at(irr_root)
 npv_at_report <- npv_at(ae$irr_project)
 
-# Hard check on the IRR computed in this vignette
-stopifnot(abs(npv_at_root) <= tol_cash)
-
-# Informative diagnostics on the package's reported IRR
 gap_rate <- abs(irr_root - ae$irr_project)
-
-status_report <- if (is.finite(npv_at_report) && abs(npv_at_report) <= tol_cash) {
-  "✓ Reported IRR behaves as a root of the NPV equation under this cash-flow convention."
-} else {
-  paste0(
-    "⚠ Reported IRR does not exactly solve NPV = 0 under this vignette's convention.\n",
-    "  This may reflect different timing or cash-flow conventions in the internal implementation."
-  )
-}
+stopifnot(abs(npv_at_report) <= tol_cash)
 
 
-# ---- Pedagogical printout ----
+# ---- Print a short summary ----
 
 cat(
-  "\nIRR identity diagnostic (all-equity case):\n",
+  "\nIRR check (all-equity case):\n",
   sprintf("• Interval used for root search: [%.2f, %.2f]\n", lower, upper),
   sprintf("• Computed IRR from cash-flow root: %.8f\n", irr_root),
   sprintf("• Reported IRR from run_case(): %.8f\n", ae$irr_project),
   sprintf("• Absolute rate gap (for information): %.10f\n", gap_rate),
-  sprintf("• NPV evaluated at computed IRR: %.4f (tolerance %.2f)\n",
+  sprintf("• NPV evaluated at computed IRR: %.4f\n",
           npv_at_root, tol_cash),
   sprintf("• NPV evaluated at reported IRR: %.4f\n", npv_at_report),
-  "\n", status_report, "\n"
+  "✓ The reported IRR solves the NPV equation within tolerance.\n"
 )
 
 # Optional: tabular summary for visual output
@@ -205,7 +178,7 @@ data.frame(
 )
 ```
 
-This block operationalises the textbook definition of IRR and checks that the implementation respects it.
+This confirms that the reported project IRR is consistent with the all-equity cash-flow stream.
 
 ## 5. Discount factor monotonicity
 
@@ -217,7 +190,7 @@ $$
 t
 $$
 ), and its inverse as the actual discount factor.
-The monotonicity of this inverse sequence is a simple but powerful diagnostic of time-value-of-money consistency.
+A decreasing discount-factor sequence is another quick consistency check.
 
 ```{r}
 ## 5. Discount factor consistency and interpretation
@@ -238,15 +211,15 @@ disc_factor <- 1 / df
 stopifnot(abs(disc_factor[1] - 1) < 1e-12)         # t = 0 --> discount factor = 1
 stopifnot(all(diff(disc_factor) <= 1e-10))         # should be non-increasing
 
-# Summary metrics for transparency
+# Summary metrics
 
 rate_estimate <- (df[length(df)]^(1 / (length(df) - 1))) - 1
 decay_ratio   <- disc_factor[length(disc_factor)] / disc_factor[1]
 
-# ---- Pedagogical printout ----
+# ---- Print a short summary ----
 
 cat(
-"\nDiscount factor diagnostics:\n",
+"\nDiscount factor check:\n",
 sprintf("• First value of df (t = 0): %.6f\n", df[1]),
 sprintf("• Last value of df (t = %d): %.6f\n", length(df) - 1, tail(df, 1)),
 sprintf("• Implied constant annual rate ≈ %.4f%%\n", 100 * rate_estimate),
@@ -254,12 +227,12 @@ sprintf("• Discount factor at t = %d: %.6f\n",
 length(disc_factor) - 1, tail(disc_factor, 1)),
 sprintf("• Ratio (disc_t_end / disc_t0): %.6f\n", decay_ratio),
 if (all(diff(disc_factor) <= 1e-10))
-"✓ Discount factors decrease monotonically - internal consistency confirmed.\n"
+"✓ Discount factors decrease monotonically.\n"
 else
 "✗ Discount factors not monotonic - check time indexing or rate definition.\n"
 )
 
-# Display a concise comparative table for reader visibility
+# Display a concise table
 
 knitr::kable(
 data.frame(
@@ -274,11 +247,10 @@ caption = "Evolution of accumulation and discount factors across time"
 
 ## 6. Sanity checks
 
-Beyond identities, simple sanity checks help detect gross specification errors (negative NOI, inconsistent acquisition prices, etc.).
-This section implements such basic controls.
+Beyond formal identities, a few basic checks help catch obvious setup issues.
 
 ```{r}
-## 6. Sanity checks and diagnostic printout
+## 6. Sanity checks
 
 # (a) NOI finiteness and range
 
@@ -302,7 +274,7 @@ price_cf  <- cfe$acquisition_price[1]
 gap_price <- abs(price_di - price_cf)
 stopifnot(gap_price < 1e-6)
 
-# ---- Display results for transparency ----
+# ---- Print a short summary ----
 
 cat(
 "\nSanity checks summary:\n",
@@ -325,7 +297,7 @@ else
 ## 7. Display a compact summary
 
 Finally, a compact summary brings together the main unlevered and levered indicators for the base case.
-This provides a quick diagnostic of the leverage effect and of overall value creation at the chosen discount rate.
+This is a convenient way to read the case before drilling into the detailed tables.
 
 ```{r}
 ## 7. Compact financial summary
@@ -347,8 +319,6 @@ case$pricing$price_di
 )
 )
 
-# Pedagogical printout with interpretation
-
 cat(
 "\n--- Summary of DCF core results ---\n",
 sprintf("• Unlevered IRR (project): %.4f%%\n", 100 * ae$irr_project),
@@ -359,11 +329,7 @@ sprintf("• Levered NPV (equity): %s\n",
 formatC(al$npv_equity, format = 'f', big.mark = " ")),
 sprintf("• Acquisition price (price_di): %s\n",
 formatC(case$pricing$price_di, format = 'f', big.mark = " ")),
-"\nInterpretation:\n",
-"  - The unlevered IRR reflects the intrinsic profitability of the asset before financing.\n",
-"  - The levered IRR measures the equity return after accounting for debt leverage.\n",
-"  - The gap between both IRRs quantifies the effect of financial leverage on expected return.\n",
-"  - NPV values in currency units provide absolute measures of value creation at the chosen discount rate.\n"
+"\n"
 )
 
 knitr::kable(

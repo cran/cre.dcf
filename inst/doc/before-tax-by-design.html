@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Package cre.dcf" />
+
+
+<title>Before-tax by design: scope, portability, and future tax extensions</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Before-tax by design: scope, portability,
+and future tax extensions</h1>
+<h4 class="author">Package cre.dcf</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#purpose" id="toc-purpose"><span class="toc-section-number">1</span> Purpose</a></li>
+<li><a href="#why-the-core-still-stops-at-the-before-tax-level" id="toc-why-the-core-still-stops-at-the-before-tax-level"><span class="toc-section-number">2</span> Why the core still stops at the
+before-tax level</a></li>
+<li><a href="#what-the-core-already-gives-us" id="toc-what-the-core-already-gives-us"><span class="toc-section-number">3</span> What the core already gives
+us</a></li>
+<li><a href="#what-the-current-tax_rate-does-and-does-not-do" id="toc-what-the-current-tax_rate-does-and-does-not-do"><span class="toc-section-number">4</span> What the current
+<code>tax_rate</code> does and does not do</a></li>
+<li><a href="#why-this-helps-with-multi-jurisdiction-portability" id="toc-why-this-helps-with-multi-jurisdiction-portability"><span class="toc-section-number">5</span> Why this helps with
+multi-jurisdiction portability</a></li>
+<li><a href="#the-current-spv-level-tax-helper" id="toc-the-current-spv-level-tax-helper"><span class="toc-section-number">6</span> The current SPV-level tax
+helper</a></li>
+<li><a href="#a-working-generic-spv-tax-run" id="toc-a-working-generic-spv-tax-run"><span class="toc-section-number">7</span> A working generic SPV tax
+run</a></li>
+<li><a href="#how-to-read-the-french-fiscal-impact-vignette" id="toc-how-to-read-the-french-fiscal-impact-vignette"><span class="toc-section-number">8</span> How to read the French fiscal-impact
+vignette</a></li>
+<li><a href="#summary" id="toc-summary"><span class="toc-section-number">9</span> Summary</a></li>
+</ul>
+</div>
+
+<div id="purpose" class="section level2" number="1">
+<h2><span class="header-section-number">1</span> Purpose</h2>
+<p>This vignette explains a deliberate scope choice in
+<code>cre.dcf</code>: the package is currently designed as a
+property-level, before-tax DCF engine.</p>
+<p>That choice is methodological and practical at the same time.</p>
+<ul>
+<li>Methodologically, the manuals first structure valuation around
+operating cash flows, terminal value, and leverage before opening the
+more jurisdiction-specific after-tax layer <span class="citation">(<a href="#ref-geltnerChapitre11Nuts_and_Bolts_for_Real_Estate_Valuation_Cash_Flow_Proformas_and_Discount_Rates2014">Geltner
+et al. 2014a</a>, <a href="#ref-geltnerChapitre14AfterTax_Investment_Analysis_and_Corporate_Real_Estate2014">2014b</a>;
+<a href="#ref-hartzellChapter5Basic">Hartzell and Baum
+2020</a>)</span>.</li>
+<li>Practically, a before-tax core is much easier to mobilize across
+countries, vehicles, and investor types.</li>
+</ul>
+<p>The portability argument is an implementation choice inferred from
+those chapters. The textbooks justify a strong before-tax core; the
+package then keeps that core jurisdiction-agnostic on purpose.</p>
+<p>The package now also includes a first generic SPV-level tax helper,
+<code>tax_run_spv()</code>. The important design point is that this tax
+layer sits on top of the before-tax core rather than replacing it.</p>
+</div>
+<div id="why-the-core-still-stops-at-the-before-tax-level" class="section level2" number="2">
+<h2><span class="header-section-number">2</span> Why the core still
+stops at the before-tax level</h2>
+<p>The current public API is strongest where the manuals are most
+universal:</p>
+<ul>
+<li>build the operating pro forma,</li>
+<li>expose the property-before-tax cash flow (<code>PBTCF</code>),</li>
+<li>isolate terminal value,</li>
+<li>layer leverage,</li>
+<li>read underwriting constraints.</li>
+</ul>
+<p>This is already a meaningful analytical perimeter. It supports
+property comparison, financing comparison, exit-dependence diagnostics,
+and lease analysis without hard-coding any national tax code into the
+engine.</p>
+<p>By contrast, after-tax analysis quickly becomes specific to:</p>
+<ul>
+<li>depreciation lives and asset splits,</li>
+<li>limits on interest deductibility,</li>
+<li>treatment of capital expenditures,</li>
+<li>loss carryforwards,</li>
+<li>exit taxation,</li>
+<li>investor and vehicle structure.</li>
+</ul>
+<p>That is exactly why <code>cre.dcf</code> does not yet pretend to
+return a fully jurisdiction-specific after-tax investment value. The new
+tax helper is intentionally generic and stylized.</p>
+</div>
+<div id="what-the-core-already-gives-us" class="section level2" number="3">
+<h2><span class="header-section-number">3</span> What the core already
+gives us</h2>
+<p>The present version already produces most of the building blocks that
+a future SPV-level tax layer would need.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>cfg_path <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;preset_core.yml&quot;</span>, <span class="at">package =</span> <span class="st">&quot;cre.dcf&quot;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>cfg <span class="ot">&lt;-</span> yaml<span class="sc">::</span><span class="fu">read_yaml</span>(cfg_path)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>case <span class="ot">&lt;-</span> <span class="fu">run_case</span>(cfg)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>tax_basis_preview <span class="ot">&lt;-</span> case<span class="sc">$</span>cashflows <span class="sc">|&gt;</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="fu">select</span>(year, gei, noi, pbtcf, capex, interest, sale_proceeds, equity_flow) <span class="sc">|&gt;</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">&lt;=</span> <span class="dv">4</span> <span class="sc">|</span> year <span class="sc">==</span> <span class="fu">max</span>(year))</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>  tax_basis_preview,</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">0</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Current outputs that can feed a future SPV-level tax layer&quot;</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>Current outputs that can feed a future SPV-level tax
+layer</caption>
+<colgroup>
+<col width="7%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+<col width="8%" />
+<col width="12%" />
+<col width="20%" />
+<col width="17%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">year</th>
+<th align="right">gei</th>
+<th align="right">noi</th>
+<th align="right">pbtcf</th>
+<th align="right">capex</th>
+<th align="right">interest</th>
+<th align="right">sale_proceeds</th>
+<th align="right">equity_flow</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">-30816000</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">2377950</td>
+<td align="right">2376000</td>
+<td align="right">2376000</td>
+<td align="right">0</td>
+<td align="right">451968</td>
+<td align="right">0</td>
+<td align="right">1924032</td>
+</tr>
+<tr class="odd">
+<td align="right">2</td>
+<td align="right">2401730</td>
+<td align="right">2399760</td>
+<td align="right">2399760</td>
+<td align="right">0</td>
+<td align="right">451968</td>
+<td align="right">0</td>
+<td align="right">1947792</td>
+</tr>
+<tr class="even">
+<td align="right">3</td>
+<td align="right">2425747</td>
+<td align="right">2423758</td>
+<td align="right">2423758</td>
+<td align="right">0</td>
+<td align="right">451968</td>
+<td align="right">0</td>
+<td align="right">1971790</td>
+</tr>
+<tr class="odd">
+<td align="right">4</td>
+<td align="right">2450004</td>
+<td align="right">2447995</td>
+<td align="right">2447995</td>
+<td align="right">0</td>
+<td align="right">451968</td>
+<td align="right">0</td>
+<td align="right">1996027</td>
+</tr>
+<tr class="even">
+<td align="right">10</td>
+<td align="right">2628946</td>
+<td align="right">2618283</td>
+<td align="right">2601877</td>
+<td align="right">16405</td>
+<td align="right">451968</td>
+<td align="right">49867061</td>
+<td align="right">31472970</td>
+</tr>
+</tbody>
+</table>
+<p>The economic logic is already explicit:</p>
+<ul>
+<li><code>gei</code> captures effective income,</li>
+<li><code>noi</code> captures operating income net of recurring
+expenses,</li>
+<li><code>pbtcf</code> captures the property-level cash flow before debt
+and taxes,</li>
+<li><code>interest</code> and <code>sale_proceeds</code> are already
+separated in the consolidated table.</li>
+</ul>
+<p>This is one of the main reasons the package can add a fiscal layer
+later without rewriting the current core.</p>
+</div>
+<div id="what-the-current-tax_rate-does-and-does-not-do" class="section level2" number="4">
+<h2><span class="header-section-number">4</span> What the current
+<code>tax_rate</code> does and does not do</h2>
+<p>The package still exposes a <code>tax_rate</code> inside the
+WACC-oriented discount-rate blocks.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>tpl <span class="ot">&lt;-</span> <span class="fu">dcf_spec_template</span>()</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="fu">tibble</span>(</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="at">KE =</span> tpl<span class="sc">$</span>disc_rate_wacc<span class="sc">$</span>KE,</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="at">KD =</span> tpl<span class="sc">$</span>disc_rate_wacc<span class="sc">$</span>KD,</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="at">tax_rate =</span> tpl<span class="sc">$</span>disc_rate_wacc<span class="sc">$</span>tax_rate</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## # A tibble: 1 × 3
+##      KE    KD tax_rate
+##   &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
+## 1  0.08  0.04     0.28</code></pre>
+<p>That field is part of the discounting convention. It adjusts the debt
+leg in a WACC-style formula. It is not a cash-tax engine.</p>
+<p>In the current version, the following statements are true:</p>
+<ul>
+<li><code>disc_rate_wacc$tax_rate</code> affects discount-rate
+construction,</li>
+<li><code>scr_ratio</code> can still act as a fallback in some
+discounting workflows,</li>
+<li>neither of those fields computes annual corporate tax
+liabilities,</li>
+<li>neither of those fields applies depreciation, loss carryforwards, or
+tax rules at exit.</li>
+</ul>
+<p>So the package already acknowledges tax in the cost-of-capital sense,
+but not yet in the jurisdictional cash-flow sense.</p>
+</div>
+<div id="why-this-helps-with-multi-jurisdiction-portability" class="section level2" number="5">
+<h2><span class="header-section-number">5</span> Why this helps with
+multi-jurisdiction portability</h2>
+<p>A generic before-tax engine travels well because it focuses on the
+economics that are most stable across jurisdictions:</p>
+<ul>
+<li>rents, vacancy, expenses, capital expenditure,</li>
+<li>financing terms,</li>
+<li>debt service,</li>
+<li>terminal value,</li>
+<li>value composition between operations and exit.</li>
+</ul>
+<p>The parts that differ the most from one country to another can then
+be isolated in a future tax specification instead of being mixed into
+the core valuation engine.</p>
+<p>This is especially important if the same package may later be used
+for:</p>
+<ul>
+<li>a French SPV,</li>
+<li>a German asset-holding vehicle,</li>
+<li>a UK single-asset company,</li>
+<li>or a teaching case where only stylized tax assumptions are
+needed.</li>
+</ul>
+</div>
+<div id="the-current-spv-level-tax-helper" class="section level2" number="6">
+<h2><span class="header-section-number">6</span> The current SPV-level
+tax helper</h2>
+<p>The tax layer is optional and leaves <code>run_case()</code>
+untouched.</p>
+<p>The intended split is:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>future_tax_blocks <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tribble</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="sc">~</span>block, <span class="sc">~</span>consumes_from_core, <span class="sc">~</span>adds_from_tax_spec, <span class="sc">~</span>target_output,</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="st">&quot;Tax depreciation&quot;</span>, <span class="st">&quot;price, capex, holding period&quot;</span>, <span class="st">&quot;asset split, depreciation lives, start rule&quot;</span>, <span class="st">&quot;tax_depreciation&quot;</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="st">&quot;Interest deductibility&quot;</span>, <span class="st">&quot;interest&quot;</span>, <span class="st">&quot;deductibility rule&quot;</span>, <span class="st">&quot;deductible_interest, interest_disallowed&quot;</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="st">&quot;Simple corporate tax&quot;</span>, <span class="st">&quot;taxable base after adjustments&quot;</span>, <span class="st">&quot;statutory rate&quot;</span>, <span class="st">&quot;cash_is&quot;</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="st">&quot;Loss carryforwards&quot;</span>, <span class="st">&quot;negative taxable income&quot;</span>, <span class="st">&quot;carryforward rule&quot;</span>, <span class="st">&quot;loss_cf_open, loss_cf_used, loss_cf_close&quot;</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>)</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  future_tax_blocks,</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Target blocks for a future SPV-level tax layer&quot;</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>Target blocks for a future SPV-level tax layer</caption>
+<colgroup>
+<col width="16%" />
+<col width="22%" />
+<col width="31%" />
+<col width="30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">block</th>
+<th align="left">consumes_from_core</th>
+<th align="left">adds_from_tax_spec</th>
+<th align="left">target_output</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Tax depreciation</td>
+<td align="left">price, capex, holding period</td>
+<td align="left">asset split, depreciation lives, start rule</td>
+<td align="left">tax_depreciation</td>
+</tr>
+<tr class="even">
+<td align="left">Interest deductibility</td>
+<td align="left">interest</td>
+<td align="left">deductibility rule</td>
+<td align="left">deductible_interest, interest_disallowed</td>
+</tr>
+<tr class="odd">
+<td align="left">Simple corporate tax</td>
+<td align="left">taxable base after adjustments</td>
+<td align="left">statutory rate</td>
+<td align="left">cash_is</td>
+</tr>
+<tr class="even">
+<td align="left">Loss carryforwards</td>
+<td align="left">negative taxable income</td>
+<td align="left">carryforward rule</td>
+<td align="left">loss_cf_open, loss_cf_used, loss_cf_close</td>
+</tr>
+</tbody>
+</table>
+<p>For version 1 of that tax layer, the scope should remain
+intentionally narrow:</p>
+<ul>
+<li>straight-line tax depreciation,</li>
+<li>deductible interest under a simple rule,</li>
+<li>a single corporate income-tax rate,</li>
+<li>loss carryforwards.</li>
+</ul>
+<p>That scope is large enough to support realistic teaching cases and
+comparative illustrations, but still narrow enough to remain portable
+across stylized jurisdictions.</p>
+</div>
+<div id="a-working-generic-spv-tax-run" class="section level2" number="7">
+<h2><span class="header-section-number">7</span> A working generic SPV
+tax run</h2>
+<p>The key design principle is that the before-tax case is still the
+source object, and the tax layer consumes it.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>tax_basis <span class="ot">&lt;-</span> <span class="fu">tax_basis_spv</span>(case)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>tax_spec <span class="ot">&lt;-</span> <span class="fu">tax_spec_spv</span>(</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="at">corp_tax_rate =</span> <span class="fl">0.25</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="at">depreciation_spec =</span> <span class="fu">depreciation_spec</span>(</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>    <span class="at">acquisition_split =</span> tibble<span class="sc">::</span><span class="fu">tribble</span>(</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>      <span class="sc">~</span>bucket,    <span class="sc">~</span>share, <span class="sc">~</span>life_years, <span class="sc">~</span>method,          <span class="sc">~</span>depreciable,</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>      <span class="st">&quot;land&quot;</span>,      <span class="fl">0.20</span>,        <span class="cn">NA</span>,    <span class="st">&quot;none&quot;</span>,           <span class="cn">FALSE</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>      <span class="st">&quot;building&quot;</span>,  <span class="fl">0.65</span>,        <span class="dv">30</span>,    <span class="st">&quot;straight_line&quot;</span>,  <span class="cn">TRUE</span>,</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>      <span class="st">&quot;fitout&quot;</span>,    <span class="fl">0.15</span>,        <span class="dv">10</span>,    <span class="st">&quot;straight_line&quot;</span>,  <span class="cn">TRUE</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>    ),</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>    <span class="at">capex_bucket =</span> <span class="st">&quot;fitout&quot;</span>,</span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>    <span class="at">start_rule =</span> <span class="st">&quot;full_year&quot;</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>  ),</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>  <span class="at">interest_rule =</span> <span class="fu">interest_rule</span>(<span class="at">mode =</span> <span class="st">&quot;full&quot;</span>),</span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>  <span class="at">loss_rule =</span> <span class="fu">loss_rule</span>(<span class="at">carryforward =</span> <span class="cn">TRUE</span>, <span class="at">carryforward_years =</span> <span class="cn">Inf</span>)</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>)</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>tax_res <span class="ot">&lt;-</span> <span class="fu">tax_run_spv</span>(tax_basis, tax_spec)</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>tax_res<span class="sc">$</span>tax_table <span class="sc">|&gt;</span></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>    year, noi, tax_depreciation, deductible_interest,</span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>    taxable_income_pre_losses, loss_cf_open, loss_cf_used,</span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>    cash_is, after_tax_equity_cf</span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">&lt;=</span> <span class="dv">4</span> <span class="sc">|</span> year <span class="sc">==</span> <span class="fu">max</span>(year))</span></code></pre></div>
+<pre><code>## # A tibble: 6 × 9
+##    year      noi tax_depreciation deductible_interest taxable_income_pre_losses
+##   &lt;int&gt;    &lt;dbl&gt;            &lt;dbl&gt;               &lt;dbl&gt;                     &lt;dbl&gt;
+## 1     0       0                0                    0                        0 
+## 2     1 2376000          1760000               451968                   164032 
+## 3     2 2399760          1760000               451968                   187792 
+## 4     3 2423758.         1760000               451968                   211790.
+## 5     4 2447995.         1760000               451968                   236027.
+## 6    10 2618283.         1766465.              451968                 19818340.
+## # ℹ 4 more variables: loss_cf_open &lt;dbl&gt;, loss_cf_used &lt;dbl&gt;, cash_is &lt;dbl&gt;,
+## #   after_tax_equity_cf &lt;dbl&gt;</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>tax_res<span class="sc">$</span>summary</span></code></pre></div>
+<pre><code>## # A tibble: 1 × 7
+##   corp_tax_rate acquisition_price total_tax_depreciation total_cash_is
+##           &lt;dbl&gt;             &lt;dbl&gt;                  &lt;dbl&gt;         &lt;dbl&gt;
+## 1          0.25          48000000              17616083.      5554632.
+## # ℹ 3 more variables: total_loss_generated &lt;dbl&gt;, final_loss_cf &lt;dbl&gt;,
+## #   total_after_tax_equity_cf &lt;dbl&gt;</code></pre>
+<p>This is enough to show the intended layering:</p>
+<ul>
+<li>the DCF engine still produces the economic case,</li>
+<li><code>tax_basis_spv()</code> extracts a tax basis from that
+case,</li>
+<li><code>tax_run_spv()</code> adds depreciation, deductible interest,
+simple CIT, and loss carryforwards.</li>
+</ul>
+<p>The yearly tax table now exposes columns such as:</p>
+<ul>
+<li><code>tax_depreciation</code>,</li>
+<li><code>deductible_interest</code>,</li>
+<li><code>interest_disallowed</code>,</li>
+<li><code>taxable_income_pre_losses</code>,</li>
+<li><code>loss_cf_open</code>,</li>
+<li><code>loss_cf_used</code>,</li>
+<li><code>loss_cf_close</code>,</li>
+<li><code>cash_is</code>,</li>
+<li><code>after_tax_equity_cf</code>.</li>
+</ul>
+<p>It remains deliberately modest:</p>
+<ul>
+<li>no investor-level taxes,</li>
+<li>no withholding taxes,</li>
+<li>no jurisdiction-specific interest-cap regimes,</li>
+<li>no recapture logic,</li>
+<li>no treaty logic.</li>
+</ul>
+</div>
+<div id="how-to-read-the-french-fiscal-impact-vignette" class="section level2" number="8">
+<h2><span class="header-section-number">8</span> How to read the French
+fiscal-impact vignette</h2>
+<p>The package now includes a French investment vignette built on
+<code>tax_run_spv()</code>.</p>
+<p>That vignette should be read for what it is:</p>
+<ol style="list-style-type: decimal">
+<li>an illustration of one country-like parameterization of the generic
+engine,</li>
+<li>a teaching-oriented bridge from before-tax DCF to SPV-level cash
+taxes,</li>
+<li>not a complete encoding of French tax law.</li>
+</ol>
+<p>In other words, the French vignette is useful precisely because it
+sits on top of the generic architecture rather than driving the
+architecture itself.</p>
+</div>
+<div id="summary" class="section level2" number="9">
+<h2><span class="header-section-number">9</span> Summary</h2>
+<p>The absence of a full tax engine in the current release is not a
+methodological weakness. It is a scope decision.</p>
+<ul>
+<li>The package is strongest on the textbook before-tax core.</li>
+<li>That core is explicit enough to feed a generic SPV-level tax
+layer.</li>
+<li>The current <code>tax_rate</code> input is part of discounting, not
+a fiscal cash-flow model.</li>
+<li>The new <code>tax_run_spv()</code> helper stays optional, generic,
+and jurisdiction-agnostic at the API level.</li>
+</ul>
+<p>This keeps <code>cre.dcf</code> scientifically defensible today while
+supporting applied tax vignettes, including the current stylized French
+investment illustration built on <code>tax_run_spv()</code>.</p>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-geltnerChapitre11Nuts_and_Bolts_for_Real_Estate_Valuation_Cash_Flow_Proformas_and_Discount_Rates2014" class="csl-entry">
+Geltner, David, Norman Miller, Jim Clayton, and Piet Eichholtz. 2014a.
+<span>“Chapter 11 - Nuts and Bolts for Real Estate Valuation: Cash Flow
+Proformas and Discount Rates.”</span> In <em>Commercial Real Estate
+Analysis and Investments</em>, 3rd ed. Mbition.
+</div>
+<div id="ref-geltnerChapitre14AfterTax_Investment_Analysis_and_Corporate_Real_Estate2014" class="csl-entry">
+———. 2014b. <span>“Chapter 14 - After-Tax Investment Analysis and
+Corporate Real Estate.”</span> In <em>Commercial Real Estate Analysis
+and Investments</em>, 3rd ed. Mbition.
+</div>
+<div id="ref-hartzellChapter5Basic" class="csl-entry">
+Hartzell, David, and Andrew Baum. 2020. <span>“Chapter 5 - Basic
+Valuation and Investment Analysis.”</span> In <em>Real Estate
+Investment: Strategies, Structures, Decisions</em>. Wiley.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -6,7 +6,7 @@ library(yaml)
 
 
 ## -----------------------------------------------------------------------------
-# 1) Load a canonical configuration
+# 1) Load a baseline configuration
 
 cfg_path <- system.file("extdata", "preset_default.yml", package = "cre.dcf")
 stopifnot(nzchar(cfg_path))
@@ -72,7 +72,7 @@ identical(serialize(sm1, NULL), serialize(sm2, NULL))
 )
 
 cat(
-"\nReproducibility diagnostics (byte-level):\n",
+"\nReproducibility checks:\n",
 "  • Core metrics: byte-level identity confirmed.\n",
 "  • All-equity cashflows: byte-level identity confirmed.\n",
 "  • Leveraged cashflows: byte-level identity confirmed.\n",

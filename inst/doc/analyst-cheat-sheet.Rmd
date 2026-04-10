@@ -1,0 +1,174 @@
+---
+title: "Analyst Cheat Sheet"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{Analyst Cheat Sheet}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+## Goal
+
+This guide covers the basic workflow:
+
+```r
+deal_spec() -> analyze_deal() -> summary() -> deal_cashflows()
+```
+
+## The 5 functions to know
+
+- `deal_spec()`: define the deal
+- `debt_terms()`: define the debt
+- `analyze_deal()`: run the model
+- `summary()`: read key metrics
+- `deal_cashflows()`: extract tables
+
+## The 10 variables that matter most
+
+| Variable | Meaning |
+|:--|:--|
+| `price` | all-in acquisition price |
+| `horizon_years` | holding period |
+| `entry_yield` | entry cap rate |
+| `noi_y1` | year-1 NOI if already known |
+| `rent_sqm` | rent per sqm |
+| `area_sqm` | lettable area |
+| `vacancy_rate` | average vacancy |
+| `discount_rate` | discount rate |
+| `ltv` | initial leverage |
+| `rate` | debt interest rate |
+
+Use exactly one income mode:
+
+- `entry_yield`
+- or `noi_y1`
+- or `rent_sqm + area_sqm`
+
+## Quick Start
+
+```{r}
+library(cre.dcf)
+
+deal <- deal_spec(
+  price = 10e6,
+  entry_yield = 0.055,
+  horizon_years = 10,
+  debt = debt_terms(
+    ltv = 0.60,
+    rate = 0.045,
+    type = "bullet"
+  )
+)
+
+res <- analyze_deal(deal)
+
+summary(res)
+```
+
+## Typical Workflow
+
+### 1. Define the deal
+
+```{r}
+deal <- deal_spec(
+  price = 12e6,
+  rent_sqm = 240,
+  area_sqm = 4000,
+  vacancy_rate = 0.08,
+  opex_sqm = 15,
+  horizon_years = 7,
+  discount_rate = 0.08,
+  debt = debt_terms(
+    ltv = 0.55,
+    rate = 0.043,
+    type = "amort",
+    maturity = 7
+  )
+)
+
+deal
+```
+
+### 2. Run the deal
+
+```{r}
+res <- analyze_deal(deal)
+res
+```
+
+### 3. Read the key metrics
+
+```{r}
+summary(res)
+```
+
+Key fields:
+
+- `irr_project`: project return before leverage
+- `irr_equity`: return to equity
+- `dscr_min`: minimum debt-service coverage ratio
+- `ltv_max_forward`: maximum forward LTV
+- `ops_share`: share of present value coming from operating cash flows
+- `tv_share`: share of present value coming from terminal value
+
+### 4. Extract the tables
+
+```{r}
+deal_cashflows(res, "comparison")
+deal_cashflows(res, "full")
+```
+
+Use:
+
+- `"full"` for the merged operating and debt cash flows
+- `"all_equity"` for the unlevered table
+- `"leveraged"` for the equity cash-flow view
+- `"comparison"` for the summary by financing structure
+
+## Three Common Input Styles
+
+### Entry yield known
+
+```{r}
+deal_spec(price = 10e6, entry_yield = 0.055)
+```
+
+### NOI already known
+
+```{r}
+deal_spec(price = 10e6, noi_y1 = 550000)
+```
+
+### Rent roll style input
+
+```{r}
+deal_spec(
+  price = 10e6,
+  rent_sqm = 220,
+  area_sqm = 3000,
+  vacancy_rate = 0.05,
+  opex_sqm = 12
+)
+```
+
+## Common Mistakes
+
+- Do not provide more than one income mode.
+- `price` is always the all-in acquisition price in the simplified API.
+- If you use `rent_sqm + area_sqm`, the package derives year-1 NOI for you.
+- If you want a quick first pass, start with `debt_terms()` defaults and only change `ltv`, `rate`, and `type`.
+
+## When to move to the advanced API
+
+Use the advanced API only if you need:
+
+- YAML-based workflows,
+- explicit lease-event structures,
+- direct access to normalization helpers,
+- custom scenario tooling built around `run_case()`.

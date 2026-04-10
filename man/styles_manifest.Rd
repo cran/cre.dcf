@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{styles_manifest}
 \alias{styles_manifest}
-\title{Compute the style-by-style manifest for canonical presets}
+\title{Compute the style-by-style manifest for preset scenarios}
 \usage{
 styles_manifest(
   styles = c("core", "core_plus", "value_added", "opportunistic")
@@ -10,19 +10,20 @@ styles_manifest(
 }
 \arguments{
 \item{styles}{Character vector of style names to include.
-Defaults to the four canonical presets:
+Defaults to the four preset scenarios:
 \code{c("core", "core_plus", "value_added", "opportunistic")}.}
 }
 \value{
 A tibble with one row per style and the columns:
 \code{style}, \code{class}, \code{irr_project}, \code{irr_equity},
-\code{dscr_min_bul}, \code{ltv_init}, \code{ltv_max_fwd}, \code{npv_equity}.
+\code{dscr_min_bul}, \code{ltv_init}, \code{ltv_max_fwd},
+\code{ops_share}, \code{tv_share}, and \code{npv_equity}.
 }
 \description{
-This helper runs the four canonical style presets
+This helper runs the four preset style scenarios
 (\code{"core"}, \code{"core_plus"}, \code{"value_added"}, \code{"opportunistic"})
 through [\code{\link[=run_case]{run_case()}}] and extracts a compact set of indicators that are
-salient for both investors and lenders:
+useful for both investors and lenders:
 }
 \details{
 \itemize{
@@ -34,7 +35,11 @@ salient for both investors and lenders:
 \item equity NPV.
 }
 
-The result is a tibble that can be reused both in vignettes and in automated
-tests to ensure that the canonical presets preserve the intended
-risk–return and leverage–coverage hierarchies.
+The result is a tibble that can be reused in vignettes and automated tests
+to check that the presets preserve the intended risk-return and
+leverage-coverage hierarchies. The initial LTV is the structural leverage
+choice at origination. By contrast, \code{ltv_max_fwd} is a conditional
+stress indicator computed along the simulated business plan; for transitional
+or lease-up strategies it may therefore be non-monotonic across styles even
+when the overall risk ordering remains economically coherent.
 }

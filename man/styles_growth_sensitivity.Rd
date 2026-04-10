@@ -31,9 +31,9 @@ This helper perturbs the global \code{index_rate} parameter of each style preset
 by a given grid of additive shocks and recomputes the leveraged equity IRR.
 }
 \details{
-It therefore measures how dependent each style is on rental_growth
-(via indexation and lease renewals) to reach its target equity_IRR.
-In canonical calibrations, core strategies tend to be less sensitive than
-value_added or opportunistic profiles, which rely more heavily on
+It therefore measures how dependent each style is on rental growth
+(via indexation and lease renewals) to reach its target equity IRR.
+In typical preset calibrations, core strategies tend to be less sensitive
+than value_added or opportunistic profiles, which rely more heavily on
 growth and lease-up.
 }

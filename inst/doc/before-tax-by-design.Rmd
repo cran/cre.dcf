@@ -1,0 +1,248 @@
+---
+title: "Before-tax by design: scope, portability, and future tax extensions"
+author: "Package cre.dcf"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{Before-tax by design: scope, portability, and future tax extensions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: manual-foundations.bib
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(cre.dcf)
+library(dplyr)
+library(tibble)
+```
+
+## Purpose
+
+This vignette explains a deliberate scope choice in `cre.dcf`: the package is currently designed as a property-level, before-tax DCF engine.
+
+That choice is methodological and practical at the same time.
+
+- Methodologically, the manuals first structure valuation around operating cash flows, terminal value, and leverage before opening the more jurisdiction-specific after-tax layer [@geltnerChapitre11Nuts_and_Bolts_for_Real_Estate_Valuation_Cash_Flow_Proformas_and_Discount_Rates2014; @hartzellChapter5Basic; @geltnerChapitre14AfterTax_Investment_Analysis_and_Corporate_Real_Estate2014].
+- Practically, a before-tax core is much easier to mobilize across countries, vehicles, and investor types.
+
+The portability argument is an implementation choice inferred from those chapters. The textbooks justify a strong before-tax core; the package then keeps that core jurisdiction-agnostic on purpose.
+
+The package now also includes a first generic SPV-level tax helper, `tax_run_spv()`. The important design point is that this tax layer sits on top of the before-tax core rather than replacing it.
+
+## Why the core still stops at the before-tax level
+
+The current public API is strongest where the manuals are most universal:
+
+- build the operating pro forma,
+- expose the property-before-tax cash flow (`PBTCF`),
+- isolate terminal value,
+- layer leverage,
+- read underwriting constraints.
+
+This is already a meaningful analytical perimeter. It supports property comparison, financing comparison, exit-dependence diagnostics, and lease analysis without hard-coding any national tax code into the engine.
+
+By contrast, after-tax analysis quickly becomes specific to:
+
+- depreciation lives and asset splits,
+- limits on interest deductibility,
+- treatment of capital expenditures,
+- loss carryforwards,
+- exit taxation,
+- investor and vehicle structure.
+
+That is exactly why `cre.dcf` does not yet pretend to return a fully jurisdiction-specific after-tax investment value. The new tax helper is intentionally generic and stylized.
+
+## What the core already gives us
+
+The present version already produces most of the building blocks that a future SPV-level tax layer would need.
+
+```{r}
+cfg_path <- system.file("extdata", "preset_core.yml", package = "cre.dcf")
+cfg <- yaml::read_yaml(cfg_path)
+case <- run_case(cfg)
+
+tax_basis_preview <- case$cashflows |>
+  select(year, gei, noi, pbtcf, capex, interest, sale_proceeds, equity_flow) |>
+  filter(year <= 4 | year == max(year))
+
+knitr::kable(
+  tax_basis_preview,
+  digits = 0,
+  caption = "Current outputs that can feed a future SPV-level tax layer"
+)
+```
+
+The economic logic is already explicit:
+
+- `gei` captures effective income,
+- `noi` captures operating income net of recurring expenses,
+- `pbtcf` captures the property-level cash flow before debt and taxes,
+- `interest` and `sale_proceeds` are already separated in the consolidated table.
+
+This is one of the main reasons the package can add a fiscal layer later without rewriting the current core.
+
+## What the current `tax_rate` does and does not do
+
+The package still exposes a `tax_rate` inside the WACC-oriented discount-rate blocks.
+
+```{r}
+tpl <- dcf_spec_template()
+
+tibble(
+  KE = tpl$disc_rate_wacc$KE,
+  KD = tpl$disc_rate_wacc$KD,
+  tax_rate = tpl$disc_rate_wacc$tax_rate
+)
+```
+
+That field is part of the discounting convention. It adjusts the debt leg in a WACC-style formula. It is not a cash-tax engine.
+
+In the current version, the following statements are true:
+
+- `disc_rate_wacc$tax_rate` affects discount-rate construction,
+- `scr_ratio` can still act as a fallback in some discounting workflows,
+- neither of those fields computes annual corporate tax liabilities,
+- neither of those fields applies depreciation, loss carryforwards, or tax rules at exit.
+
+So the package already acknowledges tax in the cost-of-capital sense, but not yet in the jurisdictional cash-flow sense.
+
+## Why this helps with multi-jurisdiction portability
+
+A generic before-tax engine travels well because it focuses on the economics that are most stable across jurisdictions:
+
+- rents, vacancy, expenses, capital expenditure,
+- financing terms,
+- debt service,
+- terminal value,
+- value composition between operations and exit.
+
+The parts that differ the most from one country to another can then be isolated in a future tax specification instead of being mixed into the core valuation engine.
+
+This is especially important if the same package may later be used for:
+
+- a French SPV,
+- a German asset-holding vehicle,
+- a UK single-asset company,
+- or a teaching case where only stylized tax assumptions are needed.
+
+## The current SPV-level tax helper
+
+The tax layer is optional and leaves `run_case()` untouched.
+
+The intended split is:
+
+```{r}
+future_tax_blocks <- tibble::tribble(
+  ~block, ~consumes_from_core, ~adds_from_tax_spec, ~target_output,
+  "Tax depreciation", "price, capex, holding period", "asset split, depreciation lives, start rule", "tax_depreciation",
+  "Interest deductibility", "interest", "deductibility rule", "deductible_interest, interest_disallowed",
+  "Simple corporate tax", "taxable base after adjustments", "statutory rate", "cash_is",
+  "Loss carryforwards", "negative taxable income", "carryforward rule", "loss_cf_open, loss_cf_used, loss_cf_close"
+)
+
+knitr::kable(
+  future_tax_blocks,
+  caption = "Target blocks for a future SPV-level tax layer"
+)
+```
+
+For version 1 of that tax layer, the scope should remain intentionally narrow:
+
+- straight-line tax depreciation,
+- deductible interest under a simple rule,
+- a single corporate income-tax rate,
+- loss carryforwards.
+
+That scope is large enough to support realistic teaching cases and comparative illustrations, but still narrow enough to remain portable across stylized jurisdictions.
+
+## A working generic SPV tax run
+
+The key design principle is that the before-tax case is still the source object, and the tax layer consumes it.
+
+```{r}
+tax_basis <- tax_basis_spv(case)
+
+tax_spec <- tax_spec_spv(
+  corp_tax_rate = 0.25,
+  depreciation_spec = depreciation_spec(
+    acquisition_split = tibble::tribble(
+      ~bucket,    ~share, ~life_years, ~method,          ~depreciable,
+      "land",      0.20,        NA,    "none",           FALSE,
+      "building",  0.65,        30,    "straight_line",  TRUE,
+      "fitout",    0.15,        10,    "straight_line",  TRUE
+    ),
+    capex_bucket = "fitout",
+    start_rule = "full_year"
+  ),
+  interest_rule = interest_rule(mode = "full"),
+  loss_rule = loss_rule(carryforward = TRUE, carryforward_years = Inf)
+)
+
+tax_res <- tax_run_spv(tax_basis, tax_spec)
+
+tax_res$tax_table |>
+  select(
+    year, noi, tax_depreciation, deductible_interest,
+    taxable_income_pre_losses, loss_cf_open, loss_cf_used,
+    cash_is, after_tax_equity_cf
+  ) |>
+  filter(year <= 4 | year == max(year))
+```
+
+```{r}
+tax_res$summary
+```
+
+This is enough to show the intended layering:
+
+- the DCF engine still produces the economic case,
+- `tax_basis_spv()` extracts a tax basis from that case,
+- `tax_run_spv()` adds depreciation, deductible interest, simple CIT, and loss carryforwards.
+
+The yearly tax table now exposes columns such as:
+
+- `tax_depreciation`,
+- `deductible_interest`,
+- `interest_disallowed`,
+- `taxable_income_pre_losses`,
+- `loss_cf_open`,
+- `loss_cf_used`,
+- `loss_cf_close`,
+- `cash_is`,
+- `after_tax_equity_cf`.
+
+It remains deliberately modest:
+
+- no investor-level taxes,
+- no withholding taxes,
+- no jurisdiction-specific interest-cap regimes,
+- no recapture logic,
+- no treaty logic.
+
+## How to read the French fiscal-impact vignette
+
+The package now includes a French investment vignette built on `tax_run_spv()`.
+
+That vignette should be read for what it is:
+
+1. an illustration of one country-like parameterization of the generic engine,
+2. a teaching-oriented bridge from before-tax DCF to SPV-level cash taxes,
+3. not a complete encoding of French tax law.
+
+In other words, the French vignette is useful precisely because it sits on top of the generic architecture rather than driving the architecture itself.
+
+## Summary
+
+The absence of a full tax engine in the current release is not a methodological weakness. It is a scope decision.
+
+- The package is strongest on the textbook before-tax core.
+- That core is explicit enough to feed a generic SPV-level tax layer.
+- The current `tax_rate` input is part of discounting, not a fiscal cash-flow model.
+- The new `tax_run_spv()` helper stays optional, generic, and jurisdiction-agnostic at the API level.
+
+This keeps `cre.dcf` scientifically defensible today while supporting applied tax vignettes, including the current stylized French investment illustration built on `tax_run_spv()`.

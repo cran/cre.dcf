@@ -10,6 +10,8 @@ compare_financing_scenarios(
   ltv,
   rate,
   maturity,
+  arrangement_fee_pct = 0,
+  capitalized_fees = FALSE,
   covenants = list(dscr_min = 1.25, ltv_max = 0.65)
 )
 }
@@ -29,6 +31,12 @@ to build the debt schedules.}
 
 \item{maturity}{Integer scalar greater than or equal to 1; debt maturity
 in years.}
+
+\item{arrangement_fee_pct}{Numeric scalar in \code{[0, 1]}; arrangement fee
+rate applied to the initial principal.}
+
+\item{capitalized_fees}{Logical scalar; whether arrangement fees are
+capitalized into the initial drawdown.}
 
 \item{covenants}{Optional list of covenant thresholds, for example
 \code{list(dscr_min = 1.25, ltv_max = 0.65)}. These values are passed

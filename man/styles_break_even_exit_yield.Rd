@@ -46,7 +46,7 @@ equity IRR and \code{target_irr},
 \item bracketing the root over a user-specified interval.
 }
 
-The lower the break-even exit yield, the tighter the exit_pricing
-assumption that must be met to reach the hurdle, and the more the style
-depends on favourable market_conditions at sale.
+The lower the break-even exit yield, the tighter the exit pricing
+assumption needed to reach the hurdle, and the more the style depends on
+favourable market conditions at sale.
 }

@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Package cre.dcf" />
+
+
+<title>Methodological foundations: DCF, effective rent, and underwriting in CRE</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Methodological foundations: DCF, effective
+rent, and underwriting in CRE</h1>
+<h4 class="author">Package cre.dcf</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#purpose" id="toc-purpose"><span class="toc-section-number">1</span> Purpose</a></li>
+<li><a href="#why-the-package-works-at-the-property-before-tax-level" id="toc-why-the-package-works-at-the-property-before-tax-level"><span class="toc-section-number">2</span> Why the package works at the
+property-before-tax level</a></li>
+<li><a href="#why-terminal-value-is-surfaced-explicitly" id="toc-why-terminal-value-is-surfaced-explicitly"><span class="toc-section-number">3</span> Why terminal value is surfaced
+explicitly</a></li>
+<li><a href="#why-effective-rent-is-treated-as-an-annuitized-value" id="toc-why-effective-rent-is-treated-as-an-annuitized-value"><span class="toc-section-number">4</span> Why effective rent is treated as an
+annuitized value</a></li>
+<li><a href="#why-underwriting-is-implemented-as-binding-constraints" id="toc-why-underwriting-is-implemented-as-binding-constraints"><span class="toc-section-number">5</span> Why underwriting is implemented as
+binding constraints</a></li>
+<li><a href="#market-value-investment-value-and-what-is-not-yet-in-the-package" id="toc-market-value-investment-value-and-what-is-not-yet-in-the-package"><span class="toc-section-number">6</span> Market value, investment value, and
+what is not yet in the package</a></li>
+<li><a href="#summary" id="toc-summary"><span class="toc-section-number">7</span> Summary</a></li>
+</ul>
+</div>
+
+<div id="purpose" class="section level2" number="1">
+<h2><span class="header-section-number">1</span> Purpose</h2>
+<p>This vignette documents the methodological choices embedded in
+<code>cre.dcf</code>.</p>
+<p>The package is intentionally centered on a property-level, before-tax
+DCF. This is close to the way the core valuation chapters in Baum and
+Hartzell and Geltner structure the problem: identify the operating cash
+flows, add the terminal event, discount the resulting stream, and only
+then layer leverage and underwriting <span class="citation">(<a href="#ref-hartzellChapter5Basic">Hartzell and Baum 2020a</a>; <a href="#ref-baumChapter7Techniques2020">Baum and Hartzell 2020</a>; <a href="#ref-geltnerChapitre11Nuts_and_Bolts_for_Real_Estate_Valuation_Cash_Flow_Proformas_and_Discount_Rates2014">Geltner
+et al. 2014a</a>)</span>.</p>
+<p>The implementation follows four principles.</p>
+<ul>
+<li>Make the operating chain explicit as
+<code>GEI -&gt; NOI -&gt; PBTCF</code>.</li>
+<li>Isolate terminal value instead of hiding it inside a single return
+number.</li>
+<li>Treat lease comparison through an annuitized present-value
+logic.</li>
+<li>Treat underwriting as a problem of active constraints rather than as
+a single ratio.</li>
+</ul>
+</div>
+<div id="why-the-package-works-at-the-property-before-tax-level" class="section level2" number="2">
+<h2><span class="header-section-number">2</span> Why the package works
+at the property-before-tax level</h2>
+<p>Geltner labels the property pro forma bottom line as
+<code>&quot;property-before-tax cash flow (PBTCF)&quot;</code> <span class="citation">(<a href="#ref-geltnerChapitre11Nuts_and_Bolts_for_Real_Estate_Valuation_Cash_Flow_Proformas_and_Discount_Rates2014">Geltner
+et al. 2014a, 11</a>)</span>. The same chapter also states that a pro
+forma should
+<code>&quot;always include reversion cash flows in the last year&quot;</code>
+<span class="citation">(<a href="#ref-geltnerChapitre11Nuts_and_Bolts_for_Real_Estate_Valuation_Cash_Flow_Proformas_and_Discount_Rates2014">Geltner
+et al. 2014a, 11</a>)</span>.</p>
+<p>In <code>cre.dcf</code>, this translates into three explicit
+operating columns plus a separate terminal event:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>dcf <span class="ot">&lt;-</span> <span class="fu">dcf_calculate</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="at">acq_price =</span> <span class="fl">10e6</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="at">entry_yield =</span> <span class="fl">0.055</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  <span class="at">exit_yield =</span> <span class="fl">0.0575</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  <span class="at">horizon_years =</span> <span class="dv">5</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="at">disc_rate =</span> <span class="fl">0.075</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  <span class="at">opex =</span> <span class="fu">c</span>(<span class="dv">50000</span>, <span class="dv">51000</span>, <span class="dv">52020</span>, <span class="dv">53060</span>, <span class="dv">54121</span>),</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>  <span class="at">capex =</span> <span class="fu">c</span>(<span class="dv">15000</span>, <span class="dv">15000</span>, <span class="dv">20000</span>, <span class="dv">15000</span>, <span class="dv">0</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>)</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>dcf<span class="sc">$</span>cashflows <span class="sc">|&gt;</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>  <span class="fu">select</span>(year, gei, noi, pbtcf, sale_proceeds, free_cash_flow)</span></code></pre></div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["year"],"name":[1],"type":["int"],"align":["right"]},{"label":["gei"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["noi"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["pbtcf"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["sale_proceeds"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["free_cash_flow"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"0","2":"0","3":"0","4":"0","5":"0","6":"-10000000"},{"1":"1","2":"600000","3":"550000","4":"535000","5":"0","6":"535000"},{"1":"2","2":"601000","3":"550000","4":"535000","5":"0","6":"535000"},{"1":"3","2":"602020","3":"550000","4":"530000","5":"0","6":"530000"},{"1":"4","2":"603060","3":"550000","4":"535000","5":"0","6":"535000"},{"1":"5","2":"604121","3":"550000","4":"550000","5":"9565217","6":"10115217"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>The public preference is now:</p>
+<ul>
+<li><code>gei</code>: gross effective income after vacancy and rent-free
+effects,</li>
+<li><code>noi</code>: operating income net of recurring operating
+expenses,</li>
+<li><code>pbtcf</code>: property-before-tax cash flow, that is
+<code>noi - capex</code>.</li>
+</ul>
+<p>The legacy column <code>net_operating_income</code> is still kept for
+backward compatibility, but the documentation no longer treats it as the
+central concept.</p>
+</div>
+<div id="why-terminal-value-is-surfaced-explicitly" class="section level2" number="3">
+<h2><span class="header-section-number">3</span> Why terminal value is
+surfaced explicitly</h2>
+<p>Baum and Hartzell present unlevered feasibility as a cash-flow
+problem before leverage, and their worked example decomposes value
+between ongoing operations and sale proceeds <span class="citation">(<a href="#ref-baumChapter7Techniques2020">Baum and Hartzell 2020,
+14–15</a>)</span>. In that example, 27.6% of value comes from operating
+cash flows and 72.4% from disposition proceeds <span class="citation">(<a href="#ref-baumChapter7Techniques2020">Baum and
+Hartzell 2020, 15</a>)</span>.</p>
+<p>In the same spirit, Geltner emphasizes that reversion is typically
+capitalized off the NOI one year beyond the explicit holding period, or
+off a stabilized forward NOI when the next year is atypical <span class="citation">(<a href="#ref-geltnerChapitre11Nuts_and_Bolts_for_Real_Estate_Valuation_Cash_Flow_Proformas_and_Discount_Rates2014">Geltner
+et al. 2014a, 25–26</a>)</span>. The current <code>cre.dcf</code>
+implementation therefore capitalizes a forwardized terminal NOI rather
+than reusing the final in-horizon NOI mechanically.</p>
+<p>For that reason, <code>cre.dcf</code> now reports the present-value
+split between operations and terminal value:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>metrics <span class="ot">&lt;-</span> <span class="fu">compute_unleveraged_metrics</span>(dcf)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="fu">tibble</span>(</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="at">pv_operations =</span> metrics<span class="sc">$</span>pv_operations,</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="at">pv_terminal =</span> metrics<span class="sc">$</span>pv_terminal,</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="at">ops_share =</span> metrics<span class="sc">$</span>ops_share,</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="at">tv_share =</span> metrics<span class="sc">$</span>tv_share</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>)</span></code></pre></div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["pv_operations"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["pv_terminal"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["ops_share"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["tv_share"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"2170972","2":"6662735","3":"0.24576","4":"0.75424"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>This is useful for two reasons.</p>
+<ul>
+<li>It makes exit dependence measurable instead of implicit.</li>
+<li>It gives a direct diagnostic when a case is mostly driven by the
+reversion.</li>
+</ul>
+<p>The package does not impose a universal threshold, but a high
+<code>tv_share</code> should prompt explicit discussion of exit-yield,
+stabilization, and market-liquidity assumptions.</p>
+<p>One related caution from Geltner matters for interpretation: observed
+market cap rates are usually NOI-based, not PBTCF-based cash yields. In
+other words, a quoted cap rate is useful pricing evidence, but it is not
+automatically identical to the discount rate applied to a full PBTCF
+stream. In <code>cre.dcf</code>, this is why the
+<code>&quot;yield_plus_growth&quot;</code> convention is treated as a simplified
+robustness check rather than as a full recovery of the opportunity cost
+of capital from market cap-rate evidence alone.</p>
+</div>
+<div id="why-effective-rent-is-treated-as-an-annuitized-value" class="section level2" number="4">
+<h2><span class="header-section-number">4</span> Why effective rent is
+treated as an annuitized value</h2>
+<p>In Geltner’s lease chapter, the rigorous version of effective rent is
+the <code>&quot;annuitized lease value (ALV)&quot;</code>, and
+<code>&quot;the ALV of a lease is a level annuity&quot;</code> with the same
+present value as the lease cash-flow stream <span class="citation">(<a href="#ref-geltnerChapitre29Leases_and_Leasing_Strategy2014">Geltner et
+al. 2014e, 8</a>)</span>. The chapter also emphasizes that ALV can be
+computed from either the landlord’s or tenant’s perspective <span class="citation">(<a href="#ref-geltnerChapitre29Leases_and_Leasing_Strategy2014">Geltner et
+al. 2014e, 8–11</a>)</span>.</p>
+<p>This is why the package now includes
+<code>lease_effective_rent()</code> as a generic helper:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>lease_compare <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="at">concession =</span> <span class="fu">lease_effective_rent</span>(</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>    <span class="at">cashflows =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>, <span class="dv">100</span>),</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>    <span class="at">discount_rate =</span> <span class="fl">0.08</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>    <span class="at">area =</span> <span class="dv">1</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>    <span class="at">timing =</span> <span class="st">&quot;arrears&quot;</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>    <span class="at">perspective =</span> <span class="st">&quot;landlord&quot;</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  ),</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>  <span class="at">flat =</span> <span class="fu">lease_effective_rent</span>(</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>    <span class="at">cashflows =</span> <span class="fu">c</span>(<span class="dv">90</span>, <span class="dv">90</span>, <span class="dv">90</span>, <span class="dv">90</span>, <span class="dv">90</span>),</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>    <span class="at">discount_rate =</span> <span class="fl">0.08</span>,</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>    <span class="at">area =</span> <span class="dv">1</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>    <span class="at">timing =</span> <span class="st">&quot;arrears&quot;</span>,</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>    <span class="at">perspective =</span> <span class="st">&quot;landlord&quot;</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>  ),</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>  <span class="at">.id =</span> <span class="st">&quot;lease&quot;</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>)</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>lease_compare <span class="sc">|&gt;</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>  <span class="fu">select</span>(lease, pv, equivalent_annuity, effective_rent)</span></code></pre></div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["lease"],"name":[1],"type":["chr"],"align":["left"]},{"label":["pv"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["equivalent_annuity"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["effective_rent"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"concession","2":"306.6784","3":"76.80959","4":"76.80959"},{"1":"flat","2":"359.3439","3":"90.00000","4":"90.00000"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>The function is deliberately simple in version 1.</p>
+<ul>
+<li>It accepts already-constructed cash flows.</li>
+<li>It does not depend on the package event grammar.</li>
+<li>It can be used from either landlord or tenant perspective.</li>
+</ul>
+<p>This keeps the API scientifically clear while leaving room for richer
+lease-option logic later.</p>
+</div>
+<div id="why-underwriting-is-implemented-as-binding-constraints" class="section level2" number="5">
+<h2><span class="header-section-number">5</span> Why underwriting is
+implemented as binding constraints</h2>
+<p>Hartzell and Baum state that
+<code>&quot;either the debt coverage ratio or the loan-to-value ratio will be the constraining factor&quot;</code>
+when underwriting a loan <span class="citation">(<a href="#ref-hartzellChapter9Commercial">Hartzell and Baum 2020b,
+5</a>)</span>. Their chapter also sizes a maximum loan amount directly
+from NOI and a debt-coverage requirement <span class="citation">(<a href="#ref-hartzellChapter9Commercial">Hartzell and Baum 2020b,
+4–5</a>)</span>.</p>
+<p>That logic is now exposed in a public helper:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>uw <span class="ot">&lt;-</span> <span class="fu">underwrite_loan</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="at">noi =</span> <span class="dv">500000</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="at">value =</span> <span class="fl">8e6</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="at">rate_annual =</span> <span class="fl">0.045</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="at">maturity =</span> <span class="dv">5</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;bullet&quot;</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  <span class="at">dscr_min =</span> <span class="fl">1.25</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  <span class="at">ltv_max =</span> <span class="fl">0.65</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  <span class="at">debt_yield_min =</span> <span class="fl">0.08</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>)</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>uw<span class="sc">$</span>constraints</span></code></pre></div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["constraint"],"name":[1],"type":["chr"],"align":["left"]},{"label":["max_loan"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"ltv","2":"5200000"},{"1":"dscr","2":"10000000"},{"1":"debt_yield","2":"6250000"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">tibble</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="at">binding_constraint =</span> uw<span class="sc">$</span>binding_constraint,</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="at">max_loan =</span> uw<span class="sc">$</span>max_loan,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="at">payment_year1 =</span> uw<span class="sc">$</span>payment_year1,</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="at">implied_ltv =</span> uw<span class="sc">$</span>implied_ltv,</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="at">implied_dscr =</span> uw<span class="sc">$</span>implied_dscr,</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="at">implied_debt_yield =</span> uw<span class="sc">$</span>implied_debt_yield</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>)</span></code></pre></div>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["binding_constraint"],"name":[1],"type":["chr"],"align":["left"]},{"label":["max_loan"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["payment_year1"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["implied_ltv"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["implied_dscr"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["implied_debt_yield"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"ltv","2":"5200000","3":"234000","4":"0.65","5":"2.136752","6":"0.09615385"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>The methodological choice is straightforward: underwriting is
+presented as a deterministic property-level screen. This is narrower
+than the full lender-return framework developed later in Geltner, but it
+captures the central textbook logic with a transparent API.</p>
+</div>
+<div id="market-value-investment-value-and-what-is-not-yet-in-the-package" class="section level2" number="6">
+<h2><span class="header-section-number">6</span> Market value,
+investment value, and what is not yet in the package</h2>
+<p>Geltner’s advanced valuation chapter distinguishes market value from
+investment value and argues that both should be analyzed with the same
+multiperiod DCF machinery <span class="citation">(<a href="#ref-geltnerChapitre12Advanced_MicroLevel_Valuation2014">Geltner
+et al. 2014b, 2–3</a>)</span>. <code>cre.dcf</code> does not yet expose
+a dedicated <code>market_value()</code> versus
+<code>investment_value()</code> API, but the package documentation now
+adopts that distinction as part of its methodological framing.</p>
+<p>Two major extensions are intentionally deferred.</p>
+<ul>
+<li>After-tax valuation: the chapter on after-tax analysis frames the
+next step around value additivity and the APV decision rule <span class="citation">(<a href="#ref-geltnerChapitre14AfterTax_Investment_Analysis_and_Corporate_Real_Estate2014">Geltner
+et al. 2014c, 1–3</a>)</span>.</li>
+<li>Development: Geltner treats the development phase as a distinct
+analytical problem rather than as a simple DCF with larger capex <span class="citation">(<a href="#ref-geltnerChapitre27Investment_Analysis_of_Real_Estate_Development_Projects_Overview__Background2014">Geltner
+et al. 2014d, 1–2</a>)</span>.</li>
+</ul>
+<p>In other words, the current package is intentionally strongest on the
+asset-level, before-tax DCF core. That core now has a clearer scientific
+grammar, but it is not yet the full textbook universe.</p>
+</div>
+<div id="summary" class="section level2" number="7">
+<h2><span class="header-section-number">7</span> Summary</h2>
+<p>The current package design is justified by the manuals in a fairly
+direct way.</p>
+<ul>
+<li><code>pbtcf</code> is explicit because the property pro forma bottom
+line matters.</li>
+<li><code>tv_share</code> is explicit because terminal dependence is
+analytically important.</li>
+<li><code>lease_effective_rent()</code> exists because lease comparison
+should be present-value based.</li>
+<li><code>underwrite_loan()</code> exists because underwriting is
+fundamentally a constrained sizing exercise.</li>
+</ul>
+<p>The result is still intentionally modest in scope, but
+methodologically tighter and easier to defend in academic or
+professional discussion.</p>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-baumChapter7Techniques2020" class="csl-entry">
+Baum, Andrew, and David Hartzell. 2020. <span>“Chapter 7 - Techniques
+for Valuing Commercial Real Estate and Determining Feasibility: The
+Unleveraged Case.”</span> In <em>Real Estate Investment: Strategies,
+Structures, Decisions</em>. Wiley.
+</div>
+<div id="ref-geltnerChapitre11Nuts_and_Bolts_for_Real_Estate_Valuation_Cash_Flow_Proformas_and_Discount_Rates2014" class="csl-entry">
+Geltner, David, Norman Miller, Jim Clayton, and Piet Eichholtz. 2014a.
+<span>“Chapter 11 - Nuts and Bolts for Real Estate Valuation: Cash Flow
+Proformas and Discount Rates.”</span> In <em>Commercial Real Estate
+Analysis and Investments</em>, 3rd ed. Mbition.
+</div>
+<div id="ref-geltnerChapitre12Advanced_MicroLevel_Valuation2014" class="csl-entry">
+———. 2014b. <span>“Chapter 12 - Advanced Micro-Level Valuation.”</span>
+In <em>Commercial Real Estate Analysis and Investments</em>, 3rd ed.
+Mbition.
+</div>
+<div id="ref-geltnerChapitre14AfterTax_Investment_Analysis_and_Corporate_Real_Estate2014" class="csl-entry">
+———. 2014c. <span>“Chapter 14 - After-Tax Investment Analysis and
+Corporate Real Estate.”</span> In <em>Commercial Real Estate Analysis
+and Investments</em>, 3rd ed. Mbition.
+</div>
+<div id="ref-geltnerChapitre27Investment_Analysis_of_Real_Estate_Development_Projects_Overview__Background2014" class="csl-entry">
+———. 2014d. <span>“Chapter 27 - Investment Analysis of Real Estate
+Development Projects: Overview and Background.”</span> In <em>Commercial
+Real Estate Analysis and Investments</em>, 3rd ed. Mbition.
+</div>
+<div id="ref-geltnerChapitre29Leases_and_Leasing_Strategy2014" class="csl-entry">
+———. 2014e. <span>“Chapter 29 - Leases and Leasing Strategy.”</span> In
+<em>Commercial Real Estate Analysis and Investments</em>, 3rd ed.
+Mbition.
+</div>
+<div id="ref-hartzellChapter5Basic" class="csl-entry">
+Hartzell, David, and Andrew Baum. 2020a. <span>“Chapter 5 - Basic
+Valuation and Investment Analysis.”</span> In <em>Real Estate
+Investment: Strategies, Structures, Decisions</em>. Wiley.
+</div>
+<div id="ref-hartzellChapter9Commercial" class="csl-entry">
+———. 2020b. <span>“Chapter 9 - Commercial Mortgage Underwriting and
+Leveraged Feasibility Analysis.”</span> In <em>Real Estate Investment:
+Strategies, Structures, Decisions</em>. Wiley.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

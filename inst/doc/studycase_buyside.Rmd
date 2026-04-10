@@ -4,7 +4,7 @@ author: "Package cre.dcf"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Étude de cas : note d’investissement buy-side}
+  %\VignetteIndexEntry{Case study: buy-side investment memo}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -28,8 +28,7 @@ library(tibble)
 
 ## Purpose of this vignette
 
-This vignette mirrors a typical situation faced by a junior buy-side analyst:
-a small office asset is brought to the investment committee, and the analyst is asked to:
+This vignette mirrors a typical buy-side analyst workflow:
 
 - load a standardised configuration (preset_default) into the DCF engine,
 
@@ -43,11 +42,11 @@ a small office asset is brought to the investment committee, and the analyst is 
 
 The numerical example follows the teaching case developed by Karl Delattre (CNAM ICH, Financement immobilier privé, 2020), and is encoded in the preset_default configuration shipped with the package.
 
-The objective is not to build a full-blown investment committee paper, but to show a transparent, reproducible workflow from YAML assumptions to a stylised investment note.
+The objective is to show a simple workflow from YAML assumptions to a short investment note.
 
 ## Setting the scene: the analyst’s brief
 
-In this fictional example, the junior analyst receives the following mandate:
+In this fictional example, the analyst receives the following mandate:
 
 “We are looking at a fully-let office asset with stable rents and limited capex over a 5-year hold. Use the preset_default assumptions, run the DCF, compare a bullet and an amortising loan at 30% LTV, and prepare a short note summarising returns, leverage, and key risks.”
 
@@ -64,8 +63,7 @@ We translate this request into three tasks:
 
 ### Loading the preset configuration
 
-We first read the preset_default.yml file from inst/extdata.
-The configuration encodes pricing, rental assumptions, indexation, capex, debt parameters and covenant guardrails.
+We first read `preset_default.yml` from `inst/extdata`.
 
 ```{r}
 
@@ -195,12 +193,20 @@ The unlevered metrics are stored directly in the all_equity object:
 all_equity[c("irr_project", "npv_project")]
 ```
 
+The package also reports how much of present value comes from ongoing operations versus the terminal event:
+
+```{r}
+all_equity[c("ops_share", "tv_share")]
+```
+
 In words:
 
 the unlevered project IRR is `r scales::percent(all_equity$irr_project, accuracy = 0.01)`,
 
 the unlevered project NPV at the chosen discount rate is
 `r scales::comma(all_equity$npv_project, accuracy = 1)` EUR.
+
+This short-hold teaching case is intentionally exit-heavy: `r scales::percent(all_equity$tv_share, accuracy = 0.1)` of present value comes from the terminal sale. From a methodological perspective, that is acceptable for a compact classroom example, but it means the analyst should discuss exit yield and disposition assumptions explicitly rather than treating the IRR as self-explanatory.
 
 For a junior analyst, this provides the first sanity check:
 
@@ -379,9 +385,9 @@ These three indicators are typically the core of the buy-side decision.
 
 ## Exploring alternative financing structures
 
-In many investment-committee settings, the junior analyst is expected not only to assess the project on an all-equity basis and under a single leverage profile, but also to explore how equity performance and credit risk evolve when leverage and repayment structures change.
+In many investment-committee settings, the analyst is expected not only to assess the project on an all-equity basis and under one leverage profile, but also to test how equity performance and credit risk change with different debt structures.
 
-In this section, we keep the *same real-estate cash-flow profile* as in the base case (the Delattre teaching example encoded in `preset_default.yml`), and vary only the **financing structure** around four canonical variants:
+In this section, we keep the *same real-estate cash-flow profile* as in the base case (`preset_default.yml`) and vary only the **financing structure** around four simple variants:
 
 - 100% equity (no leverage),
 - 30% LTV, bullet loan, 2% interest rate,
@@ -392,7 +398,7 @@ The aim is to build a compact comparison grid of equity IRRs, NPVs and basic cre
 
 ### Normalising the configuration and rebuilding the unlevered DCF
 
-We reuse the YAML configuration already loaded as `cfg_default`, and normalise it exactly as `run_case()` does. This provides a consistent bundle of inputs for the DCF engine.
+We reuse the YAML configuration already loaded as `cfg_default`, and normalise it the same way as `run_case()`. This gives us a consistent set of inputs for the DCF engine.
 
 ```{r}
 # Normalised configuration (same logic as in run_case())

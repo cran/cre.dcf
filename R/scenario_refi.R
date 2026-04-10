@@ -60,11 +60,11 @@ simulate_shock <- function(cfg, deltas = list()) {
 }
 
 
-#' Test the feasibility of a refinancing at year T (interest-only diagnostic)
+#' Test the feasibility of a refinancing at year T
 #'
 #' @description
 #' Assesses at \(T\) the simultaneous feasibility of DSCR and forward LTV
-#' covenants assuming an interest-only payment at \(T+1\). This diagnostic
+#' covenants assuming an interest-only payment at \(T+1\). This check
 #' isolates covenant feasibility from the precise structure of the new loan.
 #'
 #' @param full data.frame. Merged table (0..N) from [cf_make_full_table()],
@@ -102,7 +102,7 @@ test_refi <- function(full, year_T, covenants, new_rate, new_exit_yield) {
     noi_T1 <- full$net_operating_income[idx]
   }
 
-  # diagnostic payment (interest-only)
+  # interest-only test payment
   payment_T1   <- out_open_T * new_rate
   dscr_T1      <- noi_T1 / pmax(payment_T1, 1e-9)
   value_forward <- noi_T1 / new_exit_yield

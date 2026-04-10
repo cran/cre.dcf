@@ -13,9 +13,10 @@ Required columns: \code{opex} and either \code{gei} or
 \code{net_operating_income}.}
 }
 \value{
-A \code{tibble} with guaranteed numeric columns \code{gei} and
-\code{noi}. Existing \code{noi} is preserved when present, but a warning is
-emitted if it differs from \code{gei - opex} beyond a small tolerance.
+A \code{tibble} with guaranteed numeric columns \code{gei},
+\code{noi}, and \code{pbtcf}. Existing \code{noi} or \code{pbtcf} are
+preserved when present, but a warning is emitted if they differ from the
+implied identities beyond a small tolerance.
 }
 \description{
 Guarantees the presence of numeric columns \code{gei} and \code{noi} in a

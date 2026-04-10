@@ -2,12 +2,12 @@
 % Please edit documentation in R/utils.R
 \name{load_style_preset}
 \alias{load_style_preset}
-\title{Load a canonical style preset from YAML}
+\title{Load a preset style YAML file}
 \usage{
 load_style_preset(style)
 }
 \description{
-This loader follows \emph{exactly} the same logic as the vignette:
-it only reads YAMLs from inst/extdata inside the installed package.
+This loader reads preset YAML files from \code{inst/extdata} inside the installed
+package.
 }
 \keyword{internal}

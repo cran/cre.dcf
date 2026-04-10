@@ -360,14 +360,15 @@ chain</a></li>
 
 <div id="purpose" class="section level2" number="1">
 <h2><span class="header-section-number">1</span> Purpose</h2>
-<p>This vignette investigates the <strong>internal coherence of the
-income generation process</strong> within the DCF model - specifically,
-the link between contractual lease parameters and the resulting
-<strong>Net Operating Income (NOI)</strong>.<br />
-It formalizes a key accounting relationship that underpins all
-real-estate valuation models:</p>
+<p>This vignette checks the link between lease inputs and the
+operating-income block of the DCF.<br />
+It formalizes two accounting relationships that underpin the
+package:</p>
 <p><span class="math display">\[
-\text{NOI}_t = \text{GEI}_t - \text{OPEX}_t - \text{CAPEX}_t
+\text{NOI}_t = \text{GEI}_t - \text{OPEX}_t
+\]</span></p>
+<p><span class="math display">\[
+\text{PBTCF}_t = \text{NOI}_t - \text{CAPEX}_t
 \]</span></p>
 <p>where</p>
 <ul>
@@ -378,12 +379,13 @@ rent-free periods, and incentives,</li>
 the owner, and<br />
 </li>
 <li><strong>CAPEX</strong> captures periodic reinvestments necessary to
-maintain the property’s income capacity.</li>
+maintain the property’s income capacity, and<br />
+</li>
+<li><strong>PBTCF</strong> is the property-before-tax cash flow used
+before debt.</li>
 </ul>
-<p>Verifying this chain ensures that rental assumptions (lease terms,
-indexation, vacancy, and maintenance policies) are faithfully
-transmitted through the model’s computation of operating
-performance.</p>
+<p>It checks that rental assumptions are correctly transmitted to
+operating performance.</p>
 </div>
 <div id="building-the-case-and-extracting-the-cash-flow-table" class="section level2" number="2">
 <h2><span class="header-section-number">2</span> Building the case and
@@ -400,12 +402,11 @@ extracting the cash-flow table</h2>
 <span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
 <span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co"># 1.2 Verify that all required variables are present</span></span>
 <span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>required_cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;year&quot;</span>, <span class="st">&quot;gei&quot;</span>, <span class="st">&quot;opex&quot;</span>, <span class="st">&quot;capex&quot;</span>, <span class="st">&quot;noi&quot;</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>required_cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;year&quot;</span>, <span class="st">&quot;gei&quot;</span>, <span class="st">&quot;opex&quot;</span>, <span class="st">&quot;capex&quot;</span>, <span class="st">&quot;noi&quot;</span>, <span class="st">&quot;pbtcf&quot;</span>)</span>
 <span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(required_cols <span class="sc">%in%</span> <span class="fu">names</span>(cf)))</span></code></pre></div>
-<p>The preset_default.yml configuration encodes a stylised leasing
-pattern (initial occupancy, lease expiry, vacancy, reletting with
-CAPEX), which is suitable for testing how contractual assumptions
-propagate into GEI and NOI over time.</p>
+<p><code>preset_default.yml</code> encodes a simple leasing pattern that
+is useful for testing how assumptions propagate into GEI and NOI over
+time.</p>
 </div>
 <div id="analytical-structure-of-the-income-chain" class="section level2" number="3">
 <h2><span class="header-section-number">3</span> Analytical structure of
@@ -415,46 +416,46 @@ the income chain</h2>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># 2.1 NOI as implemented in the engine: GEI - OPEX</span></span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>cf <span class="ot">&lt;-</span> cf <span class="sc">|&gt;</span></span>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>    <span class="at">noi_from_gei_opex =</span> gei <span class="sc">-</span> opex,</span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>    <span class="at">resid_noi_core    =</span> noi_from_gei_opex <span class="sc">-</span> noi,</span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>    <span class="at">noi_after_capex   =</span> noi <span class="sc">-</span> capex</span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>  )</span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>gei_min <span class="ot">&lt;-</span> <span class="fu">min</span>(cf<span class="sc">$</span>gei, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>gei_max <span class="ot">&lt;-</span> <span class="fu">max</span>(cf<span class="sc">$</span>gei, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>noi_min <span class="ot">&lt;-</span> <span class="fu">min</span>(cf<span class="sc">$</span>noi, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>noi_max <span class="ot">&lt;-</span> <span class="fu">max</span>(cf<span class="sc">$</span>noi, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>max_abs_resid_core <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="fu">abs</span>(cf<span class="sc">$</span>resid_noi_core), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a></span>
-<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="fu">cat</span>(</span>
-<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>  <span class="st">&quot;</span><span class="sc">\n</span><span class="st">Income chain diagnostics (NOI core identity):</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;• Minimum GEI: %s</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">formatC</span>(gei_min, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>)),</span>
-<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;• Maximum GEI: %s</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">formatC</span>(gei_max, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>)),</span>
-<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;• Minimum NOI: %s</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">formatC</span>(noi_min, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>)),</span>
-<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;• Maximum NOI: %s</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">formatC</span>(noi_max, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>)),</span>
-<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;• Max |(GEI - OPEX) - NOI|: %s</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a>          <span class="fu">formatC</span>(max_abs_resid_core, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>))</span>
-<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>)</span></code></pre></div>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>    <span class="at">noi_from_gei_opex   =</span> gei <span class="sc">-</span> opex,</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>    <span class="at">resid_noi_core      =</span> noi_from_gei_opex <span class="sc">-</span> noi,</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>    <span class="at">pbtcf_from_noi_capex =</span> noi <span class="sc">-</span> capex,</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>    <span class="at">resid_pbtcf         =</span> pbtcf_from_noi_capex <span class="sc">-</span> pbtcf</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>  )</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>gei_min <span class="ot">&lt;-</span> <span class="fu">min</span>(cf<span class="sc">$</span>gei, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>gei_max <span class="ot">&lt;-</span> <span class="fu">max</span>(cf<span class="sc">$</span>gei, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>noi_min <span class="ot">&lt;-</span> <span class="fu">min</span>(cf<span class="sc">$</span>noi, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>noi_max <span class="ot">&lt;-</span> <span class="fu">max</span>(cf<span class="sc">$</span>noi, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>max_abs_resid_core <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="fu">abs</span>(cf<span class="sc">$</span>resid_noi_core), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="fu">cat</span>(</span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>  <span class="st">&quot;</span><span class="sc">\n</span><span class="st">Income chain check (NOI identity):</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;• Minimum GEI: %s</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">formatC</span>(gei_min, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>)),</span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;• Maximum GEI: %s</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">formatC</span>(gei_max, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>)),</span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;• Minimum NOI: %s</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">formatC</span>(noi_min, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>)),</span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;• Maximum NOI: %s</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">formatC</span>(noi_max, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>)),</span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;• Max |(GEI - OPEX) - NOI|: %s</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>          <span class="fu">formatC</span>(max_abs_resid_core, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>)),</span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;• Max |(NOI - CAPEX) - PBTCF|: %s</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a>          <span class="fu">formatC</span>(<span class="fu">max</span>(<span class="fu">abs</span>(cf<span class="sc">$</span>resid_pbtcf), <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>))</span>
+<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## 
-## Income chain diagnostics (NOI core identity):
+## Income chain check (NOI identity):
 ##  • Minimum GEI: 0.0000
 ##  • Maximum GEI: 204 020.0000
-##  • Minimum NOI: -61 818.0600
+##  • Minimum NOI: 0.0000
 ##  • Maximum NOI: 204 020.0000
-##  • Max |(GEI - OPEX) - NOI|: 0.0000</code></pre>
-<p>The variable residual_noi measures, for each period, the deviation
-from the ideal accounting identity. A well-specified model should yield
-residuals numerically indistinguishable from zero (up to floating-point
-tolerance).</p>
+##  • Max |(GEI - OPEX) - NOI|: 0.0000
+##  • Max |(NOI - CAPEX) - PBTCF|: 0.0000</code></pre>
+<p><code>resid_noi_core</code> measures the gap from the accounting
+identity. In a clean setup, it should be numerically close to zero.</p>
 </div>
 <div id="logical-consistency-checks" class="section level2" number="4">
 <h2><span class="header-section-number">4</span> Logical consistency
 checks</h2>
-<p>Rather than imposing unrealistic sign constraints (for instance, that
-NOI must always be non-negative), the vignette focuses on coherence
-conditions that should hold for a broad spectrum of strategies,
-including transitional years.</p>
+<p>The vignette focuses on coherence conditions that should hold across
+a broad range of strategies, including transitional years.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="do">## 3. Logical and accounting consistency checks</span></span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co"># 3.1 Finiteness</span></span>
@@ -473,37 +474,42 @@ including transitional years.</p>
 <span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co"># 3.4 NOI core identity: GEI - OPEX == NOI</span></span>
 <span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(<span class="fu">abs</span>(cf<span class="sc">$</span>resid_noi_core) <span class="sc">&lt;</span> <span class="fl">1e-6</span>))</span>
 <span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a></span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="fu">cat</span>(</span>
-<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>  <span class="st">&quot;</span><span class="sc">\n</span><span class="st">✓ Accounting checks passed:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>  <span class="st">&quot;  • NOI in the engine is equal to GEI minus OPEX (CAPEX is treated separately).</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>  <span class="st">&quot;  • OPEX and CAPEX remain non-negative, and NOI never exceeds GEI.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
-<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>)</span></code></pre></div>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co"># 3.5 PBTCF identity: NOI - CAPEX == PBTCF</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(<span class="fu">abs</span>(cf<span class="sc">$</span>resid_pbtcf) <span class="sc">&lt;</span> <span class="fl">1e-6</span>))</span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="fu">cat</span>(</span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>  <span class="st">&quot;</span><span class="sc">\n</span><span class="st">✓ Accounting checks passed:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>  <span class="st">&quot;  • NOI in the engine is equal to GEI minus OPEX.</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a>  <span class="st">&quot;  • PBTCF is equal to NOI minus CAPEX.</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>  <span class="st">&quot;  • OPEX and CAPEX remain non-negative, and NOI never exceeds GEI.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## 
 ## ✓ Accounting checks passed:
-##    • NOI in the engine is equal to GEI minus OPEX (CAPEX is treated separately).
+##    • NOI in the engine is equal to GEI minus OPEX.
+##    • PBTCF is equal to NOI minus CAPEX.
 ##    • OPEX and CAPEX remain non-negative, and NOI never exceeds GEI.</code></pre>
-<p>These tests together ensure that:</p>
+<p>These tests ensure that:</p>
 <ul>
 <li><p>GEI, OPEX, CAPEX, and NOI are all finite;</p></li>
 <li><p>cost blocks are not spuriously negative;</p></li>
 <li><p>NOI does not exceed GEI when costs are non-negative;</p></li>
 </ul>
-<p>the identity <span class="math display">\[NOIt=GEIt-OPEXt-CAPEXt\]</span> holds up to
-numerical tolerance.</p>
+<p>the identities <span class="math display">\[NOI_t = GEI_t -
+OPEX_t\]</span> and <span class="math display">\[PBTCF_t = NOI_t -
+CAPEX_t\]</span> hold up to numerical tolerance.</p>
 </div>
 <div id="sign-and-distribution-of-noi" class="section level2" number="5">
 <h2><span class="header-section-number">5</span> Sign and distribution
 of NOI</h2>
-<p>In many empirical cases, especially for value-added or opportunistic
-strategies, NOI can be temporarily negative (e.g. vacancy plus heavy
-CAPEX). It is therefore useful to document the distribution of NOI
-rather than to impose an a priori positivity constraint.</p>
+<p>In many real cases, especially for value-added or opportunistic
+strategies, NOI can be temporarily negative. It is therefore more useful
+to describe its distribution than to force it to stay positive.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="do">## 4.1 Share of periods with negative NOI</span></span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>neg_noi_share <span class="ot">&lt;-</span> <span class="fu">mean</span>(cf<span class="sc">$</span>noi <span class="sc">&lt;</span> <span class="dv">0</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a></span>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="fu">cat</span>(</span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">NOI sign diagnostics:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">NOI sign check:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
 <span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Share of periods with NOI &lt; 0: %.1f%%</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="dv">100</span> <span class="sc">*</span> neg_noi_share),</span>
 <span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="cf">if</span> (neg_noi_share <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
 <span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="st">&quot;  --&gt; Indicates at least one transitional year with negative operating result (vacancy, works, etc.).</span><span class="sc">\n</span><span class="st">&quot;</span></span>
@@ -511,36 +517,36 @@ rather than to impose an a priori positivity constraint.</p>
 <span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="st">&quot;  --&gt; All periods exhibit non-negative operating result in this configuration.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
 <span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## 
-## NOI sign diagnostics:
-##  • Share of periods with NOI &lt; 0: 16.7%
-##    --&gt; Indicates at least one transitional year with negative operating result (vacancy, works, etc.).</code></pre>
-<p>This diagnostic does not impose any additional constraint; it simply
-quantifies the presence (or absence) of transitional loss-making years
-in the income profile.</p>
+## NOI sign check:
+##  • Share of periods with NOI &lt; 0: 0.0%
+##    --&gt; All periods exhibit non-negative operating result in this configuration.</code></pre>
+<p>This section does not impose an extra constraint. It simply shows
+whether the income profile includes transitional loss-making years.</p>
 </div>
 <div id="illustration-of-the-income-chain" class="section level2" number="6">
 <h2><span class="header-section-number">6</span> Illustration of the
 income chain</h2>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>cf <span class="sc">|&gt;</span></span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="fu">select</span>(year, gei, opex, capex, noi,</span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>         noi_from_gei_opex, noi_after_capex, resid_noi_core) <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="fu">select</span>(year, gei, opex, capex, noi, pbtcf,</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>         noi_from_gei_opex, pbtcf_from_noi_capex, resid_noi_core, resid_pbtcf) <span class="sc">|&gt;</span></span>
 <span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">10</span>) <span class="sc">|&gt;</span></span>
 <span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
 <span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>    <span class="at">digits  =</span> <span class="dv">2</span>,</span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">&quot;GEI --&gt; NOI (core identity) and NOI after CAPEX (first 10 years)&quot;</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">&quot;GEI -&gt; NOI -&gt; PBTCF identities (first 10 years)&quot;</span></span>
 <span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>  )</span></code></pre></div>
 <table>
-<caption>GEI –&gt; NOI (core identity) and NOI after CAPEX (first 10
-years)</caption>
+<caption>GEI -&gt; NOI -&gt; PBTCF identities (first 10 years)</caption>
 <colgroup>
-<col width="5%" />
-<col width="9%" />
-<col width="9%" />
-<col width="10%" />
-<col width="10%" />
-<col width="19%" />
+<col width="4%" />
+<col width="8%" />
+<col width="7%" />
+<col width="8%" />
+<col width="7%" />
+<col width="8%" />
+<col width="15%" />
 <col width="17%" />
-<col width="16%" />
+<col width="12%" />
+<col width="10%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -549,70 +555,84 @@ years)</caption>
 <th align="right">opex</th>
 <th align="right">capex</th>
 <th align="right">noi</th>
+<th align="right">pbtcf</th>
 <th align="right">noi_from_gei_opex</th>
-<th align="right">noi_after_capex</th>
+<th align="right">pbtcf_from_noi_capex</th>
 <th align="right">resid_noi_core</th>
+<th align="right">resid_pbtcf</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td align="right">0</td>
-<td align="right">0.0</td>
-<td align="right">0.00</td>
 <td align="right">0.00</td>
 <td align="right">0.00</td>
 <td align="right">0.00</td>
 <td align="right">0.0</td>
+<td align="right">0.0</td>
+<td align="right">0.0</td>
+<td align="right">0.0</td>
+<td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td align="right">1</td>
-<td align="right">200000.0</td>
+<td align="right">200000.00</td>
 <td align="right">0.00</td>
 <td align="right">0.00</td>
-<td align="right">200000.00</td>
-<td align="right">200000.00</td>
 <td align="right">200000.0</td>
+<td align="right">200000.0</td>
+<td align="right">200000.0</td>
+<td align="right">200000.0</td>
+<td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td align="right">2</td>
-<td align="right">202000.0</td>
+<td align="right">202000.00</td>
 <td align="right">0.00</td>
 <td align="right">0.00</td>
-<td align="right">202000.00</td>
-<td align="right">202000.00</td>
 <td align="right">202000.0</td>
+<td align="right">202000.0</td>
+<td align="right">202000.0</td>
+<td align="right">202000.0</td>
+<td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td align="right">3</td>
-<td align="right">204020.0</td>
+<td align="right">204020.00</td>
 <td align="right">0.00</td>
 <td align="right">0.00</td>
-<td align="right">204020.00</td>
-<td align="right">204020.00</td>
 <td align="right">204020.0</td>
+<td align="right">204020.0</td>
+<td align="right">204020.0</td>
+<td align="right">204020.0</td>
+<td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
 <td align="right">4</td>
-<td align="right">0.0</td>
+<td align="right">61818.06</td>
 <td align="right">61818.06</td>
 <td align="right">309090.30</td>
-<td align="right">-61818.06</td>
-<td align="right">-61818.06</td>
-<td align="right">-370908.4</td>
+<td align="right">0.0</td>
+<td align="right">-309090.3</td>
+<td align="right">0.0</td>
+<td align="right">-309090.3</td>
+<td align="right">0</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
 <td align="right">5</td>
-<td align="right">197714.8</td>
+<td align="right">197714.76</td>
 <td align="right">0.00</td>
 <td align="right">29657.21</td>
-<td align="right">197714.76</td>
-<td align="right">197714.76</td>
+<td align="right">197714.8</td>
 <td align="right">168057.5</td>
+<td align="right">197714.8</td>
+<td align="right">168057.5</td>
+<td align="right">0</td>
 <td align="right">0</td>
 </tr>
 </tbody>
@@ -628,9 +648,10 @@ that:</p>
 rent schedule into cash inflows, after adjusting for vacancy, rent-free
 periods, and any explicit incentives embedded in the lease events of
 preset_default.yml;</p>
-<p>Operating expenses (OPEX) and CAPEX are deducted in a mechanically
-consistent way to obtain NOI in each period;</p>
-<p>the residuals of the GEI –&gt; OPEX/CAPEX –&gt; NOI identity are
+<p>Operating expenses (OPEX) are deducted in a mechanically consistent
+way to obtain NOI in each period;</p>
+<p>CAPEX then turns NOI into PBTCF without hidden adjustments;</p>
+<p>the residuals of the GEI -&gt; NOI and NOI -&gt; PBTCF identities are
 effectively zero, confirming the internal accounting closure of the
 model.</p>
 <p>From an analytical standpoint, this vignette demonstrates that

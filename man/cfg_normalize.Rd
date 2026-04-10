@@ -2,7 +2,7 @@
 % Please edit documentation in R/config.R
 \name{cfg_normalize}
 \alias{cfg_normalize}
-\title{Normalize YAML into canonical  Discounted Cash Flow (DCF)/debt parameters}
+\title{Normalize YAML into Discounted Cash Flow (DCF) and debt parameters}
 \usage{
 cfg_normalize(cfg)
 }

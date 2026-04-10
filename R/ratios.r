@@ -85,42 +85,37 @@
 #'
 #' out
 #'
-#' @export
-add_credit_ratios <- function(cf_tab, debt_sched, exit_yield,
-                              covenants = NULL,
-                              dscr_basis = c("noi","gei","cfads"),
-                              cfads_ti_lc = NULL,
-                              ignore_balloon_in_min = FALSE,
-                              maturity_year = NULL) {
+#' @name add_credit_ratios
+NULL
 
-  dscr_basis <- match.arg(dscr_basis)
+#' @rdname add_credit_ratios
+#' @keywords internal
+#' @noRd
+.credit_ratio_core <- function(cf_tab, debt_sched, exit_yield, dscr_basis, cfads_ti_lc = NULL, maturity_year = NULL) {
+  years <- as.numeric(cf_tab$year)
+  n <- length(years)
 
-  # Normalisation des vecteurs dette (positifs)
-  idx_match <- match(cf_tab$year, debt_sched$year)
-
+  idx_match <- match(years, debt_sched$year)
   payment_raw  <- as.numeric(debt_sched$payment)[idx_match]
   interest_raw <- as.numeric(debt_sched$interest)[idx_match]
   out_raw      <- as.numeric(debt_sched$outstanding_debt)[idx_match]
 
-  payment  <- pmax(+payment_raw,  0, na.rm = TRUE)
-  interest <- pmax(+interest_raw, 0, na.rm = TRUE)
-  out      <- pmax(+out_raw,      0, na.rm = TRUE)
+  payment  <- pmax(payment_raw, 0, na.rm = TRUE)
+  interest <- pmax(interest_raw, 0, na.rm = TRUE)
+  out      <- pmax(out_raw, 0, na.rm = TRUE)
 
-  # Si maturity_year est fourni, expliciter la logique post-maturité
   if (!is.null(maturity_year)) {
-    post_mat <- cf_tab$year > maturity_year
-
-    # Après la maturité : plus de dette en encours
-    out[post_mat]      <- 0
-    payment[post_mat]  <- 0
+    post_mat <- years > maturity_year
+    out[post_mat] <- 0
+    payment[post_mat] <- 0
     interest[post_mat] <- 0
   }
 
-  # Bases de flux
   gei <- cf_tab$gei %||% cf_tab$net_operating_income
-  noi <- cf_tab$noi %||% (gei - (cf_tab$opex %||% 0))
+  opex <- cf_tab$opex %||% 0
+  if (length(opex) == 1L) opex <- rep(opex, n)
+  noi <- cf_tab$noi %||% (gei - opex)
 
-  # CFADS optionnel (NOI – allowance TI/LC)
   cfads <- noi
   if (!is.null(cfads_ti_lc)) {
     if (is.list(cfads_ti_lc) && !is.null(cfads_ti_lc$annual_allowance)) {
@@ -131,50 +126,134 @@ add_credit_ratios <- function(cf_tab, debt_sched, exit_yield,
   }
   base_num <- switch(dscr_basis, noi = noi, gei = gei, cfads = cfads)
 
-  # Valeur forward
-  noi_fwd       <- dplyr::lead(noi)
-  value_forward <- noi_fwd / exit_yield
+  noi_fwd <- c(as.numeric(noi[-1]), NA_real_)
+  value_forward <- safe_div(noi_fwd, rep(exit_yield, n))
 
-  # Ratios
   dscr <- safe_div(base_num, payment)
-  icr  <- safe_div(base_num, interest)
+  icr <- safe_div(base_num, interest)
+  dscr[payment <= 0 | years == 0] <- NA_real_
+  icr[interest <= 0 | years == 0] <- NA_real_
+  # Mask DSCR/ICR when NOI is non-positive (ramp-up / construction period):
+  # a negative DSCR is arithmetically correct but economically meaningless.
+  dscr[base_num <= 0] <- NA_real_
+  icr[base_num <= 0]  <- NA_real_
 
-  # Pas de ratio en t=0 et là où il n'y a pas de service de dette
-  dscr[payment <= 0 | cf_tab$year == 0]  <- NA_real_
-  icr[interest <= 0 | cf_tab$year == 0]  <- NA_real_
+  loan_init_vec <- cf_tab$loan_init %||% rep(NA_real_, n)
+  if (length(loan_init_vec) == 1L) loan_init_vec <- rep(loan_init_vec, n)
+  loan0 <- if (is.finite(loan_init_vec[1])) {
+    loan_init_vec[1]
+  } else {
+    sum(pmax(debt_sched$debt_draw, 0), na.rm = TRUE)
+  }
 
-  # DebtYield_init
-  loan_init_vec <- cf_tab$loan_init %||% rep(NA_real_, nrow(cf_tab))
-  loan0 <- if (is.finite(loan_init_vec[1])) loan_init_vec[1]
-           else sum(pmax(debt_sched$debt_draw, 0), na.rm = TRUE)
-
-  noi_y1 <- if (0 %in% cf_tab$year && 1 %in% cf_tab$year) {
-    base_num[match(1, cf_tab$year)]
-  } else if (length(base_num) >= 2) {
+  idx_y1 <- match(1, years)
+  noi_y1 <- if (!is.na(idx_y1)) {
+    base_num[idx_y1]
+  } else if (length(base_num) >= 2L) {
     base_num[2]
   } else {
     NA_real_
   }
 
-  dy0 <- rep(NA_real_, nrow(cf_tab))
+  dy0 <- rep(NA_real_, n)
   dy0[1] <- if (is.finite(loan0) && loan0 > 0 && is.finite(noi_y1)) noi_y1 / loan0 else NA_real_
 
-  # DebtYield_current
   dyc <- safe_div(base_num, out)
-  dyc[out <= 0 | cf_tab$year == 0] <- NA_real_
+  dyc[out <= 0 | years == 0] <- NA_real_
 
-  # LTV forward
   ltvf <- safe_div(out, value_forward)
+  # Mask LTV forward when forward value is non-positive (negative NOI_fwd):
+  # a negative or infinite LTV is economically meaningless.
+  ltvf[!is.na(noi_fwd) & noi_fwd <= 0] <- NA_real_
 
-  out_tbl <- dplyr::mutate(
-    cf_tab,
-    payment = payment, interest = interest, outstanding_debt = out,
-    gei = gei, noi = noi,
-    noi_fwd = noi_fwd, value_forward = value_forward,
-    dscr = dscr, interest_cover_ratio = icr,
-    debt_yield_init = dy0, debt_yield_current = dyc,
+  list(
+    years = years,
+    payment = payment,
+    interest = interest,
+    outstanding_debt = out,
+    gei = gei,
+    noi = noi,
+    noi_fwd = noi_fwd,
+    value_forward = value_forward,
+    dscr = dscr,
+    interest_cover_ratio = icr,
+    debt_yield_init = dy0,
+    debt_yield_current = dyc,
     ltv_forward = ltvf
   )
+}
+
+# Internal fast path for simulation guardrails (no full ratio table materialisation).
+credit_guardrails_fast <- function(cf_tab, debt_sched, exit_yield,
+                                   dscr_basis = c("noi", "gei", "cfads"),
+                                   cfads_ti_lc = NULL,
+                                   ignore_balloon_in_min = TRUE,
+                                   maturity_year = NULL) {
+  dscr_basis <- match.arg(dscr_basis)
+  core <- .credit_ratio_core(
+    cf_tab = cf_tab,
+    debt_sched = debt_sched,
+    exit_yield = exit_yield,
+    dscr_basis = dscr_basis,
+    cfads_ti_lc = cfads_ti_lc,
+    maturity_year = maturity_year
+  )
+
+  years <- core$years
+  pre_mask <- if (isTRUE(ignore_balloon_in_min) && !is.null(maturity_year)) {
+    years >= 1 & years < maturity_year
+  } else {
+    years >= 1
+  }
+  min_pre <- suppressWarnings(min(core$dscr[pre_mask], na.rm = TRUE))
+  if (!is.finite(min_pre)) min_pre <- NA_real_
+
+  ltv_mask <- if (!is.null(maturity_year)) {
+    years >= 1 & years <= maturity_year
+  } else {
+    years >= 1
+  }
+  max_ltv <- suppressWarnings(max(core$ltv_forward[ltv_mask], na.rm = TRUE))
+  if (!is.finite(max_ltv)) max_ltv <- NA_real_
+
+  list(
+    min_dscr_pre_maturity = min_pre,
+    max_ltv_forward = max_ltv
+  )
+}
+
+#' @rdname add_credit_ratios
+#' @export
+add_credit_ratios <- function(cf_tab, debt_sched, exit_yield,
+                              covenants = NULL,
+                              dscr_basis = c("noi","gei","cfads"),
+                              cfads_ti_lc = NULL,
+                              ignore_balloon_in_min = FALSE,
+                              maturity_year = NULL) {
+
+  dscr_basis <- match.arg(dscr_basis)
+  core <- .credit_ratio_core(
+    cf_tab = cf_tab,
+    debt_sched = debt_sched,
+    exit_yield = exit_yield,
+    dscr_basis = dscr_basis,
+    cfads_ti_lc = cfads_ti_lc,
+    maturity_year = maturity_year
+  )
+
+  out_tbl <- cf_tab
+  out_tbl$payment <- core$payment
+  out_tbl$interest <- core$interest
+  out_tbl$outstanding_debt <- core$outstanding_debt
+  out_tbl$gei <- core$gei
+  out_tbl$noi <- core$noi
+  out_tbl$noi_fwd <- core$noi_fwd
+  out_tbl$value_forward <- core$value_forward
+  out_tbl$dscr <- core$dscr
+  out_tbl$interest_cover_ratio <- core$interest_cover_ratio
+  out_tbl$debt_yield_init <- core$debt_yield_init
+  out_tbl$debt_yield_current <- core$debt_yield_current
+  out_tbl$ltv_forward <- core$ltv_forward
 
   if (!is.null(covenants)) {
     out_tbl <- flag_covenants(out_tbl, list(
@@ -184,10 +263,9 @@ add_credit_ratios <- function(cf_tab, debt_sched, exit_yield,
     ))
   }
 
-  # Calcul du min DSCR pré-maturité si demandé
   if (isTRUE(ignore_balloon_in_min) && !is.null(maturity_year)) {
-    pre_mat <- which(cf_tab$year >= 1 & cf_tab$year < maturity_year)
-    min_pre <- suppressWarnings(min(dscr[pre_mat], na.rm = TRUE))
+    pre_mat <- core$years >= 1 & core$years < maturity_year
+    min_pre <- suppressWarnings(min(core$dscr[pre_mat], na.rm = TRUE))
     if (!is.finite(min_pre)) min_pre <- NA_real_
     attr(out_tbl, "min_dscr_pre_maturity") <- min_pre
   }
@@ -256,6 +334,10 @@ forward_value_from_noi <- function(noi_vec, exit_yield, g_forward = NA_real_) {
 #'   to build the debt schedules.
 #' @param maturity Integer scalar greater than or equal to 1; debt maturity
 #'   in years.
+#' @param arrangement_fee_pct Numeric scalar in \code{[0, 1]}; arrangement fee
+#'   rate applied to the initial principal.
+#' @param capitalized_fees Logical scalar; whether arrangement fees are
+#'   capitalized into the initial drawdown.
 #' @param covenants Optional list of covenant thresholds, for example
 #'   \code{list(dscr_min = 1.25, ltv_max = 0.65)}. These values are passed
 #'   to \code{add_credit_ratios()} when computing credit ratios.
@@ -275,23 +357,33 @@ compare_financing_scenarios <- function(dcf_res,
                                         ltv,
                                         rate,
                                         maturity,
+                                        arrangement_fee_pct = 0,
+                                        capitalized_fees = FALSE,
                                         covenants = list(dscr_min = 1.25, ltv_max = 0.65)) {
   checkmate::assert_list(dcf_res, any.missing = FALSE)
   checkmate::assert_number(acq_price, lower = 0)
   checkmate::assert_number(ltv, lower = 0, upper = 0.999)
   checkmate::assert_number(rate, lower = 0, upper = 1)
   checkmate::assert_integerish(maturity, lower = 1)
+  checkmate::assert_number(arrangement_fee_pct, lower = 0, upper = 1)
+  checkmate::assert_flag(capitalized_fees)
 
   # 1) all-equity
   unlev <- compute_unleveraged_metrics(dcf_res)
 
-  # helper pour éviter double-comptage des fees
   build_case <- function(type) {
-    principal <- ltv * acq_price
+    financing <- resolve_financing_inputs(
+      acq_price = acq_price,
+      ltv_init = ltv,
+      arrangement_fee_pct = arrangement_fee_pct,
+      capitalized_fees = capitalized_fees
+    )
     sch <- debt_built_schedule(
-      principal = principal, rate_annual = rate,
-      maturity = maturity, type = type
-      # arrangement_fee_pct si nécessaire
+      principal = financing$principal_sched,
+      rate_annual = rate,
+      maturity = maturity,
+      type = type,
+      arrangement_fee_pct = financing$arrangement_fee_pct_sched
     )
     full <- cf_make_full_table(dcf_res, sch)
     rat  <- add_credit_ratios(
@@ -302,7 +394,11 @@ compare_financing_scenarios <- function(dcf_res,
       ignore_balloon_in_min = TRUE,
       maturity_year         = maturity
     )
-    lev  <- compute_leveraged_metrics(dcf_res, sch, equity_invest = acq_price - principal)
+    lev  <- compute_leveraged_metrics(
+      dcf_res,
+      sch,
+      equity_invest = financing$equity_invest
+    )
     list(schedule = sch, full = full, ratios = rat, metrics = lev)
   }
 

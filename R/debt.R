@@ -45,6 +45,30 @@ compute_equity_invest <- function(acq_price,
   )
 }
 
+#' Resolve financing assumptions into debt-schedule inputs
+#' @keywords internal
+#' @noRd
+resolve_financing_inputs <- function(acq_price,
+                                     ltv_init,
+                                     arrangement_fee_pct = 0,
+                                     capitalized_fees = TRUE) {
+  eq0 <- compute_equity_invest(
+    acq_price = acq_price,
+    ltv_init = ltv_init,
+    arrangement_fee_pct = arrangement_fee_pct,
+    capitalized_fees = capitalized_fees
+  )
+
+  list(
+    principal_sched = eq0$loan_draw_0,
+    arrangement_fee_pct_sched = if (isTRUE(eq0$fees_cap)) 0 else arrangement_fee_pct,
+    equity_invest = eq0$equity_0,
+    debt_init = eq0$loan_draw_0,
+    fee_init = eq0$fees_init,
+    capitalized_fees = eq0$fees_cap
+  )
+}
+
 #' Debt schedule for bullet and amortising loans
 #'
 #' Creates an annual schedule indexed from \code{0..maturity} with an initial
@@ -163,6 +187,123 @@ debt_built_schedule <- function(
     arrangement_fee  = arrangement_fee,
     outstanding_debt = outstanding_debt,
     loan_init        = rep(rnd(principal), length(years))
+  )
+}
+
+#' Constrained underwriting for a commercial mortgage
+#'
+#' @description
+#' Computes the maximum loan amount allowed by three standard underwriting
+#' constraints: loan-to-value (LTV), debt service coverage ratio (DSCR), and
+#' debt yield. The DSCR sizing is made consistent with the package debt engine by
+#' deriving year-1 debt service from [debt_built_schedule()].
+#'
+#' @param noi Numeric scalar greater than or equal to 0. Annual net operating
+#'   income used for underwriting.
+#' @param value Numeric scalar greater than 0. Underwritten property value.
+#' @param rate_annual Numeric scalar in \code{[0, 1]}. Annual nominal interest
+#'   rate.
+#' @param maturity Integer scalar greater than or equal to 1.
+#' @param type Character scalar. Either \code{"bullet"} or \code{"amort"}.
+#' @param dscr_min Numeric scalar greater than 0. Minimum DSCR.
+#' @param ltv_max Numeric scalar in \code{[0, 1]}. Maximum LTV.
+#' @param debt_yield_min Numeric scalar greater than 0. Minimum debt yield.
+#' @param extra_amort_pct Numeric scalar in \code{[0, 1]}. Additional annual
+#'   amortisation rate for bullet structures.
+#'
+#' @return A list containing the constraint-by-constraint loan sizing, the
+#'   binding constraint, the final maximum loan amount, the corresponding
+#'   year-1 payment, implied underwriting ratios, and the debt schedule at the
+#'   constrained loan amount.
+#'
+#' @examples
+#' uw <- underwrite_loan(
+#'   noi = 500000,
+#'   value = 8e6,
+#'   rate_annual = 0.045,
+#'   maturity = 5,
+#'   type = "bullet"
+#' )
+#' uw$binding_constraint
+#' uw$max_loan
+#' @export
+underwrite_loan <- function(noi,
+                            value,
+                            rate_annual,
+                            maturity,
+                            type = c("bullet", "amort"),
+                            dscr_min = 1.25,
+                            ltv_max = 0.65,
+                            debt_yield_min = 0.08,
+                            extra_amort_pct = 0) {
+  type <- match.arg(type)
+
+  checkmate::assert_number(noi, lower = 0)
+  checkmate::assert_number(value, lower = .Machine$double.eps)
+  checkmate::assert_number(rate_annual, lower = 0, upper = 1)
+  checkmate::assert_integerish(maturity, lower = 1, len = 1)
+  checkmate::assert_number(dscr_min, lower = .Machine$double.eps)
+  checkmate::assert_number(ltv_max, lower = 0, upper = 1)
+  checkmate::assert_number(debt_yield_min, lower = .Machine$double.eps)
+  checkmate::assert_number(extra_amort_pct, lower = 0, upper = 1)
+
+  unit_schedule <- debt_built_schedule(
+    principal = 1,
+    rate_annual = rate_annual,
+    maturity = maturity,
+    type = type,
+    extra_amort_pct = extra_amort_pct
+  )
+  unit_payment_year1 <- unit_schedule$payment[unit_schedule$year == 1]
+
+  max_loan_ltv <- rnd(value * ltv_max)
+  max_loan_dscr <- if (is.finite(unit_payment_year1) && unit_payment_year1 > 0) {
+    rnd((noi / dscr_min) / unit_payment_year1)
+  } else {
+    Inf
+  }
+  max_loan_debt_yield <- rnd(noi / debt_yield_min)
+
+  constraint_tbl <- tibble::tibble(
+    constraint = c("ltv", "dscr", "debt_yield"),
+    max_loan = c(max_loan_ltv, max_loan_dscr, max_loan_debt_yield)
+  )
+
+  finite_loans <- constraint_tbl$max_loan[is.finite(constraint_tbl$max_loan)]
+  if (length(finite_loans) == 0L) {
+    stop("underwrite_loan(): no finite underwriting constraint could be computed.")
+  }
+
+  max_loan <- min(finite_loans)
+  tol <- 1e-8 + 1e-6 * max(1, abs(max_loan))
+  binding <- constraint_tbl$constraint[abs(constraint_tbl$max_loan - max_loan) <= tol]
+  binding_constraint <- paste(binding, collapse = "+")
+
+  schedule <- debt_built_schedule(
+    principal = max_loan,
+    rate_annual = rate_annual,
+    maturity = maturity,
+    type = type,
+    extra_amort_pct = extra_amort_pct
+  )
+  payment_year1 <- schedule$payment[schedule$year == 1]
+
+  implied_ltv <- max_loan / value
+  implied_dscr <- if (payment_year1 > 0) noi / payment_year1 else Inf
+  implied_debt_yield <- if (max_loan > 0) noi / max_loan else Inf
+
+  list(
+    max_loan = max_loan,
+    binding_constraint = binding_constraint,
+    max_loan_ltv = max_loan_ltv,
+    max_loan_dscr = max_loan_dscr,
+    max_loan_debt_yield = max_loan_debt_yield,
+    payment_year1 = payment_year1,
+    implied_ltv = implied_ltv,
+    implied_dscr = implied_dscr,
+    implied_debt_yield = implied_debt_yield,
+    constraints = constraint_tbl,
+    schedule = schedule
   )
 }
 

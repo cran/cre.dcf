@@ -55,18 +55,16 @@ test_that("dcf_calculate: identités NPV/IRR cohérentes", {
     tolerance = 1e-4
   )
 
-  # IRR calculé sur les flux totaux (free cash flow + sale_proceeds)
-  total_cf   <- cf$free_cash_flow + cf$sale_proceeds
-  irr_factor <- irr_safe(total_cf)  # contrat actuel : renvoie (1 + r)
-
-  expect_true(is.finite(irr_factor))
-
-  # Cohérence numérique entre irr_safe() et irr_project (r)
+  # Le free cash flow de la dernière année inclut déjà la vente nette.
   expect_equal(
-    irr_factor - 1,
-    out$irr_project,
-    tolerance = 1e-6  # tolérance adaptée à un solveur numérique
+    cf$free_cash_flow[nrow(cf)],
+    noi1 + cf$sale_proceeds[nrow(cf)],
+    tolerance = 1e-6
   )
+
+  irr_expected <- irr_safe(cf$free_cash_flow)
+  expect_true(is.finite(irr_expected))
+  expect_equal(out$irr_project, irr_expected, tolerance = 1e-6)
 
   # Encadrement grossier pour éviter des valeurs aberrantes
   expect_gt(out$irr_project, 0)
@@ -86,6 +84,93 @@ test_that("dcf_calculate: recyclage des vecteurs longueur 1 en N", {
   # capex/opex présents à t>=1, nuls à t=0
   expect_equal(cf$capex[1], 0)
   expect_equal(cf$opex[1], 0)
+})
+
+test_that("dcf_calculate: gei, noi and pbtcf are explicit and coherent", {
+  out <- dcf_calculate(
+    acq_price = 1e7,
+    entry_yield = 0.05,
+    exit_yield = 0.055,
+    horizon_years = 4,
+    disc_rate = 0.07,
+    capex = c(10000, 15000, 20000, 0),
+    index_rent = 0,
+    vacancy = 0,
+    opex = c(50000, 50000, 50000, 50000)
+  )
+
+  cf <- out$cashflows
+  idx <- cf$year >= 1
+
+  expect_true(all(c("gei", "noi", "pbtcf") %in% names(cf)))
+  expect_equal(cf$noi[idx], cf$gei[idx] - cf$opex[idx], tolerance = 1e-10)
+  expect_equal(cf$pbtcf[idx], cf$noi[idx] - cf$capex[idx], tolerance = 1e-10)
+  expect_equal(out$inputs$terminal_noi, tail(cf$noi, 1))
+})
+
+test_that("dcf_calculate anchors entry yield on NOI1 in top-down mode", {
+  out <- dcf_calculate(
+    acq_price = 1e7,
+    entry_yield = 0.05,
+    exit_yield = 0.055,
+    horizon_years = 3,
+    disc_rate = 0.07,
+    capex = 0,
+    index_rent = 0,
+    vacancy = 0,
+    opex = c(50000, 52000, 54000)
+  )
+
+  cf <- out$cashflows
+
+  expect_equal(cf$noi[cf$year == 1], 5e5, tolerance = 1e-10)
+  expect_equal(cf$gei[cf$year == 1], 5.5e5, tolerance = 1e-10)
+})
+
+test_that("dcf_calculate capitalizes a forward NOI in terminal value", {
+  out <- dcf_calculate(
+    acq_price = 1e7,
+    entry_yield = 0.05,
+    exit_yield = 0.05,
+    horizon_years = 3,
+    disc_rate = 0.07,
+    capex = 0,
+    index_rent = c(0.02, 0.02, 0.02),
+    vacancy = 0,
+    opex = 0
+  )
+
+  cf <- out$cashflows
+  noi_n <- cf$noi[cf$year == 3]
+  expected_forward_noi <- noi_n * 1.02
+
+  expect_equal(out$inputs$terminal_noi_base, noi_n, tolerance = 1e-10)
+  expect_equal(out$inputs$terminal_noi, expected_forward_noi, tolerance = 1e-10)
+  expect_equal(cf$sale_proceeds[cf$year == 3], expected_forward_noi / 0.05, tolerance = 1e-6)
+})
+
+test_that("compute_unleveraged_metrics reports operations and terminal shares", {
+  base <- dcf_calculate(
+    acq_price = 1e7,
+    entry_yield = 0.05,
+    exit_yield = 0.05,
+    horizon_years = 1,
+    disc_rate = 0.07
+  )
+  high_exit_yield <- dcf_calculate(
+    acq_price = 1e7,
+    entry_yield = 0.05,
+    exit_yield = 0.08,
+    horizon_years = 1,
+    disc_rate = 0.07
+  )
+
+  base_metrics <- compute_unleveraged_metrics(base)
+  alt_metrics <- compute_unleveraged_metrics(high_exit_yield)
+
+  expect_equal(base_metrics$ops_share + base_metrics$tv_share, 1, tolerance = 1e-10)
+  expect_gt(base_metrics$tv_share, 0.8)
+  expect_gt(alt_metrics$ops_share, base_metrics$ops_share)
 })
 
 test_that("DCF: colonnes 0..N alignées", {

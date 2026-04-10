@@ -345,33 +345,24 @@ identical outputs</h1>
 <div id="TOC">
 <ul>
 <li><a href="#purpose" id="toc-purpose"><span class="toc-section-number">1</span> Purpose</a></li>
-<li><a href="#load-and-validate-a-canonical-configuration" id="toc-load-and-validate-a-canonical-configuration"><span class="toc-section-number">2</span> Load and validate a canonical
+<li><a href="#load-and-validate-a-baseline-configuration" id="toc-load-and-validate-a-baseline-configuration"><span class="toc-section-number">2</span> Load and validate a baseline
 configuration</a></li>
 <li><a href="#two-runs-under-identical-conditions" id="toc-two-runs-under-identical-conditions"><span class="toc-section-number">3</span> Two runs under identical
 conditions</a></li>
-<li><a href="#numerical-drift-diagnostics-for-transparency" id="toc-numerical-drift-diagnostics-for-transparency"><span class="toc-section-number">4</span> Numerical drift diagnostics (for
-transparency)</a></li>
+<li><a href="#numerical-drift-checks" id="toc-numerical-drift-checks"><span class="toc-section-number">4</span> Numerical drift checks</a></li>
 <li><a href="#interpretation" id="toc-interpretation"><span class="toc-section-number">5</span> Interpretation</a></li>
 </ul>
 </div>
 
 <div id="purpose" class="section level2" number="1">
 <h2><span class="header-section-number">1</span> Purpose</h2>
-<p>This vignette evaluates strict reproducibility of run_case() under
-identical inputs. In a deterministic DCF pipeline, two invocations on
-the same configuration should yield byte-for-byte identical results for
-core metrics and tabular outputs. The checks proceed in two layers:</p>
-<p>Exact identity via serialization (byte-level comparison).</p>
-<p>Numerical guardrail printing (max absolute differences) to diagnose
-any minute deviations that may occur under heterogeneous BLAS/lapack
-builds or platform-specific floating-point behavior.</p>
-<p>Passing the first layer establishes computational determinism; the
-second layer is provided for transparency.</p>
+<p>This vignette checks that <code>run_case()</code> is deterministic
+under identical inputs.</p>
 </div>
-<div id="load-and-validate-a-canonical-configuration" class="section level2" number="2">
+<div id="load-and-validate-a-baseline-configuration" class="section level2" number="2">
 <h2><span class="header-section-number">2</span> Load and validate a
-canonical configuration</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># 1) Load a canonical configuration</span></span>
+baseline configuration</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># 1) Load a baseline configuration</span></span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>cfg_path <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;preset_default.yml&quot;</span>, <span class="at">package =</span> <span class="st">&quot;cre.dcf&quot;</span>)</span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">nzchar</span>(cfg_path))</span>
@@ -439,30 +430,26 @@ identical conditions</h2>
 <span id="cb3-48"><a href="#cb3-48" tabindex="-1"></a>)</span>
 <span id="cb3-49"><a href="#cb3-49" tabindex="-1"></a></span>
 <span id="cb3-50"><a href="#cb3-50" tabindex="-1"></a><span class="fu">cat</span>(</span>
-<span id="cb3-51"><a href="#cb3-51" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">Reproducibility diagnostics (byte-level):</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb3-51"><a href="#cb3-51" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">Reproducibility checks:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
 <span id="cb3-52"><a href="#cb3-52" tabindex="-1"></a><span class="st">&quot;  • Core metrics: byte-level identity confirmed.</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
 <span id="cb3-53"><a href="#cb3-53" tabindex="-1"></a><span class="st">&quot;  • All-equity cashflows: byte-level identity confirmed.</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
 <span id="cb3-54"><a href="#cb3-54" tabindex="-1"></a><span class="st">&quot;  • Leveraged cashflows: byte-level identity confirmed.</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
 <span id="cb3-55"><a href="#cb3-55" tabindex="-1"></a><span class="st">&quot;  • Comparison summary: byte-level identity confirmed.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
 <span id="cb3-56"><a href="#cb3-56" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## 
-## Reproducibility diagnostics (byte-level):
+## Reproducibility checks:
 ##    • Core metrics: byte-level identity confirmed.
 ##    • All-equity cashflows: byte-level identity confirmed.
 ##    • Leveraged cashflows: byte-level identity confirmed.
 ##    • Comparison summary: byte-level identity confirmed.</code></pre>
-<p>These assertions guarantee that, on the current platform, run_case()
-behaves as a deterministic mapping from the YAML configuration to the
-computed outputs.</p>
+<p>These assertions show that <code>run_case()</code> maps a given YAML
+configuration to the same outputs every time.</p>
 </div>
-<div id="numerical-drift-diagnostics-for-transparency" class="section level2" number="4">
+<div id="numerical-drift-checks" class="section level2" number="4">
 <h2><span class="header-section-number">4</span> Numerical drift
-diagnostics (for transparency)</h2>
-<p>To document the absence (or presence) of any small numerical
-differences, we compute maximum absolute differences on numeric columns.
-If byte-level identity holds, all these diagnostics should be exactly
-zero; they are nevertheless informative if a future platform breaks
-strict identity.</p>
+checks</h2>
+<p>We also compute maximum absolute differences on numeric outputs. If
+byte-level identity holds, these values should be zero.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>max_abs_diff <span class="ot">&lt;-</span> <span class="cf">function</span>(x, y) {</span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co"># Vector case</span></span>
@@ -519,22 +506,9 @@ strict identity.</p>
 </div>
 <div id="interpretation" class="section level2" number="5">
 <h2><span class="header-section-number">5</span> Interpretation</h2>
-<p>The results obtained in this vignette show that:</p>
-<p>Core scalar metrics (irr_project, npv_project, irr_equity,
-npv_equity) are exactly identical at the byte level across two runs with
-the same configuration.</p>
-<p>Key tabular outputs (all-equity cashflows, leveraged cashflows,
-comparison summary) are also byte-identical.</p>
-<p>The maximum absolute differences on numeric entries are zero,
-confirming the absence of hidden numerical drift in this
-environment.</p>
-<p>This establishes that run_case() behaves as a deterministic map from
-a validated YAML configuration to a structured output object, which is a
-strong form of reproducibility in computational finance:</p>
-<p>identical YAML files ⇒ identical DCF outputs,</p>
-<p>any divergence in valuation metrics must therefore be traced to
-explicit differences in configuration, not to stochastic elements or
-unstable numerical routines.</p>
+<p>If all checks pass, identical YAML inputs produce identical outputs
+in this environment. If a future platform shows small differences, the
+max-absolute-difference block helps locate them quickly.</p>
 </div>
 
 

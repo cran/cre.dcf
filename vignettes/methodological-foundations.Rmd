@@ -1,0 +1,183 @@
+---
+title: "Methodological foundations: DCF, effective rent, and underwriting in CRE"
+author: "Package cre.dcf"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    number_sections: true
+    df_print: paged
+vignette: >
+  %\VignetteIndexEntry{Methodological foundations: DCF, effective rent, and underwriting in CRE}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: manual-foundations.bib
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(cre.dcf)
+library(dplyr)
+library(tibble)
+```
+
+## Purpose
+
+This vignette documents the methodological choices embedded in `cre.dcf`.
+
+The package is intentionally centered on a property-level, before-tax DCF. This is close to the way the core valuation chapters in Baum and Hartzell and Geltner structure the problem: identify the operating cash flows, add the terminal event, discount the resulting stream, and only then layer leverage and underwriting [@hartzellChapter5Basic; @baumChapter7Techniques2020; @geltnerChapitre11Nuts_and_Bolts_for_Real_Estate_Valuation_Cash_Flow_Proformas_and_Discount_Rates2014].
+
+The implementation follows four principles.
+
+- Make the operating chain explicit as `GEI -> NOI -> PBTCF`.
+- Isolate terminal value instead of hiding it inside a single return number.
+- Treat lease comparison through an annuitized present-value logic.
+- Treat underwriting as a problem of active constraints rather than as a single ratio.
+
+## Why the package works at the property-before-tax level
+
+Geltner labels the property pro forma bottom line as `"property-before-tax cash flow (PBTCF)"` [@geltnerChapitre11Nuts_and_Bolts_for_Real_Estate_Valuation_Cash_Flow_Proformas_and_Discount_Rates2014, p. 11]. The same chapter also states that a pro forma should `"always include reversion cash flows in the last year"` [@geltnerChapitre11Nuts_and_Bolts_for_Real_Estate_Valuation_Cash_Flow_Proformas_and_Discount_Rates2014, p. 11].
+
+In `cre.dcf`, this translates into three explicit operating columns plus a separate terminal event:
+
+```{r}
+dcf <- dcf_calculate(
+  acq_price = 10e6,
+  entry_yield = 0.055,
+  exit_yield = 0.0575,
+  horizon_years = 5,
+  disc_rate = 0.075,
+  opex = c(50000, 51000, 52020, 53060, 54121),
+  capex = c(15000, 15000, 20000, 15000, 0)
+)
+
+dcf$cashflows |>
+  select(year, gei, noi, pbtcf, sale_proceeds, free_cash_flow)
+```
+
+The public preference is now:
+
+- `gei`: gross effective income after vacancy and rent-free effects,
+- `noi`: operating income net of recurring operating expenses,
+- `pbtcf`: property-before-tax cash flow, that is `noi - capex`.
+
+The legacy column `net_operating_income` is still kept for backward compatibility, but the documentation no longer treats it as the central concept.
+
+## Why terminal value is surfaced explicitly
+
+Baum and Hartzell present unlevered feasibility as a cash-flow problem before leverage, and their worked example decomposes value between ongoing operations and sale proceeds [@baumChapter7Techniques2020, pp. 14-15]. In that example, 27.6% of value comes from operating cash flows and 72.4% from disposition proceeds [@baumChapter7Techniques2020, p. 15].
+
+In the same spirit, Geltner emphasizes that reversion is typically capitalized off the NOI one year beyond the explicit holding period, or off a stabilized forward NOI when the next year is atypical [@geltnerChapitre11Nuts_and_Bolts_for_Real_Estate_Valuation_Cash_Flow_Proformas_and_Discount_Rates2014, pp. 25-26]. The current `cre.dcf` implementation therefore capitalizes a forwardized terminal NOI rather than reusing the final in-horizon NOI mechanically.
+
+For that reason, `cre.dcf` now reports the present-value split between operations and terminal value:
+
+```{r}
+metrics <- compute_unleveraged_metrics(dcf)
+
+tibble(
+  pv_operations = metrics$pv_operations,
+  pv_terminal = metrics$pv_terminal,
+  ops_share = metrics$ops_share,
+  tv_share = metrics$tv_share
+)
+```
+
+This is useful for two reasons.
+
+- It makes exit dependence measurable instead of implicit.
+- It gives a direct diagnostic when a case is mostly driven by the reversion.
+
+The package does not impose a universal threshold, but a high `tv_share` should prompt explicit discussion of exit-yield, stabilization, and market-liquidity assumptions.
+
+One related caution from Geltner matters for interpretation: observed market cap rates are usually NOI-based, not PBTCF-based cash yields. In other words, a quoted cap rate is useful pricing evidence, but it is not automatically identical to the discount rate applied to a full PBTCF stream. In `cre.dcf`, this is why the `"yield_plus_growth"` convention is treated as a simplified robustness check rather than as a full recovery of the opportunity cost of capital from market cap-rate evidence alone.
+
+## Why effective rent is treated as an annuitized value
+
+In Geltner's lease chapter, the rigorous version of effective rent is the `"annuitized lease value (ALV)"`, and `"the ALV of a lease is a level annuity"` with the same present value as the lease cash-flow stream [@geltnerChapitre29Leases_and_Leasing_Strategy2014, p. 8]. The chapter also emphasizes that ALV can be computed from either the landlord's or tenant's perspective [@geltnerChapitre29Leases_and_Leasing_Strategy2014, pp. 8-11].
+
+This is why the package now includes `lease_effective_rent()` as a generic helper:
+
+```{r}
+lease_compare <- bind_rows(
+  concession = lease_effective_rent(
+    cashflows = c(0, 100, 100, 100, 100),
+    discount_rate = 0.08,
+    area = 1,
+    timing = "arrears",
+    perspective = "landlord"
+  ),
+  flat = lease_effective_rent(
+    cashflows = c(90, 90, 90, 90, 90),
+    discount_rate = 0.08,
+    area = 1,
+    timing = "arrears",
+    perspective = "landlord"
+  ),
+  .id = "lease"
+)
+
+lease_compare |>
+  select(lease, pv, equivalent_annuity, effective_rent)
+```
+
+The function is deliberately simple in version 1.
+
+- It accepts already-constructed cash flows.
+- It does not depend on the package event grammar.
+- It can be used from either landlord or tenant perspective.
+
+This keeps the API scientifically clear while leaving room for richer lease-option logic later.
+
+## Why underwriting is implemented as binding constraints
+
+Hartzell and Baum state that `"either the debt coverage ratio or the loan-to-value ratio will be the constraining factor"` when underwriting a loan [@hartzellChapter9Commercial, p. 5]. Their chapter also sizes a maximum loan amount directly from NOI and a debt-coverage requirement [@hartzellChapter9Commercial, pp. 4-5].
+
+That logic is now exposed in a public helper:
+
+```{r}
+uw <- underwrite_loan(
+  noi = 500000,
+  value = 8e6,
+  rate_annual = 0.045,
+  maturity = 5,
+  type = "bullet",
+  dscr_min = 1.25,
+  ltv_max = 0.65,
+  debt_yield_min = 0.08
+)
+
+uw$constraints
+
+tibble(
+  binding_constraint = uw$binding_constraint,
+  max_loan = uw$max_loan,
+  payment_year1 = uw$payment_year1,
+  implied_ltv = uw$implied_ltv,
+  implied_dscr = uw$implied_dscr,
+  implied_debt_yield = uw$implied_debt_yield
+)
+```
+
+The methodological choice is straightforward: underwriting is presented as a deterministic property-level screen. This is narrower than the full lender-return framework developed later in Geltner, but it captures the central textbook logic with a transparent API.
+
+## Market value, investment value, and what is not yet in the package
+
+Geltner's advanced valuation chapter distinguishes market value from investment value and argues that both should be analyzed with the same multiperiod DCF machinery [@geltnerChapitre12Advanced_MicroLevel_Valuation2014, pp. 2-3]. `cre.dcf` does not yet expose a dedicated `market_value()` versus `investment_value()` API, but the package documentation now adopts that distinction as part of its methodological framing.
+
+Two major extensions are intentionally deferred.
+
+- After-tax valuation: the chapter on after-tax analysis frames the next step around value additivity and the APV decision rule [@geltnerChapitre14AfterTax_Investment_Analysis_and_Corporate_Real_Estate2014, pp. 1-3].
+- Development: Geltner treats the development phase as a distinct analytical problem rather than as a simple DCF with larger capex [@geltnerChapitre27Investment_Analysis_of_Real_Estate_Development_Projects_Overview__Background2014, pp. 1-2].
+
+In other words, the current package is intentionally strongest on the asset-level, before-tax DCF core. That core now has a clearer scientific grammar, but it is not yet the full textbook universe.
+
+## Summary
+
+The current package design is justified by the manuals in a fairly direct way.
+
+- `pbtcf` is explicit because the property pro forma bottom line matters.
+- `tv_share` is explicit because terminal dependence is analytically important.
+- `lease_effective_rent()` exists because lease comparison should be present-value based.
+- `underwrite_loan()` exists because underwriting is fundamentally a constrained sizing exercise.
+
+The result is still intentionally modest in scope, but methodologically tighter and easier to defend in academic or professional discussion.

@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Analyst Cheat Sheet</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Analyst Cheat Sheet</h1>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#goal" id="toc-goal">Goal</a></li>
+<li><a href="#the-5-functions-to-know" id="toc-the-5-functions-to-know">The 5 functions to know</a></li>
+<li><a href="#the-10-variables-that-matter-most" id="toc-the-10-variables-that-matter-most">The 10 variables that matter
+most</a></li>
+<li><a href="#quick-start" id="toc-quick-start">Quick Start</a></li>
+<li><a href="#typical-workflow" id="toc-typical-workflow">Typical
+Workflow</a>
+<ul>
+<li><a href="#define-the-deal" id="toc-define-the-deal">1. Define the
+deal</a></li>
+<li><a href="#run-the-deal" id="toc-run-the-deal">2. Run the
+deal</a></li>
+<li><a href="#read-the-key-metrics" id="toc-read-the-key-metrics">3.
+Read the key metrics</a></li>
+<li><a href="#extract-the-tables" id="toc-extract-the-tables">4. Extract
+the tables</a></li>
+</ul></li>
+<li><a href="#three-common-input-styles" id="toc-three-common-input-styles">Three Common Input Styles</a>
+<ul>
+<li><a href="#entry-yield-known" id="toc-entry-yield-known">Entry yield
+known</a></li>
+<li><a href="#noi-already-known" id="toc-noi-already-known">NOI already
+known</a></li>
+<li><a href="#rent-roll-style-input" id="toc-rent-roll-style-input">Rent
+roll style input</a></li>
+</ul></li>
+<li><a href="#common-mistakes" id="toc-common-mistakes">Common
+Mistakes</a></li>
+<li><a href="#when-to-move-to-the-advanced-api" id="toc-when-to-move-to-the-advanced-api">When to move to the advanced
+API</a></li>
+</ul>
+</div>
+
+<div id="goal" class="section level2">
+<h2>Goal</h2>
+<p>This guide covers the basic workflow:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">deal_spec</span>() <span class="ot">-&gt;</span> <span class="fu">analyze_deal</span>() <span class="ot">-&gt;</span> <span class="fu">summary</span>() <span class="ot">-&gt;</span> <span class="fu">deal_cashflows</span>()</span></code></pre></div>
+</div>
+<div id="the-5-functions-to-know" class="section level2">
+<h2>The 5 functions to know</h2>
+<ul>
+<li><code>deal_spec()</code>: define the deal</li>
+<li><code>debt_terms()</code>: define the debt</li>
+<li><code>analyze_deal()</code>: run the model</li>
+<li><code>summary()</code>: read key metrics</li>
+<li><code>deal_cashflows()</code>: extract tables</li>
+</ul>
+</div>
+<div id="the-10-variables-that-matter-most" class="section level2">
+<h2>The 10 variables that matter most</h2>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Variable</th>
+<th align="left">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>price</code></td>
+<td align="left">all-in acquisition price</td>
+</tr>
+<tr class="even">
+<td align="left"><code>horizon_years</code></td>
+<td align="left">holding period</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>entry_yield</code></td>
+<td align="left">entry cap rate</td>
+</tr>
+<tr class="even">
+<td align="left"><code>noi_y1</code></td>
+<td align="left">year-1 NOI if already known</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>rent_sqm</code></td>
+<td align="left">rent per sqm</td>
+</tr>
+<tr class="even">
+<td align="left"><code>area_sqm</code></td>
+<td align="left">lettable area</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>vacancy_rate</code></td>
+<td align="left">average vacancy</td>
+</tr>
+<tr class="even">
+<td align="left"><code>discount_rate</code></td>
+<td align="left">discount rate</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>ltv</code></td>
+<td align="left">initial leverage</td>
+</tr>
+<tr class="even">
+<td align="left"><code>rate</code></td>
+<td align="left">debt interest rate</td>
+</tr>
+</tbody>
+</table>
+<p>Use exactly one income mode:</p>
+<ul>
+<li><code>entry_yield</code></li>
+<li>or <code>noi_y1</code></li>
+<li>or <code>rent_sqm + area_sqm</code></li>
+</ul>
+</div>
+<div id="quick-start" class="section level2">
+<h2>Quick Start</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(cre.dcf)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>deal <span class="ot">&lt;-</span> <span class="fu">deal_spec</span>(</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="at">price =</span> <span class="fl">10e6</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="at">entry_yield =</span> <span class="fl">0.055</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="at">horizon_years =</span> <span class="dv">10</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="at">debt =</span> <span class="fu">debt_terms</span>(</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>    <span class="at">ltv =</span> <span class="fl">0.60</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>    <span class="at">rate =</span> <span class="fl">0.045</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>    <span class="at">type =</span> <span class="st">&quot;bullet&quot;</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>  )</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>)</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">analyze_deal</span>(deal)</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="fu">summary</span>(res)</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 25</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt;   income_mode purchase_year  price horizon_years area_sqm price_per_sqm rent_sqm</span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;               &lt;dbl&gt;  &lt;dbl&gt;         &lt;int&gt;    &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;</span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co">#&gt; 1 entry_yield          2026    1e7            10       NA            NA       NA</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="co">#&gt; # ℹ 18 more variables: vacancy_rate &lt;dbl&gt;, opex_sqm &lt;dbl&gt;,</span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="co">#&gt; #   gross_potential_rent_y1 &lt;dbl&gt;, gei_y1 &lt;dbl&gt;, noi_y1 &lt;dbl&gt;, pbtcf_y1 &lt;dbl&gt;,</span></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="co">#&gt; #   entry_yield &lt;dbl&gt;, index_rate &lt;dbl&gt;, discount_rate &lt;dbl&gt;, debt_type &lt;chr&gt;,</span></span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="co">#&gt; #   debt_ltv &lt;dbl&gt;, debt_rate &lt;dbl&gt;, irr_project &lt;dbl&gt;, irr_equity &lt;dbl&gt;,</span></span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="co">#&gt; #   dscr_min &lt;dbl&gt;, ltv_max_forward &lt;dbl&gt;, ops_share &lt;dbl&gt;, tv_share &lt;dbl&gt;</span></span></code></pre></div>
+</div>
+<div id="typical-workflow" class="section level2">
+<h2>Typical Workflow</h2>
+<div id="define-the-deal" class="section level3">
+<h3>1. Define the deal</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>deal <span class="ot">&lt;-</span> <span class="fu">deal_spec</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="at">price =</span> <span class="fl">12e6</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="at">rent_sqm =</span> <span class="dv">240</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="at">area_sqm =</span> <span class="dv">4000</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  <span class="at">vacancy_rate =</span> <span class="fl">0.08</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  <span class="at">opex_sqm =</span> <span class="dv">15</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  <span class="at">horizon_years =</span> <span class="dv">7</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  <span class="at">discount_rate =</span> <span class="fl">0.08</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>  <span class="at">debt =</span> <span class="fu">debt_terms</span>(</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>    <span class="at">ltv =</span> <span class="fl">0.55</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>    <span class="at">rate =</span> <span class="fl">0.043</span>,</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>    <span class="at">type =</span> <span class="st">&quot;amort&quot;</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>    <span class="at">maturity =</span> <span class="dv">7</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>  )</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>)</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>deal</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; &lt;cre_deal_spec&gt;</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; price_di: 12000000.00</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; asset: 4,000.00 sqm | rent 240.00/sqm | vacancy 8.0% | opex 15.00/sqm | price 3,000.00/sqm</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; year-1: GEI 883,200.00 | NOI 823,200.00 | PBTCF 823,200.00 | entry yield 6.86%</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; horizon: 7 years</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt; income mode: 4000.00 sqm x 240.00 rent/sqm</span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; growth/discount: indexation 2.00% | discount rate 8.00%</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; debt: amort, LTV 55.0%, rate 4.30%</span></span></code></pre></div>
+</div>
+<div id="run-the-deal" class="section level3">
+<h3>2. Run the deal</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">analyze_deal</span>(deal)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>res</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; &lt;cre_deal_result&gt;</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 25</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt;   income_mode purchase_year  price horizon_years area_sqm price_per_sqm rent_sqm</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;               &lt;dbl&gt;  &lt;dbl&gt;         &lt;int&gt;    &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; 1 rent_roll            2026 1.20e7             7     4000          3000      240</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; # ℹ 18 more variables: vacancy_rate &lt;dbl&gt;, opex_sqm &lt;dbl&gt;,</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; #   gross_potential_rent_y1 &lt;dbl&gt;, gei_y1 &lt;dbl&gt;, noi_y1 &lt;dbl&gt;, pbtcf_y1 &lt;dbl&gt;,</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; #   entry_yield &lt;dbl&gt;, index_rate &lt;dbl&gt;, discount_rate &lt;dbl&gt;, debt_type &lt;chr&gt;,</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; #   debt_ltv &lt;dbl&gt;, debt_rate &lt;dbl&gt;, irr_project &lt;dbl&gt;, irr_equity &lt;dbl&gt;,</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; #   dscr_min &lt;dbl&gt;, ltv_max_forward &lt;dbl&gt;, ops_share &lt;dbl&gt;, tv_share &lt;dbl&gt;</span></span></code></pre></div>
+</div>
+<div id="read-the-key-metrics" class="section level3">
+<h3>3. Read the key metrics</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">summary</span>(res)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 25</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt;   income_mode purchase_year  price horizon_years area_sqm price_per_sqm rent_sqm</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;               &lt;dbl&gt;  &lt;dbl&gt;         &lt;int&gt;    &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; 1 rent_roll            2026 1.20e7             7     4000          3000      240</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; # ℹ 18 more variables: vacancy_rate &lt;dbl&gt;, opex_sqm &lt;dbl&gt;,</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt; #   gross_potential_rent_y1 &lt;dbl&gt;, gei_y1 &lt;dbl&gt;, noi_y1 &lt;dbl&gt;, pbtcf_y1 &lt;dbl&gt;,</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; #   entry_yield &lt;dbl&gt;, index_rate &lt;dbl&gt;, discount_rate &lt;dbl&gt;, debt_type &lt;chr&gt;,</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; #   debt_ltv &lt;dbl&gt;, debt_rate &lt;dbl&gt;, irr_project &lt;dbl&gt;, irr_equity &lt;dbl&gt;,</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; #   dscr_min &lt;dbl&gt;, ltv_max_forward &lt;dbl&gt;, ops_share &lt;dbl&gt;, tv_share &lt;dbl&gt;</span></span></code></pre></div>
+<p>Key fields:</p>
+<ul>
+<li><code>irr_project</code>: project return before leverage</li>
+<li><code>irr_equity</code>: return to equity</li>
+<li><code>dscr_min</code>: minimum debt-service coverage ratio</li>
+<li><code>ltv_max_forward</code>: maximum forward LTV</li>
+<li><code>ops_share</code>: share of present value coming from operating
+cash flows</li>
+<li><code>tv_share</code>: share of present value coming from terminal
+value</li>
+</ul>
+</div>
+<div id="extract-the-tables" class="section level3">
+<h3>4. Extract the tables</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">deal_cashflows</span>(res, <span class="st">&quot;comparison&quot;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 9</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt;   scenario    irr_equity npv_equity irr_project npv_project min_dscr</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;            &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;    &lt;dbl&gt;</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt; 1 all_equity       0.100   1353712.       0.100    1353712.   NA    </span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; 2 debt_bullet      0.161   2625108.       0.100    1353712.    3.11 </span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; 3 debt_amort       0.130   2165030.       0.100    1353712.    0.794</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; # ℹ 3 more variables: max_ltv_forward &lt;dbl&gt;, ops_share &lt;dbl&gt;, tv_share &lt;dbl&gt;</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="fu">deal_cashflows</span>(res, <span class="st">&quot;full&quot;</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; # A tibble: 8 × 36</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt;    year      gei     noi   pbtcf net_operating_income capex  opex free_cash_flow</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt;   &lt;int&gt;    &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;                &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;          &lt;dbl&gt;</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; 1     0       0       0       0                    0      0    0      -12000000 </span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; 2     1  888000  883200  883200               888000      0 4800         883200 </span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; 3     2  905760  900864  900864               905760      0 4896         900864 </span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; 4     3  923875. 918881. 918881.              923875.     0 4994.        918881.</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; 5     4  942353. 937259. 937259.              942353.     0 5094.        937259.</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; 6     5  961200. 956004. 956004.              961200.     0 5196.        956004.</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; 7     6  980424. 975124. 975124.              980424.     0 5300.        975124.</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; 8     7 1000032. 994627. 994627.             1000032.     0 5406.      15561702.</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; # ℹ 28 more variables: sale_proceeds &lt;dbl&gt;, discount_factor &lt;dbl&gt;,</span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt; #   discounted_cash_flow &lt;dbl&gt;, asset_value &lt;dbl&gt;, acquisition_price &lt;dbl&gt;,</span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt; #   discounted_cf &lt;dbl&gt;, debt_draw &lt;dbl&gt;, interest &lt;dbl&gt;, amortization &lt;dbl&gt;,</span></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#&gt; #   payment &lt;dbl&gt;, arrangement_fee &lt;dbl&gt;, outstanding_debt &lt;dbl&gt;,</span></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#&gt; #   loan_init &lt;dbl&gt;, df &lt;dbl&gt;, cf_pre_debt &lt;dbl&gt;, cf_post_debt &lt;dbl&gt;,</span></span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co">#&gt; #   equity_flow &lt;dbl&gt;, equity_disc &lt;dbl&gt;, noi_fwd &lt;dbl&gt;, value_forward &lt;dbl&gt;,</span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="co">#&gt; #   dscr &lt;dbl&gt;, interest_cover_ratio &lt;dbl&gt;, debt_yield_init &lt;dbl&gt;, …</span></span></code></pre></div>
+<p>Use:</p>
+<ul>
+<li><code>&quot;full&quot;</code> for the merged operating and debt cash
+flows</li>
+<li><code>&quot;all_equity&quot;</code> for the unlevered table</li>
+<li><code>&quot;leveraged&quot;</code> for the equity cash-flow view</li>
+<li><code>&quot;comparison&quot;</code> for the summary by financing
+structure</li>
+</ul>
+</div>
+</div>
+<div id="three-common-input-styles" class="section level2">
+<h2>Three Common Input Styles</h2>
+<div id="entry-yield-known" class="section level3">
+<h3>Entry yield known</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">deal_spec</span>(<span class="at">price =</span> <span class="fl">10e6</span>, <span class="at">entry_yield =</span> <span class="fl">0.055</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">#&gt; &lt;cre_deal_spec&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; price_di: 10000000.00</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; asset: aggregated inputs (entry_yield)</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt; year-1: GEI NA | NOI 550,000.00 | PBTCF 550,000.00 | entry yield 5.50%</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt; horizon: 10 years</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; income mode: entry yield 5.50%</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; growth/discount: indexation 2.00% | discount rate 8.00%</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; debt: bullet, LTV 55.0%, rate 4.50%</span></span></code></pre></div>
+</div>
+<div id="noi-already-known" class="section level3">
+<h3>NOI already known</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">deal_spec</span>(<span class="at">price =</span> <span class="fl">10e6</span>, <span class="at">noi_y1 =</span> <span class="dv">550000</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co">#&gt; &lt;cre_deal_spec&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt; price_di: 10000000.00</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; asset: aggregated inputs (noi_y1)</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; year-1: GEI 550,000.00 | NOI 550,000.00 | PBTCF 550,000.00 | entry yield 5.50%</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; horizon: 10 years</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; income mode: NOI_y1 550000.00</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; growth/discount: indexation 2.00% | discount rate 8.00%</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; debt: bullet, LTV 55.0%, rate 4.50%</span></span></code></pre></div>
+</div>
+<div id="rent-roll-style-input" class="section level3">
+<h3>Rent roll style input</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">deal_spec</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="at">price =</span> <span class="fl">10e6</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="at">rent_sqm =</span> <span class="dv">220</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">area_sqm =</span> <span class="dv">3000</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="at">vacancy_rate =</span> <span class="fl">0.05</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="at">opex_sqm =</span> <span class="dv">12</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>)</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; &lt;cre_deal_spec&gt;</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; price_di: 10000000.00</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; asset: 3,000.00 sqm | rent 220.00/sqm | vacancy 5.0% | opex 12.00/sqm | price 3,333.33/sqm</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; year-1: GEI 627,000.00 | NOI 591,000.00 | PBTCF 591,000.00 | entry yield 5.91%</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; horizon: 10 years</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; income mode: 3000.00 sqm x 220.00 rent/sqm</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; growth/discount: indexation 2.00% | discount rate 8.00%</span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; debt: bullet, LTV 55.0%, rate 4.50%</span></span></code></pre></div>
+</div>
+</div>
+<div id="common-mistakes" class="section level2">
+<h2>Common Mistakes</h2>
+<ul>
+<li>Do not provide more than one income mode.</li>
+<li><code>price</code> is always the all-in acquisition price in the
+simplified API.</li>
+<li>If you use <code>rent_sqm + area_sqm</code>, the package derives
+year-1 NOI for you.</li>
+<li>If you want a quick first pass, start with <code>debt_terms()</code>
+defaults and only change <code>ltv</code>, <code>rate</code>, and
+<code>type</code>.</li>
+</ul>
+</div>
+<div id="when-to-move-to-the-advanced-api" class="section level2">
+<h2>When to move to the advanced API</h2>
+<p>Use the advanced API only if you need:</p>
+<ul>
+<li>YAML-based workflows,</li>
+<li>explicit lease-event structures,</li>
+<li>direct access to normalization helpers,</li>
+<li>custom scenario tooling built around <code>run_case()</code>.</li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -4,7 +4,9 @@
 #' Builds an indexed annual pro forma over years 0..N, a terminal value, and
 #' unlevered valuation metrics including net present value (NPV) and internal
 #' rate of return (IRR) for a directly held commercial real estate (CRE) asset,
-#' without debt. The income base is net operating income (NOI).
+#' without debt. The annual operating chain is made explicit through gross
+#' effective income (GEI), net operating income (NOI), and property before-tax
+#' cash flow (PBTCF).
 #'
 #' @details
 #' Time convention: \code{year = 0..N}. The acquisition is booked at \code{year = 0}
@@ -18,7 +20,10 @@
 #' \item \strong{Top-down mode} (default): when \code{noi} is \code{NULL}, the NOI
 #'   path is derived from the entry yield and acquisition price:
 #'   \code{NOI[1] = entry_yield * acq_price}, then indexed with \code{index_rent}
-#'   and adjusted by \code{vacancy}.
+#'   and adjusted by \code{vacancy}. In this mode, \code{gei} is reconstructed
+#'   as \code{noi + opex} so that the cap-rate convention remains anchored on
+#'   \code{NOI1}, which is the textbook convention used in direct capitalization
+#'   and terminal-value estimation.
 #' \item \strong{Bottom-up mode}: when \code{noi} is supplied (scalar or vector), it
 #'   is recycled to length \code{N} and used as the \code{NOI[1..N]} path. In this
 #'   case, \code{entry_yield}, \code{index_rent}, and \code{vacancy} are not used to
@@ -39,8 +44,16 @@
 #' @param vacancy Numeric scalar or numeric vector of length \code{N} in \code{[0, 1)}. Average annual vacancy.
 #'   Used only in top-down mode. Default is 0.
 #' @param opex Numeric scalar or numeric vector of length \code{N}. Operating expenses (non-recoverable). Default is 0.
-#' @param noi Numeric scalar or numeric vector of length \code{N}, optional. Exogenous NOI path (for example
-#'   computed from leases). When non-\code{NULL}, it replaces the internal NOI calculation.
+#' @param noi Numeric scalar or numeric vector of length \code{N}, optional.
+#'   Exogenous operating income path (for example computed from leases). When
+#'   non-\code{NULL}, it replaces the internal income calculation and is treated
+#'   as the NOI path from which explicit \code{gei}, \code{noi}, and
+#'   \code{pbtcf} columns are derived.
+#' @param terminal_growth Optional numeric scalar. Growth rate used to forwardize
+#'   the stabilised terminal NOI by one year for resale valuation. When
+#'   \code{NULL}, the function infers a conservative growth rate from the latest
+#'   clean NOI observations, falling back to zero when no robust inference is
+#'   available.
 #'
 #' @return A list with:
 #' \itemize{
@@ -79,7 +92,8 @@ dcf_calculate <- function(
     index_rent = 0,
     vacancy = 0,
     opex = 0,
-    noi = NULL
+    noi = NULL,
+    terminal_growth = NULL
 ) {
   # ── scalar validations ─────────────────────────────────────────────────────
   checkmate::assert_number(acq_price, lower = 0)
@@ -103,61 +117,83 @@ dcf_calculate <- function(
   checkmate::assert_numeric(vacancy,    len = N, lower = 0, upper = 0.999, any.missing = FALSE)
   checkmate::assert_numeric(opex,       len = N, any.missing = FALSE)
 
-  # ── NOI path: bottom-up (if supplied) or top-down (fallback) ──────────────
-  if (!is.null(noi)) {
-    # bottom-up mode: imposed NOI (for example, aggregated leases)
-    noi <- recycle(noi)
-    checkmate::assert_numeric(noi, len = N, any.missing = FALSE)
-  } else {
-    # historical top-down mode: NOI derived from entry cap rate and trajectories
-    noi <- numeric(N)
-    noi[1] <- entry_yield * acq_price
-    if (N > 1) {
-      for (t in 2:N) {
-        # indexed rent, adjusted for relative vacancy
-        noi[t] <- noi[t - 1] * (1 + index_rent[t]) * (1 - vacancy[t]) / (1 - vacancy[t - 1])
-      }
-    }
+  if (!is.null(terminal_growth)) {
+    checkmate::assert_number(terminal_growth, lower = -0.999999, finite = TRUE)
   }
 
-  # ── free cash flow before debt ─────────────────────────────────────────────
-  free_cf <- noi - opex - capex
+  # ── Income path: bottom-up (if supplied) or top-down (fallback) ───────────
+  if (!is.null(noi)) {
+    # bottom-up mode: imposed NOI path (for example, aggregated leases)
+    noi_path <- recycle(noi)
+    checkmate::assert_numeric(noi_path, len = N, any.missing = FALSE)
+    gei <- noi_path + opex
+  } else {
+    # top-down mode: cap-rate convention is anchored on NOI_1 = entry_yield * price
+    noi_path <- numeric(N)
+    noi_path[1] <- entry_yield * acq_price
+    if (N > 1) {
+      for (t in 2:N) {
+        noi_path[t] <- noi_path[t - 1] * (1 + index_rent[t]) * (1 - vacancy[t]) / (1 - vacancy[t - 1])
+      }
+    }
+    gei <- noi_path + opex
+  }
+
+  pbtcf    <- noi_path - capex
 
   # ── terminal value and net sale proceeds ───────────────────────────────────
-  # choice of stabilised terminal NOI
-  noi_terminal <- select_terminal_noi(
-    noi             = noi,
+  # choose a stabilised terminal NOI base, then forwardize by one year
+  noi_terminal_base <- select_terminal_noi(
+    noi             = noi_path,
     vacancy         = vacancy,
     capex           = capex,
     noi_theoretical = NULL  # or a value computed upstream if passed from cfg_normalize()
+  )
+
+  noi_terminal <- project_terminal_noi(
+    noi             = noi_path,
+    vacancy         = vacancy,
+    capex           = capex,
+    noi_theoretical = noi_terminal_base,
+    growth_rate     = terminal_growth
   )
 
   gross_sale <- noi_terminal / exit_yield
   net_sale   <- gross_sale * (1 - exit_cost)
 
   # ── table 0...N (sale only at N) ─────────────────────────────────────────────
-  # value components
-  free_cf <- noi - opex - capex
+  free_cf <- pbtcf
 
   # add the sale in the final year
   free_cf[N] <- free_cf[N] + net_sale
+  gei_all <- c(0, gei)
+  noi_all <- c(0, noi_path)
+  pbtcf_all <- c(0, pbtcf)
+  capex_all <- c(0, capex)
+  opex_all <- c(0, opex)
+  legacy_income_all <- gei_all
+  free_cf_all <- c(-acq_price, free_cf)
+  discount_factor_vec <- (1 + disc_rate)^(0:N)
 
   cash <- tibble::tibble(
     year                 = 0:N,
-    net_operating_income = c(0, noi),
-    capex                = c(0, capex),
-    opex                 = c(0, opex),
-    free_cash_flow       = c(-acq_price, free_cf),
+    gei                  = gei_all,
+    noi                  = noi_all,
+    pbtcf                = pbtcf_all,
+    net_operating_income = legacy_income_all,
+    capex                = capex_all,
+    opex                 = opex_all,
+    free_cash_flow       = free_cf_all,
     sale_proceeds        = c(rep(0, N), net_sale),
-    discount_factor      = (1 + disc_rate)^(0:N),
-    discounted_cash_flow = free_cash_flow / discount_factor,
+    discount_factor      = discount_factor_vec,
+    discounted_cash_flow = free_cf_all / discount_factor_vec,
     asset_value          = c(rep(NA_real_, N), gross_sale),
     acquisition_price    = c(acq_price, rep(NA_real_, N))
   )
 
   # minimal contract on columns and uniqueness of the sale
   req <- c(
-    "year", "net_operating_income", "opex", "capex", "free_cash_flow",
+    "year", "gei", "noi", "pbtcf", "net_operating_income", "opex", "capex", "free_cash_flow",
     "sale_proceeds", "discount_factor", "discounted_cash_flow",
     "asset_value", "acquisition_price"
   )
@@ -183,7 +219,14 @@ dcf_calculate <- function(
       exit_yield         = exit_yield,
       horizon_years      = N,
       disc_rate          = disc_rate,
-      exit_cost          = exit_cost
+      exit_cost          = exit_cost,
+      terminal_noi_base  = noi_terminal_base,
+      terminal_noi       = noi_terminal,
+      terminal_growth    = if (is.null(terminal_growth)) {
+        .infer_terminal_noi_growth(noi_path, vacancy = vacancy, capex = capex)
+      } else {
+        terminal_growth
+      }
     ),
     cashflows   = cash,
     npv         = npv_proj,
@@ -195,6 +238,50 @@ dcf_calculate <- function(
 #' @keywords internal
 discount_factor <- function(r, t) 1 / (1 + r)^t
 
+#' Present-value split between operations and terminal value
+#' @keywords internal
+#' @noRd
+.pv_component_split <- function(cashflows) {
+  checkmate::assert_data_frame(cashflows, min.rows = 2L)
+
+  need <- c("year", "free_cash_flow", "discount_factor")
+  miss <- setdiff(need, names(cashflows))
+  if (length(miss)) {
+    stop(".pv_component_split(): missing columns: ", paste(miss, collapse = ", "))
+  }
+
+  sale <- if ("sale_proceeds" %in% names(cashflows)) {
+    as.numeric(cashflows$sale_proceeds)
+  } else {
+    rep(0, nrow(cashflows))
+  }
+
+  idx <- cashflows$year >= 1
+  df  <- as.numeric(cashflows$discount_factor[idx])
+  cf  <- as.numeric(cashflows$free_cash_flow[idx])
+  tv  <- as.numeric(sale[idx])
+
+  pv_operations <- sum((cf - tv) / df, na.rm = TRUE)
+  pv_terminal   <- sum(tv / df, na.rm = TRUE)
+  pv_total      <- pv_operations + pv_terminal
+
+  if (!is.finite(pv_total) || abs(pv_total) < .Machine$double.eps) {
+    return(list(
+      pv_operations = pv_operations,
+      pv_terminal   = pv_terminal,
+      ops_share     = NA_real_,
+      tv_share      = NA_real_
+    ))
+  }
+
+  list(
+    pv_operations = pv_operations,
+    pv_terminal   = pv_terminal,
+    ops_share     = pv_operations / pv_total,
+    tv_share      = pv_terminal / pv_total
+  )
+}
+
 #' Unlevered summary (project metrics)
 #' @description Derives project-level metrics from the standard DCF table.
 #' @param dcf_res list. Output of `dcf_calculate()`.
@@ -205,6 +292,7 @@ compute_unleveraged_metrics <- function(dcf_res) {
   checkmate::assert_list(dcf_res, any.missing = FALSE)
   checkmate::assert_data_frame(dcf_res$cashflows, min.rows = 2L)
   cf <- dcf_res$cashflows
+  pv_split <- .pv_component_split(cf)
 
   irr_proj <- irr_safe(cf$free_cash_flow)
 
@@ -216,7 +304,11 @@ compute_unleveraged_metrics <- function(dcf_res) {
     npv_equity   = npv_proj,
     irr_project  = irr_proj,
     npv_project  = npv_proj,
-    cashflows    = cf
+    cashflows    = cf,
+    pv_operations = pv_split$pv_operations,
+    pv_terminal   = pv_split$pv_terminal,
+    ops_share     = pv_split$ops_share,
+    tv_share      = pv_split$tv_share
   )
 }
 
@@ -289,6 +381,7 @@ compute_leveraged_metrics <- function(dcf_res, debt_sched, equity_invest) {
 
   npv_prj <- dcf_res$npv %||%
     sum(cf$free_cash_flow / df_vec)
+  pv_split <- .pv_component_split(dcf_res$cashflows)
 
   # --- Levered table --------------------------------------------------------
   levered_cf <- tibble::tibble(
@@ -311,7 +404,11 @@ compute_leveraged_metrics <- function(dcf_res, debt_sched, equity_invest) {
     npv_project   = npv_prj,
     cashflows     = levered_cf,
     equity_0      = equity_invest,
-    loan_draw_0   = draw[1]
+    loan_draw_0   = draw[1],
+    pv_operations = pv_split$pv_operations,
+    pv_terminal   = pv_split$pv_terminal,
+    ops_share     = pv_split$ops_share,
+    tv_share      = pv_split$tv_share
   )
 }
 
@@ -351,7 +448,8 @@ compute_leveraged_metrics <- function(dcf_res, debt_sched, equity_invest) {
 #'   - `df` (alias of `discount_factor`),
 #'   - `cf_pre_debt` (= `free_cash_flow`),
 #'   - `cf_post_debt` (= `free_cash_flow - payment - arrangement_fee + debt_draw`),
-#'   - `equity_flow` (= `cf_post_debt + sale_proceeds`),
+#'   - `equity_flow` (= `cf_post_debt`; sale proceeds are already embedded in
+#'     `free_cash_flow` at the exit year),
 #'   - `equity_disc` (= `equity_flow / df`).
 #'
 #' @details
@@ -400,10 +498,8 @@ cf_make_full_table <- function(dcf, schedule) {
          paste(miss_cf, collapse = ", "))
   }
 
-  # GEI/NOI standardisation
-  if (!"gei" %in% names(cf))  cf$gei  <- cf$net_operating_income
-  if (!"opex" %in% names(cf)) cf$opex <- 0
-  if (!"noi" %in% names(cf))  cf$noi  <- cf$gei - cf$opex
+  # GEI/NOI/PBTCF standardisation
+  cf <- dcf_add_noi_columns(cf)
 
   # Minimal debt-side contract
   req_debt <- c("year","debt_draw","interest","amortization","payment",
@@ -419,7 +515,7 @@ cf_make_full_table <- function(dcf, schedule) {
       df           = discount_factor,
       cf_pre_debt  = free_cash_flow,
       cf_post_debt = free_cash_flow - payment - arrangement_fee + debt_draw,
-      equity_flow  = cf_post_debt + sale_proceeds,
+      equity_flow  = cf_post_debt,
       equity_disc  = equity_flow / df
     )
 
@@ -497,48 +593,20 @@ cf_compute_levered <- function(dcf_res, debt_sched, cfg) {
     arrangement_fee_pct = arr_fee,
     capitalized_fees    = cap_fees
   )
+  lev <- compute_leveraged_metrics(
+    dcf_res = dcf_res,
+    debt_sched = debt_sched,
+    equity_invest = eq0$equity_0
+  )
 
-  cf_tab <- dcf_res$cashflows
-  need_cf <- c("year","free_cash_flow","sale_proceeds","net_operating_income")
-  checkmate::assert_subset(need_cf, names(cf_tab))
-
-  ds <- debt_sched
-  need_ds <- c("year","payment","interest","amortization","outstanding_debt")
-  checkmate::assert_subset(need_ds, names(ds))
-
-  years <- cf_tab$year
-  serv  <- rep(0, length(years)); names(serv) <- years
-  outst <- rep(NA_real_, length(years)); names(outst) <- years
-
-  idx <- match(ds$year, years)
-  serv[idx]  <- as.numeric(ds$payment)
-  outst[idx] <- as.numeric(ds$outstanding_debt)
-
-  # equity cash flows
-  eq_cf <- as.numeric(cf_tab$free_cash_flow)
-  eq_cf[1L] <- -eq0$equity_0
-  Tn <- length(eq_cf)
-  if (Tn >= 2L) {
-    eq_cf[2:Tn] <- cf_tab$free_cash_flow[2:Tn] - serv[2:Tn]
-    last <- Tn
-    outN <- if (is.finite(outst[last])) outst[last] else 0
-    eq_cf[last] <- eq_cf[last] + (cf_tab$sale_proceeds[last] %||% 0) - outN
-  }
-
-  # equity metrics
-  irr <- irr_safe(eq_cf)
-  disc_rate <- dcf_res$inputs$disc_rate %||% NA_real_
-  df <- if (is.finite(disc_rate)) (1 + disc_rate)^(0:(length(eq_cf) - 1)) else NA_real_
-  npv <- if (all(is.finite(df))) sum(eq_cf / df) else NA_real_
-
-  # Full table enriched with credit ratios (uses the entry Discounted Cash Flow (DCF) exit_yield)
-  full <- add_credit_ratios(cf_tab, debt_sched, exit_yield = dcf_res$inputs$exit_yield)
+  full <- cf_make_full_table(dcf_res, debt_sched)
+  full <- add_credit_ratios(full, debt_sched, exit_yield = dcf_res$inputs$exit_yield)
 
   list(
-    equity_cf = eq_cf,
+    equity_cf = lev$cashflows$equity_cf,
     metrics = list(
-      irr_equity  = irr,
-      npv_equity  = npv,
+      irr_equity  = lev$irr_equity,
+      npv_equity  = lev$npv_equity,
       equity_0    = eq0$equity_0,
       loan_draw_0 = eq0$loan_draw_0
     ),
@@ -785,9 +853,10 @@ irr_partition <- function(cashflows, tv_disc = NULL, irr_total, initial_investme
 #'   Required columns: \code{opex} and either \code{gei} or
 #'   \code{net_operating_income}.
 #'
-#' @return A \code{tibble} with guaranteed numeric columns \code{gei} and
-#'   \code{noi}. Existing \code{noi} is preserved when present, but a warning is
-#'   emitted if it differs from \code{gei - opex} beyond a small tolerance.
+#' @return A \code{tibble} with guaranteed numeric columns \code{gei},
+#'   \code{noi}, and \code{pbtcf}. Existing \code{noi} or \code{pbtcf} are
+#'   preserved when present, but a warning is emitted if they differ from the
+#'   implied identities beyond a small tolerance.
 #'
 #' @examples
 #' # Minimal example with a legacy column name (net_operating_income interpreted as GEI)
@@ -852,13 +921,21 @@ dcf_add_noi_columns <- function(cf_tab) {
 
   gei_num  <- to_num_checked(cf_tab[[gei_col]], gei_col)
   opex_num <- to_num_checked(cf_tab[["opex"]], "opex")
+  capex_num <- if (has("capex")) {
+    to_num_checked(cf_tab[["capex"]], "capex")
+  } else {
+    rep(0, nrow(cf_tab))
+  }
 
   checkmate::assert_numeric(gei_num, any.missing = TRUE)
   checkmate::assert_numeric(opex_num, any.missing = TRUE)
+  checkmate::assert_numeric(capex_num, any.missing = TRUE)
   checkmate::assert_true(length(gei_num) == nrow(cf_tab))
   checkmate::assert_true(length(opex_num) == nrow(cf_tab))
+  checkmate::assert_true(length(capex_num) == nrow(cf_tab))
 
   noi_calc <- gei_num - opex_num
+  pbtcf_calc <- noi_calc - capex_num
 
   out <- dplyr::as_tibble(cf_tab)
 
@@ -883,6 +960,97 @@ dcf_add_noi_columns <- function(cf_tab) {
         )
       }
     }
+  }
+
+  if (!has("pbtcf")) {
+    out$pbtcf <- pbtcf_calc
+  } else {
+    pbtcf_num <- to_num_checked(out$pbtcf, "pbtcf")
+    out$pbtcf <- pbtcf_num
+
+    ok <- is.finite(pbtcf_num) & is.finite(pbtcf_calc)
+    if (any(ok)) {
+      tol <- 1e-8 + 1e-6 * pmax(1, abs(pbtcf_calc[ok]))
+      if (any(abs(pbtcf_num[ok] - pbtcf_calc[ok]) > tol, na.rm = TRUE)) {
+        warning(
+          "dcf_add_noi_columns(): existing 'pbtcf' differs from 'noi - capex' for at least one row. ",
+          "The existing 'pbtcf' has been preserved."
+        )
+      }
+    }
+  }
+
+  out
+}
+
+#' Lease effective rent from a stream of lease cash flows
+#'
+#' @description
+#' Discounts a lease cash-flow vector and converts its present value into an
+#' equivalent level annuity. This is a compact helper for comparing lease
+#' structures with different concessions, rent steps, or timing conventions.
+#'
+#' @param cashflows Numeric vector of lease cash flows already expressed from the
+#'   chosen perspective.
+#' @param discount_rate Numeric scalar in \code{[0, 1]}. Discount rate per
+#'   period.
+#' @param area Optional numeric scalar greater than 0. When supplied, the
+#'   effective rent is also reported per unit of area.
+#' @param timing Character string. Either \code{"advance"} (cash flows at the
+#'   start of each period) or \code{"arrears"} (cash flows at the end).
+#' @param perspective Character string. Either \code{"landlord"} or
+#'   \code{"tenant"}; this does not alter the sign convention and is stored for
+#'   reporting.
+#'
+#' @return A one-row tibble with present value, equivalent annuity, and effective
+#'   rent. When \code{area} is supplied, a per-area metric is also returned.
+#'
+#' @examples
+#' lease_effective_rent(
+#'   cashflows = c(0, 100, 100, 100, 100),
+#'   discount_rate = 0.08,
+#'   timing = "arrears",
+#'   perspective = "landlord"
+#' )
+#' @export
+lease_effective_rent <- function(cashflows,
+                                 discount_rate,
+                                 area = NULL,
+                                 timing = c("advance", "arrears"),
+                                 perspective = c("landlord", "tenant")) {
+  timing <- match.arg(timing)
+  perspective <- match.arg(perspective)
+
+  checkmate::assert_numeric(cashflows, any.missing = FALSE, min.len = 1)
+  checkmate::assert_number(discount_rate, lower = 0, upper = 1)
+  if (!is.null(area)) {
+    checkmate::assert_number(area, lower = .Machine$double.eps)
+  }
+
+  n <- length(cashflows)
+  times <- if (identical(timing, "advance")) {
+    0:(n - 1L)
+  } else {
+    seq_len(n)
+  }
+
+  disc_vec <- (1 + discount_rate)^times
+  pv <- sum(cashflows / disc_vec)
+  annuity_factor <- sum(1 / disc_vec)
+  eq_annuity <- if (annuity_factor > 0) pv / annuity_factor else NA_real_
+
+  out <- tibble::tibble(
+    periods            = n,
+    discount_rate      = discount_rate,
+    timing             = timing,
+    perspective        = perspective,
+    pv                 = pv,
+    equivalent_annuity = eq_annuity,
+    effective_rent     = eq_annuity
+  )
+
+  if (!is.null(area)) {
+    out$effective_rent_per_area <- eq_annuity / area
   }
 
   out
@@ -987,4 +1155,87 @@ select_terminal_noi <- function(noi,
     )
   }
   noi[N]
+}
+
+#' Infer a forward NOI growth rate from the latest robust observations
+#' @keywords internal
+#' @noRd
+.infer_terminal_noi_growth <- function(noi, vacancy = NULL, capex = NULL) {
+  checkmate::assert_numeric(noi, any.missing = FALSE)
+  N <- length(noi)
+  if (N < 2L) {
+    return(0)
+  }
+
+  vac <- if (is.null(vacancy)) rep(0, N) else vacancy
+  cap <- if (is.null(capex)) rep(0, N) else capex
+
+  clean <- is.finite(noi) & noi > 0 & is.finite(vac) & is.finite(cap) &
+    vac == 0 & cap == 0
+
+  idx_pair <- integer(0)
+  for (i in seq.int(N, 2L)) {
+    if (clean[i] && clean[i - 1L]) {
+      idx_pair <- c(i - 1L, i)
+      break
+    }
+  }
+
+  if (length(idx_pair) == 0L) {
+    for (i in seq.int(N, 2L)) {
+      if (is.finite(noi[i]) && is.finite(noi[i - 1L]) && noi[i] > 0 && noi[i - 1L] > 0) {
+        idx_pair <- c(i - 1L, i)
+        break
+      }
+    }
+  }
+
+  if (length(idx_pair) == 0L) {
+    return(0)
+  }
+
+  growth <- noi[idx_pair[2L]] / noi[idx_pair[1L]] - 1
+  if (!is.finite(growth) || growth <= -0.999999) {
+    return(0)
+  }
+
+  growth
+}
+
+#' Project the NOI capitalized in the terminal value one year forward
+#'
+#' @description
+#' Selects a stabilised terminal NOI within the explicit holding period and
+#' forwardizes it by one year, following the standard real-estate reversion
+#' convention in which a resale at time \eqn{T} is capitalized off the next
+#' year's NOI (or a stabilized forward NOI when year \eqn{T+1} is atypical).
+#'
+#' @param noi Numeric vector of annual NOI values for years 1..N.
+#' @param vacancy Optional numeric vector of annual vacancy rates.
+#' @param capex Optional numeric vector of annual capital expenditures.
+#' @param noi_theoretical Optional stabilised NOI candidate.
+#' @param growth_rate Optional numeric scalar. If \code{NULL}, a growth rate is
+#'   inferred from the latest robust NOI observations.
+#'
+#' @return Numeric scalar. Forwardized terminal NOI used for resale valuation.
+#' @export
+project_terminal_noi <- function(noi,
+                                 vacancy = NULL,
+                                 capex = NULL,
+                                 noi_theoretical = NULL,
+                                 growth_rate = NULL) {
+  base_noi <- select_terminal_noi(
+    noi = noi,
+    vacancy = vacancy,
+    capex = capex,
+    noi_theoretical = noi_theoretical
+  )
+
+  if (is.null(growth_rate)) {
+    growth_rate <- .infer_terminal_noi_growth(noi, vacancy = vacancy, capex = capex)
+  } else {
+    checkmate::assert_number(growth_rate, lower = -0.999999, finite = TRUE)
+  }
+
+  base_noi * (1 + growth_rate)
 }

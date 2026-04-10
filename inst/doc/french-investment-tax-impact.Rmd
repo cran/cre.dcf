@@ -1,0 +1,239 @@
+---
+title: "French investment illustration: stylized SPV tax impact"
+author: "Package cre.dcf"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{French investment illustration: stylized SPV tax impact}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(cre.dcf)
+library(dplyr)
+library(tibble)
+library(scales)
+library(yaml)
+```
+
+## Purpose
+
+This vignette illustrates how `tax_run_spv()` can be used on a French office investment case.
+
+It is intentionally a **stylized French-like SPV illustration**, not a legal or tax opinion. As of **April 1, 2026**, the normal French corporate income-tax rate is **25%**, following the official French tax administration's published corporate-tax guidance consulted for this vignette.
+
+The rest of the tax assumptions below are simulated package inputs chosen to remain within the current scope of `tax_run_spv()`:
+
+- straight-line depreciation only,
+- simple interest deductibility,
+- simple loss carryforwards,
+- no investor-level taxes,
+- no withholding taxes,
+- no treaty logic,
+- no attempt to encode the full French interest-limitation regime.
+
+The point of the vignette is therefore methodological: show how a French case can be parameterized in the current generic engine without pretending to replicate the full French tax code.
+
+## Start from a French operating case
+
+We use the package's `preset_core.yml`, which already describes a stylized Paris 8e office investment.
+
+```{r}
+cfg_path <- system.file("extdata", "preset_core.yml", package = "cre.dcf")
+cfg <- yaml::read_yaml(cfg_path)
+case <- run_case(cfg)
+
+bullet_summary <- case$comparison$summary |>
+  filter(scenario == "debt_bullet") |>
+  transmute(
+    scenario,
+    irr_project,
+    irr_equity,
+    min_dscr,
+    max_ltv_forward,
+    ops_share,
+    tv_share
+  )
+
+knitr::kable(
+  bullet_summary,
+  digits = 3,
+  caption = "Before-tax baseline for the stylized French core-office case"
+)
+```
+
+At this stage, the core DCF is still entirely before tax. The tax layer comes next and consumes the consolidated cash-flow table.
+
+## Translate the French-like SPV into tax inputs
+
+The current tax engine needs two objects:
+
+- a tax basis extracted from the pre-tax case,
+- a tax specification describing the stylized SPV rules.
+
+```{r}
+tax_basis <- tax_basis_spv(case)
+
+tax_assumptions <- tibble::tribble(
+  ~item, ~value, ~comment,
+  "Corporate income tax", "25%", "Official French normal CIT rate as of April 1, 2026",
+  "Land share", "20%", "Stylized non-depreciable portion",
+  "Building share", "65%", "Stylized depreciable structure",
+  "Fit-out share", "15%", "Stylized depreciable tenant-improvement bucket",
+  "Building life", "30 years", "Stylized straight-line life",
+  "Fit-out life", "10 years", "Stylized straight-line life",
+  "Interest deductibility", "full", "Current engine scope, not full French law",
+  "Loss carryforward", "on", "Stylized carryforward allowed",
+  "Offset cap", "50%", "Stylized cap used to keep the rule conservative"
+)
+
+knitr::kable(
+  tax_assumptions,
+  caption = "French-like tax assumptions used in this vignette"
+)
+```
+
+```{r}
+tax_spec <- tax_spec_spv(
+  corp_tax_rate = 0.25,
+  depreciation_spec = depreciation_spec(
+    acquisition_split = tibble::tribble(
+      ~bucket,    ~share, ~life_years, ~method,          ~depreciable,
+      "land",      0.20,        NA,    "none",           FALSE,
+      "building",  0.65,        30,    "straight_line",  TRUE,
+      "fitout",    0.15,        10,    "straight_line",  TRUE
+    ),
+    capex_bucket = "fitout",
+    start_rule = "full_year"
+  ),
+  interest_rule = interest_rule(mode = "full"),
+  loss_rule = loss_rule(
+    carryforward = TRUE,
+    carryforward_years = Inf,
+    offset_cap_pct = 0.50
+  )
+)
+
+tax_res <- tax_run_spv(tax_basis, tax_spec)
+```
+
+## Read the yearly tax table
+
+The yearly table below is the main output of `tax_run_spv()`.
+
+```{r}
+tax_view <- tax_res$tax_table |>
+  select(
+    year,
+    noi,
+    tax_depreciation,
+    deductible_interest,
+    taxable_income_pre_losses,
+    loss_cf_open,
+    loss_cf_used,
+    cash_is,
+    after_tax_equity_cf
+  )
+
+knitr::kable(
+  tax_view,
+  digits = 0,
+  caption = "Stylized French SPV tax table"
+)
+```
+
+This is the main reading grid:
+
+- `tax_depreciation` transforms acquisition basis and capex into fiscal charges,
+- `deductible_interest` removes the debt cost that is deductible under the simplified rule,
+- `taxable_income_pre_losses` is the taxable base before using prior losses,
+- `loss_cf_open` and `loss_cf_used` show how prior tax losses are mobilized,
+- `cash_is` is the annual corporate income tax paid by the SPV,
+- `after_tax_equity_cf` is the equity cash flow net of that annual tax.
+
+## Compare pre-tax and after-tax equity cash flows
+
+The generic engine does not yet build a complete French investor-level valuation. It does, however, let us measure the tax drag at the SPV level.
+
+```{r}
+equity_bridge <- tax_res$tax_table |>
+  select(year, pre_tax_equity_cf, cash_is, after_tax_equity_cf)
+
+knitr::kable(
+  equity_bridge,
+  digits = 0,
+  caption = "Bridge from pre-tax to after-tax equity cash flows"
+)
+```
+
+We can also compare the before-tax leveraged IRR with a stylized after-tax SPV equity IRR computed on `after_tax_equity_cf`.
+
+```{r}
+pre_tax_equity_irr <- case$leveraged$irr_equity
+after_tax_equity_irr <- irr_safe(tax_res$tax_table$after_tax_equity_cf)
+
+tax_highlights <- tibble(
+  pre_tax_equity_irr = pre_tax_equity_irr,
+  after_tax_spv_equity_irr = after_tax_equity_irr,
+  total_cash_is = tax_res$summary$total_cash_is,
+  total_tax_depreciation = tax_res$summary$total_tax_depreciation,
+  exit_year_cash_is = tax_res$tax_table$cash_is[
+    tax_res$tax_table$year == max(tax_res$tax_table$year)
+  ]
+)
+
+knitr::kable(
+  tax_highlights,
+  digits = 3,
+  caption = "Stylized before-tax versus after-tax SPV reading"
+)
+```
+
+In this example:
+
+- the pre-tax DCF remains the economic backbone of the case,
+- the stylized French tax layer reduces equity cash flows through annual `cash_is`,
+- depreciation materially shapes the taxable base,
+- and the exit year remains a critical point because the final tax charge can be large.
+
+## What this vignette captures and what it does not
+
+This French illustration is useful because it shows a coherent workflow:
+
+1. build the investment case,
+2. extract a tax basis,
+3. define a country-like SPV parameterization,
+4. read the yearly tax consequences.
+
+But it still has clear limits.
+
+Captured:
+
+- a French office investment setting,
+- a normal-CIT-rate scenario,
+- non-depreciable land,
+- depreciable building and fit-out buckets,
+- simple loss carryforwards,
+- a visible bridge from pre-tax to after-tax equity cash flows.
+
+Not captured:
+
+- the full French interest-limitation regime,
+- the exact French loss-carryforward formula,
+- shareholder taxation,
+- transfer-tax mechanics beyond the acquisition-cost block already embedded in the DCF,
+- exit-structuring choices,
+- treaty and cross-border effects.
+
+## Summary
+
+This vignette shows how `cre.dcf` can already support a realistic French-style teaching case without hard-coding French tax law into the package core.
+
+- The before-tax DCF remains the common economic layer.
+- `tax_run_spv()` adds a stylized SPV tax reading on top of it.
+- The result is useful for scenario analysis and methodology, but should not be read as legal advice or as a complete French tax model.

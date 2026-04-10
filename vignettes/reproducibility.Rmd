@@ -22,18 +22,12 @@ library(yaml)
 
 ## Purpose
 
-This vignette evaluates strict reproducibility of run_case() under identical inputs. In a deterministic DCF pipeline, two invocations on the same configuration should yield byte-for-byte identical results for core metrics and tabular outputs. The checks proceed in two layers:
+This vignette checks that `run_case()` is deterministic under identical inputs.
 
-Exact identity via serialization (byte-level comparison).
-
-Numerical guardrail printing (max absolute differences) to diagnose any minute deviations that may occur under heterogeneous BLAS/lapack builds or platform-specific floating-point behavior.
-
-Passing the first layer establishes computational determinism; the second layer is provided for transparency.
-
-## Load and validate a canonical configuration
+## Load and validate a baseline configuration
 
 ```{r}
-# 1) Load a canonical configuration
+# 1) Load a baseline configuration
 
 cfg_path <- system.file("extdata", "preset_default.yml", package = "cre.dcf")
 stopifnot(nzchar(cfg_path))
@@ -102,7 +96,7 @@ identical(serialize(sm1, NULL), serialize(sm2, NULL))
 )
 
 cat(
-"\nReproducibility diagnostics (byte-level):\n",
+"\nReproducibility checks:\n",
 "  • Core metrics: byte-level identity confirmed.\n",
 "  • All-equity cashflows: byte-level identity confirmed.\n",
 "  • Leveraged cashflows: byte-level identity confirmed.\n",
@@ -111,11 +105,11 @@ cat(
 
 ```
 
-These assertions guarantee that, on the current platform, run_case() behaves as a deterministic mapping from the YAML configuration to the computed outputs.
+These assertions show that `run_case()` maps a given YAML configuration to the same outputs every time.
 
-## Numerical drift diagnostics (for transparency)
+## Numerical drift checks
 
-To document the absence (or presence) of any small numerical differences, we compute maximum absolute differences on numeric columns. If byte-level identity holds, all these diagnostics should be exactly zero; they are nevertheless informative if a future platform breaks strict identity.
+We also compute maximum absolute differences on numeric outputs. If byte-level identity holds, these values should be zero.
 
 ```{r}
 max_abs_diff <- function(x, y) {
@@ -171,16 +165,4 @@ formatC(max_abs_diff(sm1, sm2), format = "g")), "\n")
 
 ## Interpretation
 
-The results obtained in this vignette show that:
-
-Core scalar metrics (irr_project, npv_project, irr_equity, npv_equity) are exactly identical at the byte level across two runs with the same configuration.
-
-Key tabular outputs (all-equity cashflows, leveraged cashflows, comparison summary) are also byte-identical.
-
-The maximum absolute differences on numeric entries are zero, confirming the absence of hidden numerical drift in this environment.
-
-This establishes that run_case() behaves as a deterministic map from a validated YAML configuration to a structured output object, which is a strong form of reproducibility in computational finance:
-
-identical YAML files ⇒ identical DCF outputs,
-
-any divergence in valuation metrics must therefore be traced to explicit differences in configuration, not to stochastic elements or unstable numerical routines.
+If all checks pass, identical YAML inputs produce identical outputs in this environment. If a future platform shows small differences, the max-absolute-difference block helps locate them quickly.

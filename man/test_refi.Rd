@@ -2,7 +2,7 @@
 % Please edit documentation in R/scenario_refi.R
 \name{test_refi}
 \alias{test_refi}
-\title{Test the feasibility of a refinancing at year T (interest-only diagnostic)}
+\title{Test the feasibility of a refinancing at year T}
 \usage{
 test_refi(full, year_T, covenants, new_rate, new_exit_yield)
 }
@@ -26,6 +26,6 @@ list with \code{status} ("ok"/"fail"), \code{reasons} (character) and \code{snap
 }
 \description{
 Assesses at \(T\) the simultaneous feasibility of DSCR and forward LTV
-covenants assuming an interest-only payment at \(T+1\). This diagnostic
+covenants assuming an interest-only payment at \(T+1\). This check
 isolates covenant feasibility from the precise structure of the new loan.
 }

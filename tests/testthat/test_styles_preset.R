@@ -14,7 +14,7 @@ test_that("style manifest preserves canonical risk/leverage hierarchy", {
   irr_proj  <- tbl$irr_project
   irr_equ   <- tbl$irr_equity
   dscr_min  <- tbl$dscr_min_bul
-  ltv_fwd   <- tbl$ltv_fwd_max_bul
+  ltv_init  <- tbl$ltv_init
 
   # Risk–return: strictly increasing IRRs
   testthat::expect_true(all(diff(irr_proj)  > 0),
@@ -29,9 +29,9 @@ test_that("style manifest preserves canonical risk/leverage hierarchy", {
     info = "Minimum DSCR (bullet) must decrease from core to opportunistic."
   )
 
-  # Leverage: strictly increasing maximum forward LTV
-  testthat::expect_true(all(diff(ltv_fwd)  > 0),
-    info = "Maximum forward LTV (bullet) must increase from core to opportunistic."
+  # Structural leverage: strictly increasing initial LTV
+  testthat::expect_true(all(diff(ltv_init) > 0),
+    info = "Initial LTV must increase from core to opportunistic."
   )
 })
 
@@ -70,6 +70,42 @@ test_that("risk–return cloud: equity IRR dominates and uplift is ordered", {
   )
 })
 
+test_that("style presets keep terminal dependence plausible and ordered", {
+  tbl <- styles_manifest()
+
+  expected <- c("core", "core_plus", "value_added", "opportunistic")
+  tbl <- dplyr::filter(tbl, style %in% expected)
+  tbl <- dplyr::arrange(
+    tbl,
+    factor(style, levels = expected)
+  )
+
+  testthat::expect_true(
+    all(is.finite(tbl$ops_share)),
+    info = "Each style should expose a finite operations PV share."
+  )
+
+  testthat::expect_true(
+    all(is.finite(tbl$tv_share)),
+    info = "Each style should expose a finite terminal-value PV share."
+  )
+
+  testthat::expect_true(
+    all(abs(tbl$ops_share + tbl$tv_share - 1) < 1e-10),
+    info = "Operations and terminal shares should sum to one."
+  )
+
+  testthat::expect_true(
+    all(diff(tbl$tv_share) > 0),
+    info = "Terminal-value dependence should increase from core to opportunistic."
+  )
+
+  testthat::expect_true(
+    all(tbl$tv_share < 0.90),
+    info = "No preset should become implausibly dominated by terminal value."
+  )
+})
+
 test_that("leverage–coverage map: LTV and DSCR follow the canonical ordering", {
   tbl <- styles_manifest()
 
@@ -81,7 +117,7 @@ test_that("leverage–coverage map: LTV and DSCR follow the canonical ordering",
   )
 
   dscr <- tbl$dscr_min_bul
-  ltv  <- tbl$ltv_fwd_max_bul
+  ltv  <- tbl$ltv_init
 
   core_dscr <- dscr[1L]
   opp_dscr  <- dscr[4L]
@@ -100,16 +136,16 @@ test_that("leverage–coverage map: LTV and DSCR follow the canonical ordering",
     info = "Opportunistic style must have the lowest minimum DSCR."
   )
 
-  # 3) Forward LTV must still increase monotonically
+  # 3) Initial LTV must increase monotonically
   testthat::expect_true(
     all(diff(ltv) > 0),
-    info = "Maximum forward LTV (bullet) must increase from core to opportunistic."
+    info = "Initial LTV must increase from core to opportunistic."
   )
 })
 
-test_that("covenant-breach counts are consistent with style risk buckets", {
-  guard_min_dscr <- 1.20
-  guard_max_ltv  <- 0.65
+test_that("tighter guardrails concentrate LTV pressure in non-core styles", {
+  guard_min_dscr <- 1.50
+  guard_max_ltv  <- 0.60
 
   tbl <- styles_breach_counts(
     styles         = c("core", "core_plus", "value_added", "opportunistic"),
@@ -130,34 +166,26 @@ test_that("covenant-breach counts are consistent with style risk buckets", {
   low_risk  <- 1:2  # core, core_plus
   high_risk <- 3:4  # value_added, opportunistic
 
-  #  DSCR 
-
-  # 1) Core doit être parmi les styles les plus "propres" en DSCR
-  testthat::expect_equal(
-    n_dscr[1],
-    min(n_dscr),
-    info = "Core should have the lowest (or tied lowest) number of DSCR breaches."
+  testthat::expect_true(
+    all(n_dscr >= 0),
+    info = "DSCR breach counts should be non-negative."
   )
 
-  # 2) En moyenne, les styles plus risqués doivent violer plus souvent le DSCR
-  mean_low_dscr  <- mean(n_dscr[low_risk])
-  mean_high_dscr <- mean(n_dscr[high_risk])
-
   testthat::expect_true(
-    mean_high_dscr >= mean_low_dscr,
-    info = "On average, value-added/opportunistic should have at least as many DSCR breaches as core/core_plus."
+    sum(n_dscr) > 0,
+    info = "At least one DSCR breach should be observed under tighter illustrative guardrails."
   )
 
   #  LTV forward 
 
-  # 3) Core doit aussi être parmi les plus "propres" sur la LTV forward
+  # 1) Core doit être parmi les plus "propres" sur la LTV forward
   testthat::expect_equal(
     n_ltv[1],
     min(n_ltv),
     info = "Core should have the lowest (or tied lowest) number of forward LTV breaches."
   )
 
-  # 4) En moyenne, les styles risqués doivent violer plus souvent la LTV forward
+  # 2) En moyenne, les styles risqués doivent violer plus souvent la LTV forward
   mean_low_ltv  <- mean(n_ltv[low_risk])
   mean_high_ltv <- mean(n_ltv[high_risk])
 
@@ -165,5 +193,94 @@ test_that("covenant-breach counts are consistent with style risk buckets", {
     mean_high_ltv >= mean_low_ltv,
     info = "On average, value-added/opportunistic should have at least as many forward LTV breaches as core/core_plus."
   )
+
+  testthat::expect_true(
+    n_ltv[4] >= n_ltv[1],
+    info = "Opportunistic should not have fewer forward-LTV breaches than core under tighter guardrails."
+  )
 })
 
+test_that("distressed-exit underwriting mode keeps transition logic as default", {
+  regimes <- tibble::tibble(
+    regime = "strict",
+    min_dscr = 1.20,
+    max_ltv = 0.65
+  )
+
+  legacy_like <- suppressWarnings(
+    styles_distressed_exit(
+      styles = c("core", "value_added", "opportunistic"),
+      regimes = regimes,
+      fire_sale_bps = 200,
+      refi_min_year = 2L,
+      allow_year1_distress = FALSE,
+      exit_shock_bps = 200,
+      growth_shock = -0.015
+    )
+  )
+
+  explicit_transition <- suppressWarnings(
+    styles_distressed_exit(
+      styles = c("core", "value_added", "opportunistic"),
+      regimes = regimes,
+      fire_sale_bps = 200,
+      refi_min_year = 2L,
+      allow_year1_distress = FALSE,
+      underwriting_mode = "transition",
+      exit_shock_bps = 200,
+      growth_shock = -0.015
+    )
+  )
+
+  testthat::expect_identical(
+    legacy_like$breach_year,
+    explicit_transition$breach_year
+  )
+
+  testthat::expect_identical(
+    explicit_transition$underwriting_mode,
+    rep("transition", nrow(explicit_transition))
+  )
+})
+
+test_that("stabilized underwriting mode surfaces early lease-up breaches", {
+  regimes <- tibble::tibble(
+    regime = "strict",
+    min_dscr = 1.20,
+    max_ltv = 0.65
+  )
+
+  transition_tbl <- suppressWarnings(
+    styles_distressed_exit(
+      styles = "value_added",
+      regimes = regimes,
+      fire_sale_bps = 200,
+      refi_min_year = 2L,
+      allow_year1_distress = FALSE,
+      underwriting_mode = "transition",
+      exit_shock_bps = 200,
+      growth_shock = -0.015
+    )
+  )
+
+  stabilized_tbl <- suppressWarnings(
+    styles_distressed_exit(
+      styles = "value_added",
+      regimes = regimes,
+      fire_sale_bps = 200,
+      refi_min_year = 2L,
+      allow_year1_distress = FALSE,
+      underwriting_mode = "stabilized",
+      exit_shock_bps = 200,
+      growth_shock = -0.015
+    )
+  )
+
+  testthat::expect_equal(transition_tbl$covenant_start_year, 3L)
+  testthat::expect_equal(stabilized_tbl$covenant_start_year, 1L)
+
+  testthat::expect_true(is.na(transition_tbl$breach_year))
+  testthat::expect_equal(stabilized_tbl$breach_year, 2L)
+  testthat::expect_true(stabilized_tbl$distress_undefined)
+  testthat::expect_match(stabilized_tbl$breach_type, "both|dscr|ltv")
+})

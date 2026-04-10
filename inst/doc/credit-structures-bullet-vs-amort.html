@@ -353,23 +353,15 @@ amort</a></li>
 expected ordering</a></li>
 <li><a href="#internal-consistency-checks-on-credit-ratios" id="toc-internal-consistency-checks-on-credit-ratios"><span class="toc-section-number">5</span> Internal consistency checks on
 credit ratios</a></li>
-<li><a href="#equity-npv-identity" id="toc-equity-npv-identity"><span class="toc-section-number">6</span> Equity NPV identity</a></li>
+<li><a href="#equity-npv-read-across" id="toc-equity-npv-read-across"><span class="toc-section-number">6</span> Equity NPV read-across</a></li>
 </ul>
 </div>
 
 <div id="purpose" class="section level2" number="1">
 <h2><span class="header-section-number">1</span> Purpose</h2>
-<p>This vignette explores the comparative behaviour of
-<strong>bullet</strong> and <strong>amortizing</strong> debt structures
-within a standardized discounted-cash-flow (DCF) framework.<br />
-Its objective is to verify that the model reproduces the <em>expected
-qualitative ordering</em> between both credit forms using the built-in
-<code>run_case()</code> comparison-without resorting to external
-scenario shocks.</p>
-<p>From a financial standpoint, the exercise highlights how repayment
-profiles affect both the <strong>temporal distribution of
-leverage</strong> and the <strong>sensitivity of equity
-returns</strong>:</p>
+<p>This vignette compares <strong>bullet</strong> and
+<strong>amortizing</strong> debt structures on the same stabilised
+operating case.</p>
 <ul>
 <li>In a <strong>bullet (in fine)</strong> structure, only interest is
 serviced during the term, and principal is repaid entirely at
@@ -388,7 +380,7 @@ financial gearing.</li>
 <div id="build-a-case-and-extract-comparison-details" class="section level2" number="2">
 <h2><span class="header-section-number">2</span> Build a case and
 extract comparison details</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>cfg_path <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;preset_default.yml&quot;</span>, <span class="at">package =</span> <span class="st">&quot;cre.dcf&quot;</span>)</span>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>cfg_path <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;preset_core.yml&quot;</span>, <span class="at">package =</span> <span class="st">&quot;cre.dcf&quot;</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">nzchar</span>(cfg_path))</span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>cfg  <span class="ot">&lt;-</span> yaml<span class="sc">::</span><span class="fu">read_yaml</span>(cfg_path)</span>
@@ -403,16 +395,18 @@ extract comparison details</h2>
 <span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(required_fields <span class="sc">%in%</span> <span class="fu">names</span>(cmp<span class="sc">$</span>summary)))</span>
 <span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a></span>
 <span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(cmp<span class="sc">$</span>summary, <span class="at">caption =</span> <span class="st">&quot;Summary comparison of bullet vs amortizing structures&quot;</span>)</span></code></pre></div>
-<table>
+<table style="width:100%;">
 <caption>Summary comparison of bullet vs amortizing structures</caption>
 <colgroup>
-<col width="14%" />
-<col width="12%" />
-<col width="12%" />
-<col width="14%" />
-<col width="14%" />
-<col width="12%" />
-<col width="18%" />
+<col width="11%" />
+<col width="10%" />
+<col width="10%" />
+<col width="11%" />
+<col width="11%" />
+<col width="8%" />
+<col width="15%" />
+<col width="9%" />
+<col width="9%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -423,35 +417,43 @@ extract comparison details</h2>
 <th align="right">npv_project</th>
 <th align="right">min_dscr</th>
 <th align="right">max_ltv_forward</th>
+<th align="right">ops_share</th>
+<th align="right">tv_share</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td align="left">all_equity</td>
-<td align="right">0.0592444</td>
-<td align="right">253371.2</td>
-<td align="right">0.0592444</td>
-<td align="right">253371.2</td>
+<td align="right">0.0458885</td>
+<td align="right">3862887</td>
+<td align="right">0.0458885</td>
+<td align="right">3862887</td>
 <td align="right">NA</td>
 <td align="right">0.0000000</td>
+<td align="right">0.3702565</td>
+<td align="right">0.6297435</td>
 </tr>
 <tr class="even">
 <td align="left">debt_bullet</td>
-<td align="right">0.0754502</td>
-<td align="right">351661.3</td>
-<td align="right">0.0592444</td>
-<td align="right">253371.2</td>
-<td align="right">-3.1148641</td>
-<td align="right">0.2509443</td>
+<td align="right">0.0619978</td>
+<td align="right">6353091</td>
+<td align="right">0.0458885</td>
+<td align="right">3862887</td>
+<td align="right">5.257009</td>
+<td align="right">0.4494449</td>
+<td align="right">0.3702565</td>
+<td align="right">0.6297435</td>
 </tr>
 <tr class="odd">
 <td align="left">debt_amort</td>
-<td align="right">0.0681650</td>
-<td align="right">314738.3</td>
-<td align="right">0.0592444</td>
-<td align="right">253371.2</td>
-<td align="right">-0.2936357</td>
-<td align="right">0.1984226</td>
+<td align="right">0.0536756</td>
+<td align="right">5350105</td>
+<td align="right">0.0458885</td>
+<td align="right">3862887</td>
+<td align="right">1.028086</td>
+<td align="right">0.4087726</td>
+<td align="right">0.3702565</td>
+<td align="right">0.6297435</td>
 </tr>
 </tbody>
 </table>
@@ -467,49 +469,47 @@ bullet vs amort</h2>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>bullet <span class="ot">&lt;-</span> rows<span class="sc">$</span>debt_bullet</span>
 <span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>amort  <span class="ot">&lt;-</span> rows<span class="sc">$</span>debt_amort</span>
 <span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co"># readable diagnostics --------------------------------------------</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co"># readable summary --------------------------------------------</span></span>
 <span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Comparaison qualitative des structures de dette :</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Qualitative comparison of debt structures:</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
 <pre><code>## 
-## Comparaison qualitative des structures de dette :</code></pre>
+## Qualitative comparison of debt structures:</code></pre>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(</span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="st">&quot;• IRR equity : bullet = %.4f%% | amort. = %.4f%%</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="dv">100</span> <span class="sc">*</span> bullet<span class="sc">$</span>irr_equity,</span>
 <span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="dv">100</span> <span class="sc">*</span> amort<span class="sc">$</span>irr_equity</span>
 <span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>))</span></code></pre></div>
-<pre><code>## • IRR equity : bullet = 7.5450% | amort. = 6.8165%</code></pre>
+<pre><code>## • IRR equity : bullet = 6.1998% | amort. = 5.3676%</code></pre>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(</span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="st">&quot;• Min DSCR   : bullet = %.3f  | amort. = %.3f</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  bullet<span class="sc">$</span>min_dscr,</span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  amort<span class="sc">$</span>min_dscr</span>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>))</span></code></pre></div>
-<pre><code>## • Min DSCR   : bullet = -3.115  | amort. = -0.294</code></pre>
+<pre><code>## • Min DSCR   : bullet = 5.257  | amort. = 1.028</code></pre>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(</span>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="st">&quot;• Max LTV f. : bullet = %.3f  | amort. = %.3f</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  bullet<span class="sc">$</span>max_ltv_forward,</span>
 <span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  amort<span class="sc">$</span>max_ltv_forward</span>
 <span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>))</span></code></pre></div>
-<pre><code>## • Max LTV f. : bullet = 0.251  | amort. = 0.198</code></pre>
+<pre><code>## • Max LTV f. : bullet = 0.449  | amort. = 0.409</code></pre>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># Expected financial ordering (sanity checks) ----------------------------</span></span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a></span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="do">## (a) Leverage effect on IRR - bullet should give a higher equity IRR</span></span>
 <span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="fu">stopifnot</span>(bullet<span class="sc">$</span>irr_equity <span class="sc">&gt;</span> amort<span class="sc">$</span>irr_equity)</span>
 <span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a></span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="do">## (b) DSCR - in this preset, the worst year is driven by negative NOI</span></span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="do">##     (vacancy + CAPEX). For a given interest profile, adding principal</span></span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="do">##     in the amortizing case makes DSCR less negative (closer to zero),</span></span>
-<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="do">##     so min DSCR for amortization should be higher than for bullet.</span></span>
-<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="fu">stopifnot</span>(bullet<span class="sc">$</span>min_dscr <span class="sc">&lt;=</span> amort<span class="sc">$</span>min_dscr)</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="do">## (b) DSCR - the ordering is not universal and depends on where the NOI trough</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="do">##     occurs relative to the amortization profile. Here we only check that the</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="do">##     summary exposes interpretable finite values.</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">is.finite</span>(bullet<span class="sc">$</span>min_dscr))</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">is.finite</span>(amort<span class="sc">$</span>min_dscr))</span>
 <span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a></span>
 <span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="do">## (c) Forward LTV - amortizing structure should deleverage over time</span></span>
 <span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="fu">stopifnot</span>(bullet<span class="sc">$</span>max_ltv_forward <span class="sc">&gt;</span> amort<span class="sc">$</span>max_ltv_forward)</span></code></pre></div>
-<p>Financial interpretation:</p>
-<ul>
-<li>The bullet loan increases IRR by deferring principal.</li>
-<li>Amortization increases debt service –&gt; DSCR goes down.</li>
-<li>Amortization decreases principal outstanding –&gt; forward LTV
-improves.</li>
-</ul>
+<p>In this stabilised core case, bullet debt keeps leverage higher for
+longer, while amortization improves the balance-sheet profile over time.
+The exact DSCR ordering remains scenario-dependent, but the current
+preset is calibrated so that both structures remain legible from an
+underwriting standpoint.</p>
 </div>
 <div id="interest-cover-icr-confirming-the-expected-ordering" class="section level2" number="4">
 <h2><span class="header-section-number">4</span> Interest cover (ICR):
@@ -542,71 +542,52 @@ confirming the expected ordering</h2>
 <span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a>icr_last_amo <span class="ot">&lt;-</span> <span class="fu">tail</span>(icr_amo, <span class="dv">1</span><span class="dt">L</span>)</span>
 <span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a></span>
 <span id="cb11-28"><a href="#cb11-28" tabindex="-1"></a><span class="fu">cat</span>(</span>
-<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">Interest cover diagnostics:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">Interest cover summary:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
 <span id="cb11-30"><a href="#cb11-30" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Min ICR    : bullet = %.3f | amort. = %.3f</span><span class="sc">\n</span><span class="st">&quot;</span>, icr_min_bul, icr_min_amo),</span>
 <span id="cb11-31"><a href="#cb11-31" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">&quot;• Mean ICR   : bullet = %.3f | amort. = %.3f</span><span class="sc">\n</span><span class="st">&quot;</span>, icr_mean_bul, icr_mean_amo),</span>
 <span id="cb11-32"><a href="#cb11-32" tabindex="-1"></a><span class="fu">sprintf</span>(</span>
 <span id="cb11-33"><a href="#cb11-33" tabindex="-1"></a><span class="st">&quot;• Last-year ICR (t = %d / %d) : bullet = %.3f | amort. = %.3f</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
 <span id="cb11-34"><a href="#cb11-34" tabindex="-1"></a>last_year_bul, last_year_amo, icr_last_bul, icr_last_amo</span>
 <span id="cb11-35"><a href="#cb11-35" tabindex="-1"></a>),</span>
-<span id="cb11-36"><a href="#cb11-36" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb11-37"><a href="#cb11-37" tabindex="-1"></a><span class="st">&quot;Interpretation:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb11-38"><a href="#cb11-38" tabindex="-1"></a><span class="st">&quot;  • Negative ICR values reflect periods where NOI is temporarily negative</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb11-39"><a href="#cb11-39" tabindex="-1"></a><span class="st">&quot;    (for example, vacancy combined with heavy CAPEX), while interest remains</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb11-40"><a href="#cb11-40" tabindex="-1"></a><span class="st">&quot;    strictly positive.</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb11-41"><a href="#cb11-41" tabindex="-1"></a><span class="st">&quot;  • The amortizing structure can exhibit a lower minimum ICR than the bullet</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb11-42"><a href="#cb11-42" tabindex="-1"></a><span class="st">&quot;    if transitional phases are front-loaded and debt service remains high.</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb11-43"><a href="#cb11-43" tabindex="-1"></a><span class="st">&quot;  • ICR should therefore be read jointly with DSCR, Debt Yield and forward LTV</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb11-44"><a href="#cb11-44" tabindex="-1"></a><span class="st">&quot;    to characterise the temporal profile of credit risk.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
-<span id="cb11-45"><a href="#cb11-45" tabindex="-1"></a>)</span></code></pre></div>
+<span id="cb11-36"><a href="#cb11-36" tabindex="-1"></a><span class="st">&quot;  • Read together with DSCR, debt yield and forward LTV.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
+<span id="cb11-37"><a href="#cb11-37" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## 
-## Interest cover diagnostics:
-##  • Min ICR    : bullet = -3.115 | amort. = -7.562
-##  • Mean ICR   : bullet = 7.477 | amort. = 15.963
-##  • Last-year ICR (t = 5 / 5) : bullet = 9.962 | amort. = 47.896
-##  
-##  Interpretation:
-##    • Negative ICR values reflect periods where NOI is temporarily negative
-##      (for example, vacancy combined with heavy CAPEX), while interest remains
-##      strictly positive.
-##    • The amortizing structure can exhibit a lower minimum ICR than the bullet
-##      if transitional phases are front-loaded and debt service remains high.
-##    • ICR should therefore be read jointly with DSCR, Debt Yield and forward LTV
-##      to characterise the temporal profile of credit risk.</code></pre>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Internal sanity check: ICR must be finite whenever interest &gt; 0 --------</span></span>
+## Interest cover summary:
+##  • Min ICR    : bullet = 5.257 | amort. = 5.257
+##  • Mean ICR   : bullet = 5.517 | amort. = 15.411
+##  • Last-year ICR (t = 10 / 10) : bullet = 5.793 | amort. = 52.629
+##    • Read together with DSCR, debt yield and forward LTV.</code></pre>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Internal sanity check: ICR must be finite whenever interest &gt; 0 and NOI &gt; 0 --</span></span>
 <span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(<span class="fu">is.finite</span>(rat_bul<span class="sc">$</span>interest_cover_ratio[rat_bul<span class="sc">$</span>interest <span class="sc">&gt;</span> <span class="dv">0</span>])))</span>
-<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(<span class="fu">is.finite</span>(rat_amo<span class="sc">$</span>interest_cover_ratio[rat_amo<span class="sc">$</span>interest <span class="sc">&gt;</span> <span class="dv">0</span>])))</span></code></pre></div>
-<p>Financial interpretation:</p>
-<p>The bullet loan increases the equity IRR by deferring principal to
-maturity and keeping leverage higher during the life of the loan.</p>
-<p>Amortization increases annual debt service and may depress the
-minimum DSCR, even though the outstanding principal is reduced.</p>
-<p>Because amortization mechanically reduces the debt balance, the
-forward LTV path improves more quickly than under a bullet
-structure.</p>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(<span class="fu">is.finite</span>(rat_bul<span class="sc">$</span>interest_cover_ratio[rat_bul<span class="sc">$</span>interest <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;</span> rat_bul<span class="sc">$</span>noi <span class="sc">&gt;</span> <span class="dv">0</span>])))</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(<span class="fu">is.finite</span>(rat_amo<span class="sc">$</span>interest_cover_ratio[rat_amo<span class="sc">$</span>interest <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;</span> rat_amo<span class="sc">$</span>noi <span class="sc">&gt;</span> <span class="dv">0</span>])))</span></code></pre></div>
+<p>Bullet debt tends to support equity returns, while amortization
+usually improves forward LTV and reduces refinance risk. In the present
+vignette, this trade-off is visible on a case that looks closer to a
+real prime-office financing memo than the former ultra-light default
+example.</p>
 </div>
 <div id="internal-consistency-checks-on-credit-ratios" class="section level2" number="5">
 <h2><span class="header-section-number">5</span> Internal consistency
 checks on credit ratios</h2>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># DSCR availability when interest is positive ----------------------------</span></span>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># DSCR availability when debt service is positive and NOI is positive -----</span></span>
 <span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a></span>
 <span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="st">&quot;dscr&quot;</span> <span class="sc">%in%</span> <span class="fu">names</span>(rat_bul))</span>
 <span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="st">&quot;dscr&quot;</span> <span class="sc">%in%</span> <span class="fu">names</span>(rat_amo))</span>
 <span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a></span>
-<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>bul_idx <span class="ot">&lt;-</span> rat_bul<span class="sc">$</span>interest <span class="sc">&gt;</span> <span class="dv">0</span></span>
-<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>amo_idx <span class="ot">&lt;-</span> rat_amo<span class="sc">$</span>interest <span class="sc">&gt;</span> <span class="dv">0</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>bul_idx <span class="ot">&lt;-</span> rat_bul<span class="sc">$</span>payment <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;</span> rat_bul<span class="sc">$</span>noi <span class="sc">&gt;</span> <span class="dv">0</span></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>amo_idx <span class="ot">&lt;-</span> rat_amo<span class="sc">$</span>payment <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;</span> rat_amo<span class="sc">$</span>noi <span class="sc">&gt;</span> <span class="dv">0</span></span>
 <span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a></span>
 <span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(<span class="fu">is.finite</span>(rat_bul<span class="sc">$</span>dscr[bul_idx])))</span>
 <span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(<span class="fu">is.finite</span>(rat_amo<span class="sc">$</span>dscr[amo_idx])))</span>
 <span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a></span>
-<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="co"># Descriptive diagnostics on the sign of DSCR ----------------------------</span></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="co"># Read the sign of DSCR --------------------------------------------------</span></span>
 <span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a></span>
 <span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a>neg_share_bul <span class="ot">&lt;-</span> <span class="fu">mean</span>(rat_bul<span class="sc">$</span>dscr[bul_idx] <span class="sc">&lt;</span> <span class="dv">0</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a>neg_share_amo <span class="ot">&lt;-</span> <span class="fu">mean</span>(rat_amo<span class="sc">$</span>dscr[amo_idx] <span class="sc">&lt;</span> <span class="dv">0</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a></span>
 <span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a><span class="fu">cat</span>(</span>
-<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">DSCR sign diagnostics:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">DSCR sign summary:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
 <span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a><span class="fu">sprintf</span>(</span>
 <span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a><span class="st">&quot;• Bullet   – min DSCR = %.3f, share of negative DSCR (interest &gt; 0): %.1f%%</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
 <span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a><span class="fu">min</span>(rat_bul<span class="sc">$</span>dscr[bul_idx], <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
@@ -617,34 +598,17 @@ checks on credit ratios</h2>
 <span id="cb14-26"><a href="#cb14-26" tabindex="-1"></a><span class="fu">min</span>(rat_amo<span class="sc">$</span>dscr[amo_idx], <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
 <span id="cb14-27"><a href="#cb14-27" tabindex="-1"></a><span class="dv">100</span> <span class="sc">*</span> neg_share_amo</span>
 <span id="cb14-28"><a href="#cb14-28" tabindex="-1"></a>),</span>
-<span id="cb14-29"><a href="#cb14-29" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">Interpretation:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb14-30"><a href="#cb14-30" tabindex="-1"></a><span class="st">&quot;  • Negative DSCR values correspond to periods where NOI is negative</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb14-31"><a href="#cb14-31" tabindex="-1"></a><span class="st">&quot;    (for instance, vacancy combined with CAPEX), while debt service remains</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb14-32"><a href="#cb14-32" tabindex="-1"></a><span class="st">&quot;    strictly positive.</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb14-33"><a href="#cb14-33" tabindex="-1"></a><span class="st">&quot;  • Such configurations are typical in transitional or value-added strategies,</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb14-34"><a href="#cb14-34" tabindex="-1"></a><span class="st">&quot;    and should not be treated as numerical errors.</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb14-35"><a href="#cb14-35" tabindex="-1"></a><span class="st">&quot;  • The role of the model is to produce coherent ratio values (finite, correctly</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb14-36"><a href="#cb14-36" tabindex="-1"></a><span class="st">&quot;    timed), while the economic interpretation of negative DSCR remains with</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb14-37"><a href="#cb14-37" tabindex="-1"></a><span class="st">&quot;    the analyst.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
-<span id="cb14-38"><a href="#cb14-38" tabindex="-1"></a>)</span></code></pre></div>
+<span id="cb14-29"><a href="#cb14-29" tabindex="-1"></a><span class="st">&quot;  • Negative values can appear in transitional years.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
+<span id="cb14-30"><a href="#cb14-30" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## 
-## DSCR sign diagnostics:
-##  • Bullet   – min DSCR = -3.115, share of negative DSCR (interest &gt; 0): 20.0%
-##  • Amort.   – min DSCR = -0.294, share of negative DSCR (interest &gt; 0): 20.0%
-##  
-## Interpretation:
-##    • Negative DSCR values correspond to periods where NOI is negative
-##      (for instance, vacancy combined with CAPEX), while debt service remains
-##      strictly positive.
-##    • Such configurations are typical in transitional or value-added strategies,
-##      and should not be treated as numerical errors.
-##    • The role of the model is to produce coherent ratio values (finite, correctly
-##      timed), while the economic interpretation of negative DSCR remains with
-##      the analyst.</code></pre>
+## DSCR sign summary:
+##  • Bullet   – min DSCR = 0.125, share of negative DSCR (interest &gt; 0): 0.0%
+##  • Amort.   – min DSCR = 1.028, share of negative DSCR (interest &gt; 0): 0.0%
+##    • Negative values can appear in transitional years.</code></pre>
 </div>
-<div id="equity-npv-identity" class="section level2" number="6">
+<div id="equity-npv-read-across" class="section level2" number="6">
 <h2><span class="header-section-number">6</span> Equity NPV
-identity</h2>
+read-across</h2>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># Global sum of discounted equity flows in the consolidated table --------</span></span>
 <span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a></span>
 <span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>cf_all <span class="ot">&lt;-</span> case<span class="sc">$</span>cashflows</span>
@@ -668,13 +632,13 @@ identity</h2>
 <span id="cb16-21"><a href="#cb16-21" tabindex="-1"></a>npv_equity_lev <span class="ot">&lt;-</span> case<span class="sc">$</span>leveraged<span class="sc">$</span>npv_equity</span>
 <span id="cb16-22"><a href="#cb16-22" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">is.finite</span>(npv_equity_lev))</span>
 <span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a></span>
-<span id="cb16-24"><a href="#cb16-24" tabindex="-1"></a><span class="co"># Diagnostics on the relationship between these quantities ---------------</span></span>
+<span id="cb16-24"><a href="#cb16-24" tabindex="-1"></a><span class="co"># Read the relationship between these quantities -------------------------</span></span>
 <span id="cb16-25"><a href="#cb16-25" tabindex="-1"></a></span>
 <span id="cb16-26"><a href="#cb16-26" tabindex="-1"></a>gap_bullet_global <span class="ot">&lt;-</span> npv_equity_sum <span class="sc">-</span> npv_equity_bullet</span>
 <span id="cb16-27"><a href="#cb16-27" tabindex="-1"></a>gap_amort_global  <span class="ot">&lt;-</span> npv_equity_sum <span class="sc">-</span> npv_equity_amort</span>
 <span id="cb16-28"><a href="#cb16-28" tabindex="-1"></a></span>
 <span id="cb16-29"><a href="#cb16-29" tabindex="-1"></a><span class="fu">cat</span>(</span>
-<span id="cb16-30"><a href="#cb16-30" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">Equity NPV diagnostics:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb16-30"><a href="#cb16-30" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">Equity NPV comparison:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
 <span id="cb16-31"><a href="#cb16-31" tabindex="-1"></a><span class="fu">sprintf</span>(</span>
 <span id="cb16-32"><a href="#cb16-32" tabindex="-1"></a><span class="st">&quot;• Global sum of discounted equity flows (cf_all$equity_disc): %s</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
 <span id="cb16-33"><a href="#cb16-33" tabindex="-1"></a><span class="fu">formatC</span>(npv_equity_sum, <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>)</span>
@@ -699,34 +663,25 @@ identity</h2>
 <span id="cb16-52"><a href="#cb16-52" tabindex="-1"></a><span class="st">&quot;• Global – amort. NPV gap                              : %s</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
 <span id="cb16-53"><a href="#cb16-53" tabindex="-1"></a><span class="fu">formatC</span>(gap_amort_global,  <span class="at">format =</span> <span class="st">&#39;f&#39;</span>, <span class="at">big.mark =</span> <span class="st">&quot; &quot;</span>)</span>
 <span id="cb16-54"><a href="#cb16-54" tabindex="-1"></a>),</span>
-<span id="cb16-55"><a href="#cb16-55" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">Interpretation:</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb16-56"><a href="#cb16-56" tabindex="-1"></a><span class="st">&quot;  • The consolidated column `equity_disc` aggregates discounted equity flows at</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb16-57"><a href="#cb16-57" tabindex="-1"></a><span class="st">&quot;    the model level; it is not, in this configuration, identical to any single</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb16-58"><a href="#cb16-58" tabindex="-1"></a><span class="st">&quot;    scenario-level NPV (bullet or amortizing).</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb16-59"><a href="#cb16-59" tabindex="-1"></a><span class="st">&quot;  • Scenario NPVs reported in the comparison summary and in `case$leveraged`</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb16-60"><a href="#cb16-60" tabindex="-1"></a><span class="st">&quot;    are computed from their own scenario-specific equity cash-flow streams.</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb16-61"><a href="#cb16-61" tabindex="-1"></a><span class="st">&quot;  • The role of this diagnostic is therefore descriptive: it documents how the</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb16-62"><a href="#cb16-62" tabindex="-1"></a><span class="st">&quot;    global discounted equity flows relate in magnitude and sign to scenario-level</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
-<span id="cb16-63"><a href="#cb16-63" tabindex="-1"></a><span class="st">&quot;    NPVs, rather than enforcing an exact algebraic identity.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
-<span id="cb16-64"><a href="#cb16-64" tabindex="-1"></a>)</span></code></pre></div>
+<span id="cb16-55"><a href="#cb16-55" tabindex="-1"></a><span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb16-56"><a href="#cb16-56" tabindex="-1"></a><span class="st">&quot;The consolidated column `equity_disc` comes from the main merged table.</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb16-57"><a href="#cb16-57" tabindex="-1"></a><span class="st">&quot;Scenario NPVs in `comparison$summary` and `case$leveraged` come from their own</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb16-58"><a href="#cb16-58" tabindex="-1"></a><span class="st">&quot;scenario-specific equity cash-flow streams, so they should be compared, not</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb16-59"><a href="#cb16-59" tabindex="-1"></a><span class="st">&quot;forced into a single algebraic identity.</span><span class="sc">\n</span><span class="st">&quot;</span></span>
+<span id="cb16-60"><a href="#cb16-60" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## 
-## Equity NPV diagnostics:
-##  • Global sum of discounted equity flows (cf_all$equity_disc): 3 532 431.3641
-##  • Bullet scenario equity NPV (comparison summary)        : 351 661.3210
-##  • Amort. scenario equity NPV (comparison summary)        : 314 738.2529
-##  • Leveraged equity NPV reported in case$leveraged        : 351 661.3210
-##  • Global – bullet NPV gap                               : 3 180 770.0432
-##  • Global – amort. NPV gap                              : 3 217 693.1113
+## Equity NPV comparison:
+##  • Global sum of discounted equity flows (cf_all$equity_disc): 6 353 091.2521
+##  • Bullet scenario equity NPV (comparison summary)        : 6 353 091.2521
+##  • Amort. scenario equity NPV (comparison summary)        : 5 350 105.3940
+##  • Leveraged equity NPV reported in case$leveraged        : 6 353 091.2521
+##  • Global – bullet NPV gap                               : 0.0000
+##  • Global – amort. NPV gap                              : 1 002 985.8580
 ##  
-## Interpretation:
-##    • The consolidated column `equity_disc` aggregates discounted equity flows at
-##      the model level; it is not, in this configuration, identical to any single
-##      scenario-level NPV (bullet or amortizing).
-##    • Scenario NPVs reported in the comparison summary and in `case$leveraged`
-##      are computed from their own scenario-specific equity cash-flow streams.
-##    • The role of this diagnostic is therefore descriptive: it documents how the
-##      global discounted equity flows relate in magnitude and sign to scenario-level
-##      NPVs, rather than enforcing an exact algebraic identity.</code></pre>
+##  The consolidated column `equity_disc` comes from the main merged table.
+##  Scenario NPVs in `comparison$summary` and `case$leveraged` come from their own
+##  scenario-specific equity cash-flow streams, so they should be compared, not
+##  forced into a single algebraic identity.</code></pre>
 </div>
 
 

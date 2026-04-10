@@ -1,16 +1,16 @@
 # ------------------------------------------------------------------------------------
 # Scenario: OPPORTUNISTIC — Rueil-Malmaison (light refurbishment & exit, ~5,500 sqm)
 # Asset: largely vacant 1990s office in [[Rueil-Malmaison]], deferred maintenance, functional mismatch.
-# Strategy: light renovation, accelerated leasing to stabilise, quick exit.
-# Horizon: 4 years, purchase in 2025.
-# Financial stance: high leverage, higher debt cost, improved exit yield on successful trade.
+# Strategy: light renovation, accelerated leasing to stabilise, then sale into a still-demanding market.
+# Horizon: 6 years, purchase in 2025.
+# Financial stance: high leverage, higher debt cost, and no heroic exit compression.
 # ------------------------------------------------------------------------------------
 purchase_year: 2025
-horizon_years: 4
+horizon_years: 6
 index_rate: 0.012
 entry_yield: 0.08
 acq_cost_rate: 0.060
-exit_yield_spread_bps: -75
+exit_yield_spread_bps: 50
 exit_transaction_costs:
   brokerage: 0.01
   taxes: 0.00
@@ -31,13 +31,14 @@ leases:
   - unit: "Wing A"
     area: 2500
     events:
-      - {start: 2025, end: 2025, rent: 100, free_months: 0, capex_sqm: 350, vac: 1, new_lease: 0}
-      - {start: 2026, end: 2029, rent: 200, free_months: 1, capex_sqm: 0,  vac: 0.2, new_lease: 1}
+      - {start: 2025, end: 2025, rent: 120, free_months: 0, capex_sqm: 250, vac: 0.85, new_lease: 0}
+      - {start: 2026, end: 2029, rent: 200, free_months: 1, capex_sqm: 0,  vac: 0.1, new_lease: 1}
   - unit: "Wing B"
     area: 2500
     events:
-      - {start: 2025, end: 2025, rent: 100, free_months: 0, capex_sqm: 350, vac: 1, new_lease: 0}
-      - {start: 2026, end: 2029, rent: 200, free_months: 1, capex_sqm: 0,  vac: 0.2, new_lease: 1}
-hurdle_equity_irr: 0.15
+      - {start: 2025, end: 2025, rent: 120, free_months: 0, capex_sqm: 250, vac: 0.85, new_lease: 0}
+      - {start: 2026, end: 2029, rent: 200, free_months: 1, capex_sqm: 0,  vac: 0.1, new_lease: 1}
+stabilization_year: 2
+hurdle_equity_irr: 0.17
 hurdle_project_irr: 0.12
 hurdle_equity_npv: 0

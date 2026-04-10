@@ -15,7 +15,7 @@ empty tibble if no issues are detected.
 }
 \description{
 Runs lightweight checks aligned with \code{cfg_validate()} and returns a table
-of issues, if any. This is a convenience wrapper for user-facing diagnostics;
+of issues, if any. This is a convenience wrapper for user-facing checks;
 it does not replace \code{cfg_validate()}.
 }
 \examples{

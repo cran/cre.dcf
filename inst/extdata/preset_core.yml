@@ -10,7 +10,7 @@ horizon_years: 10
 
 # Rental and pricing mechanics
 index_rate: 0.010          # modest indexation
-entry_yield: 0.045         # HIGHER than before → lower price / higher income share
+entry_yield: 0.050         # slightly wider entry yield for a more investable core case
 acq_cost_rate: 0.07
 exit_yield_spread_bps: 25  # exit yield = entry_yield + 25 bps → mild yield softening
 exit_transaction_costs:
@@ -31,7 +31,7 @@ disc_rate_wacc:
 opex_sqm: 65
 
 # Debt stance
-ltv_init: 0.30      # slightly lower LTV, consistent with core
+ltv_init: 0.40      # conservative but still representative institutional leverage
 rate_annual: 0.022  # close to KD, low but not ultra-cheap
 extra_amort_pct: 0.00
 scr_ratio: 0.33
@@ -46,6 +46,7 @@ leases:
       # Renewal phase, modest step-up, some vacancy and light works
       - {start: 2031, end: 2034, rent: 840, free_months: 2,  capex_sqm: 20, vac: 0.05, new_lease: 1}
 
+stabilization_year: 1
 hurdle_equity_irr: 0.045
 hurdle_project_irr: 0.040
 hurdle_equity_npv: 0

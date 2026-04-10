@@ -29,19 +29,21 @@ tbl_print <- tbl_print |>
     irr_equity,
     dscr_min_bul,
     ltv_max_fwd,
+    ops_share,
+    tv_share,
     npv_equity
   )
 
 # Defensive: stop if table empty (should never happen if helpers/tests are correct)
 if (nrow(tbl_print) == 0L) {
-  stop("No canonical presets were found. Check inst/extdata and helper logic.")
+  stop("No style presets were found. Check inst/extdata and helper logic.")
 }
 
 # Render table
 knitr::kable(
   tbl_print,
-  digits = c(0, 0, 4, 4, 3, 3, 0),
-  caption = "Style presets: unlevered (project IRR) and lender-salient (equity IRR, min-DSCR, forward-LTV) indicators"
+  digits = c(0, 0, 4, 4, 3, 3, 3, 3, 0),
+  caption = "Style presets: returns, credit profile, and value composition"
 )
 
 ## -----------------------------------------------------------------------------
@@ -116,7 +118,7 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
 }
 
 ## -----------------------------------------------------------------------------
-guard <- list(min_dscr = 1.20, max_ltv = 0.65)
+guard <- list(min_dscr = 1.50, max_ltv = 0.60)
 
 breach_tbl <- styles_breach_counts(
   styles         = c("core", "core_plus", "value_added", "opportunistic"),
@@ -214,14 +216,14 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
 ## -----------------------------------------------------------------------------
 styles_vec <- c("core", "core_plus", "value_added", "opportunistic")
 
-pv_tbl <- styles_pv_split(styles_vec) |>
+pv_tbl <- styles_manifest(styles_vec) |>
   dplyr::mutate(style = factor(style, levels = styles_vec))
 
 knitr::kable(
   pv_tbl |>
-    dplyr::select(style, share_pv_income, share_pv_resale),
+    dplyr::select(style, ops_share, tv_share),
   digits = 3,
-  caption = "Present-value split between income and resale by style (discounted at DCF rate, t >= 1)"
+  caption = "Present-value split between operations and terminal value by style"
 )
 
 ## -----------------------------------------------------------------------------
@@ -270,6 +272,11 @@ be_tbl <- styles_break_even_exit_yield(
   target_irr = target_irr
 )
 
+baseline_irr_tbl <- styles_manifest(
+  c("core", "core_plus", "value_added", "opportunistic")
+) |>
+  dplyr::select(style, irr_equity)
+
 knitr::kable(
   be_tbl,
   digits  = 4,
@@ -277,7 +284,7 @@ knitr::kable(
 )
 
 ## -----------------------------------------------------------------------------
-## Distressed exit diagnostic across regimes --------------------------------
+## Distressed exit across regimes --------------------------------
 
 # Covenant regimes: strict / baseline / flexible
 regimes <- tibble::tibble(
@@ -291,7 +298,8 @@ distress_tbl <- styles_distressed_exit(
   regimes              = regimes,
   fire_sale_bps        = 100,   # +100 bps exit-yield penalty
   refi_min_year        = 3L,    # refinancing window opens in year 3
-  allow_year1_distress = FALSE  # breaches before year 3 --> exit at year 3
+  allow_year1_distress = FALSE, # breaches before year 3 --> exit at year 3
+  underwriting_mode    = "transition"
 )
 
 # For compact display in the vignette, focus on the baseline regime
@@ -299,6 +307,8 @@ distress_baseline <- distress_tbl |>
   dplyr::filter(regime == "baseline") |>
   dplyr::select(
     style,
+    underwriting_mode,
+    covenant_start_year,
     breach_year,
     breach_type,
     irr_equity_base,
@@ -312,9 +322,9 @@ distress_baseline <- distress_tbl |>
 
 knitr::kable(
   distress_baseline,
-  digits  = c(0, 0, 0, 4, 4, 0, 2, 2, 2),
+  digits  = c(0, 0, 0, 0, 0, 4, 4, 0, 2, 2, 2),
   caption = paste(
-    "Baseline distressed-exit diagnostic by style (bullet debt scenario,",
+    "Baseline distressed-exit summary by style (bullet debt scenario,",
     "+100 bps fire-sale penalty; breaches before year 3 shifted to year 3)."
   )
 )

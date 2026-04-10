@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Package cre.dcf" />
+
+
+<title>French investment illustration: stylized SPV tax impact</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">French investment illustration: stylized
+SPV tax impact</h1>
+<h4 class="author">Package cre.dcf</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#purpose" id="toc-purpose"><span class="toc-section-number">1</span> Purpose</a></li>
+<li><a href="#start-from-a-french-operating-case" id="toc-start-from-a-french-operating-case"><span class="toc-section-number">2</span> Start from a French operating
+case</a></li>
+<li><a href="#translate-the-french-like-spv-into-tax-inputs" id="toc-translate-the-french-like-spv-into-tax-inputs"><span class="toc-section-number">3</span> Translate the French-like SPV into
+tax inputs</a></li>
+<li><a href="#read-the-yearly-tax-table" id="toc-read-the-yearly-tax-table"><span class="toc-section-number">4</span> Read the yearly tax table</a></li>
+<li><a href="#compare-pre-tax-and-after-tax-equity-cash-flows" id="toc-compare-pre-tax-and-after-tax-equity-cash-flows"><span class="toc-section-number">5</span> Compare pre-tax and after-tax equity
+cash flows</a></li>
+<li><a href="#what-this-vignette-captures-and-what-it-does-not" id="toc-what-this-vignette-captures-and-what-it-does-not"><span class="toc-section-number">6</span> What this vignette captures and what
+it does not</a></li>
+<li><a href="#summary" id="toc-summary"><span class="toc-section-number">7</span> Summary</a></li>
+</ul>
+</div>
+
+<div id="purpose" class="section level2" number="1">
+<h2><span class="header-section-number">1</span> Purpose</h2>
+<p>This vignette illustrates how <code>tax_run_spv()</code> can be used
+on a French office investment case.</p>
+<p>It is intentionally a <strong>stylized French-like SPV
+illustration</strong>, not a legal or tax opinion. As of <strong>April
+1, 2026</strong>, the normal French corporate income-tax rate is
+<strong>25%</strong>, following the official French tax administration’s
+published corporate-tax guidance consulted for this vignette.</p>
+<p>The rest of the tax assumptions below are simulated package inputs
+chosen to remain within the current scope of
+<code>tax_run_spv()</code>:</p>
+<ul>
+<li>straight-line depreciation only,</li>
+<li>simple interest deductibility,</li>
+<li>simple loss carryforwards,</li>
+<li>no investor-level taxes,</li>
+<li>no withholding taxes,</li>
+<li>no treaty logic,</li>
+<li>no attempt to encode the full French interest-limitation
+regime.</li>
+</ul>
+<p>The point of the vignette is therefore methodological: show how a
+French case can be parameterized in the current generic engine without
+pretending to replicate the full French tax code.</p>
+</div>
+<div id="start-from-a-french-operating-case" class="section level2" number="2">
+<h2><span class="header-section-number">2</span> Start from a French
+operating case</h2>
+<p>We use the package’s <code>preset_core.yml</code>, which already
+describes a stylized Paris 8e office investment.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>cfg_path <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;preset_core.yml&quot;</span>, <span class="at">package =</span> <span class="st">&quot;cre.dcf&quot;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>cfg <span class="ot">&lt;-</span> yaml<span class="sc">::</span><span class="fu">read_yaml</span>(cfg_path)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>case <span class="ot">&lt;-</span> <span class="fu">run_case</span>(cfg)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>bullet_summary <span class="ot">&lt;-</span> case<span class="sc">$</span>comparison<span class="sc">$</span>summary <span class="sc">|&gt;</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="fu">filter</span>(scenario <span class="sc">==</span> <span class="st">&quot;debt_bullet&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  <span class="fu">transmute</span>(</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>    scenario,</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>    irr_project,</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>    irr_equity,</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>    min_dscr,</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>    max_ltv_forward,</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>    ops_share,</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>    tv_share</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>  )</span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>  bullet_summary,</span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">3</span>,</span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Before-tax baseline for the stylized French core-office case&quot;</span></span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>Before-tax baseline for the stylized French core-office
+case</caption>
+<colgroup>
+<col width="15%" />
+<col width="15%" />
+<col width="13%" />
+<col width="11%" />
+<col width="20%" />
+<col width="12%" />
+<col width="11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">scenario</th>
+<th align="right">irr_project</th>
+<th align="right">irr_equity</th>
+<th align="right">min_dscr</th>
+<th align="right">max_ltv_forward</th>
+<th align="right">ops_share</th>
+<th align="right">tv_share</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">debt_bullet</td>
+<td align="right">0.046</td>
+<td align="right">0.062</td>
+<td align="right">5.257</td>
+<td align="right">0.449</td>
+<td align="right">0.37</td>
+<td align="right">0.63</td>
+</tr>
+</tbody>
+</table>
+<p>At this stage, the core DCF is still entirely before tax. The tax
+layer comes next and consumes the consolidated cash-flow table.</p>
+</div>
+<div id="translate-the-french-like-spv-into-tax-inputs" class="section level2" number="3">
+<h2><span class="header-section-number">3</span> Translate the
+French-like SPV into tax inputs</h2>
+<p>The current tax engine needs two objects:</p>
+<ul>
+<li>a tax basis extracted from the pre-tax case,</li>
+<li>a tax specification describing the stylized SPV rules.</li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>tax_basis <span class="ot">&lt;-</span> <span class="fu">tax_basis_spv</span>(case)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>tax_assumptions <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tribble</span>(</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="sc">~</span>item, <span class="sc">~</span>value, <span class="sc">~</span>comment,</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="st">&quot;Corporate income tax&quot;</span>, <span class="st">&quot;25%&quot;</span>, <span class="st">&quot;Official French normal CIT rate as of April 1, 2026&quot;</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="st">&quot;Land share&quot;</span>, <span class="st">&quot;20%&quot;</span>, <span class="st">&quot;Stylized non-depreciable portion&quot;</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="st">&quot;Building share&quot;</span>, <span class="st">&quot;65%&quot;</span>, <span class="st">&quot;Stylized depreciable structure&quot;</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>  <span class="st">&quot;Fit-out share&quot;</span>, <span class="st">&quot;15%&quot;</span>, <span class="st">&quot;Stylized depreciable tenant-improvement bucket&quot;</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>  <span class="st">&quot;Building life&quot;</span>, <span class="st">&quot;30 years&quot;</span>, <span class="st">&quot;Stylized straight-line life&quot;</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>  <span class="st">&quot;Fit-out life&quot;</span>, <span class="st">&quot;10 years&quot;</span>, <span class="st">&quot;Stylized straight-line life&quot;</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>  <span class="st">&quot;Interest deductibility&quot;</span>, <span class="st">&quot;full&quot;</span>, <span class="st">&quot;Current engine scope, not full French law&quot;</span>,</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>  <span class="st">&quot;Loss carryforward&quot;</span>, <span class="st">&quot;on&quot;</span>, <span class="st">&quot;Stylized carryforward allowed&quot;</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>  <span class="st">&quot;Offset cap&quot;</span>, <span class="st">&quot;50%&quot;</span>, <span class="st">&quot;Stylized cap used to keep the rule conservative&quot;</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>)</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>  tax_assumptions,</span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;French-like tax assumptions used in this vignette&quot;</span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>French-like tax assumptions used in this vignette</caption>
+<colgroup>
+<col width="27%" />
+<col width="10%" />
+<col width="61%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">item</th>
+<th align="left">value</th>
+<th align="left">comment</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Corporate income tax</td>
+<td align="left">25%</td>
+<td align="left">Official French normal CIT rate as of April 1,
+2026</td>
+</tr>
+<tr class="even">
+<td align="left">Land share</td>
+<td align="left">20%</td>
+<td align="left">Stylized non-depreciable portion</td>
+</tr>
+<tr class="odd">
+<td align="left">Building share</td>
+<td align="left">65%</td>
+<td align="left">Stylized depreciable structure</td>
+</tr>
+<tr class="even">
+<td align="left">Fit-out share</td>
+<td align="left">15%</td>
+<td align="left">Stylized depreciable tenant-improvement bucket</td>
+</tr>
+<tr class="odd">
+<td align="left">Building life</td>
+<td align="left">30 years</td>
+<td align="left">Stylized straight-line life</td>
+</tr>
+<tr class="even">
+<td align="left">Fit-out life</td>
+<td align="left">10 years</td>
+<td align="left">Stylized straight-line life</td>
+</tr>
+<tr class="odd">
+<td align="left">Interest deductibility</td>
+<td align="left">full</td>
+<td align="left">Current engine scope, not full French law</td>
+</tr>
+<tr class="even">
+<td align="left">Loss carryforward</td>
+<td align="left">on</td>
+<td align="left">Stylized carryforward allowed</td>
+</tr>
+<tr class="odd">
+<td align="left">Offset cap</td>
+<td align="left">50%</td>
+<td align="left">Stylized cap used to keep the rule conservative</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>tax_spec <span class="ot">&lt;-</span> <span class="fu">tax_spec_spv</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="at">corp_tax_rate =</span> <span class="fl">0.25</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="at">depreciation_spec =</span> <span class="fu">depreciation_spec</span>(</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>    <span class="at">acquisition_split =</span> tibble<span class="sc">::</span><span class="fu">tribble</span>(</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>      <span class="sc">~</span>bucket,    <span class="sc">~</span>share, <span class="sc">~</span>life_years, <span class="sc">~</span>method,          <span class="sc">~</span>depreciable,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>      <span class="st">&quot;land&quot;</span>,      <span class="fl">0.20</span>,        <span class="cn">NA</span>,    <span class="st">&quot;none&quot;</span>,           <span class="cn">FALSE</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>      <span class="st">&quot;building&quot;</span>,  <span class="fl">0.65</span>,        <span class="dv">30</span>,    <span class="st">&quot;straight_line&quot;</span>,  <span class="cn">TRUE</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>      <span class="st">&quot;fitout&quot;</span>,    <span class="fl">0.15</span>,        <span class="dv">10</span>,    <span class="st">&quot;straight_line&quot;</span>,  <span class="cn">TRUE</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>    ),</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>    <span class="at">capex_bucket =</span> <span class="st">&quot;fitout&quot;</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>    <span class="at">start_rule =</span> <span class="st">&quot;full_year&quot;</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  ),</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>  <span class="at">interest_rule =</span> <span class="fu">interest_rule</span>(<span class="at">mode =</span> <span class="st">&quot;full&quot;</span>),</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>  <span class="at">loss_rule =</span> <span class="fu">loss_rule</span>(</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>    <span class="at">carryforward =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>    <span class="at">carryforward_years =</span> <span class="cn">Inf</span>,</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>    <span class="at">offset_cap_pct =</span> <span class="fl">0.50</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>  )</span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>)</span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>tax_res <span class="ot">&lt;-</span> <span class="fu">tax_run_spv</span>(tax_basis, tax_spec)</span></code></pre></div>
+</div>
+<div id="read-the-yearly-tax-table" class="section level2" number="4">
+<h2><span class="header-section-number">4</span> Read the yearly tax
+table</h2>
+<p>The yearly table below is the main output of
+<code>tax_run_spv()</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>tax_view <span class="ot">&lt;-</span> tax_res<span class="sc">$</span>tax_table <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>    year,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    noi,</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    tax_depreciation,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>    deductible_interest,</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>    taxable_income_pre_losses,</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>    loss_cf_open,</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>    loss_cf_used,</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>    cash_is,</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>    after_tax_equity_cf</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>  )</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>  tax_view,</span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">0</span>,</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Stylized French SPV tax table&quot;</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>Stylized French SPV tax table</caption>
+<colgroup>
+<col width="3%" />
+<col width="6%" />
+<col width="13%" />
+<col width="15%" />
+<col width="20%" />
+<col width="10%" />
+<col width="10%" />
+<col width="6%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">year</th>
+<th align="right">noi</th>
+<th align="right">tax_depreciation</th>
+<th align="right">deductible_interest</th>
+<th align="right">taxable_income_pre_losses</th>
+<th align="right">loss_cf_open</th>
+<th align="right">loss_cf_used</th>
+<th align="right">cash_is</th>
+<th align="right">after_tax_equity_cf</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">-30816000</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">2376000</td>
+<td align="right">1760000</td>
+<td align="right">451968</td>
+<td align="right">164032</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">41008</td>
+<td align="right">1883024</td>
+</tr>
+<tr class="odd">
+<td align="right">2</td>
+<td align="right">2399760</td>
+<td align="right">1760000</td>
+<td align="right">451968</td>
+<td align="right">187792</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">46948</td>
+<td align="right">1900844</td>
+</tr>
+<tr class="even">
+<td align="right">3</td>
+<td align="right">2423758</td>
+<td align="right">1760000</td>
+<td align="right">451968</td>
+<td align="right">211790</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">52947</td>
+<td align="right">1918842</td>
+</tr>
+<tr class="odd">
+<td align="right">4</td>
+<td align="right">2447995</td>
+<td align="right">1760000</td>
+<td align="right">451968</td>
+<td align="right">236027</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">59007</td>
+<td align="right">1937020</td>
+</tr>
+<tr class="even">
+<td align="right">5</td>
+<td align="right">2472475</td>
+<td align="right">1760000</td>
+<td align="right">451968</td>
+<td align="right">260507</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">65127</td>
+<td align="right">1955380</td>
+</tr>
+<tr class="odd">
+<td align="right">6</td>
+<td align="right">2497200</td>
+<td align="right">1760000</td>
+<td align="right">451968</td>
+<td align="right">285232</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">71308</td>
+<td align="right">1973924</td>
+</tr>
+<tr class="even">
+<td align="right">7</td>
+<td align="right">2541279</td>
+<td align="right">1761592</td>
+<td align="right">451968</td>
+<td align="right">327719</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">81930</td>
+<td align="right">1991459</td>
+</tr>
+<tr class="odd">
+<td align="right">8</td>
+<td align="right">2566692</td>
+<td align="right">1763200</td>
+<td align="right">451968</td>
+<td align="right">351524</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">87881</td>
+<td align="right">2010761</td>
+</tr>
+<tr class="even">
+<td align="right">9</td>
+<td align="right">2592359</td>
+<td align="right">1764825</td>
+<td align="right">451968</td>
+<td align="right">375566</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">93892</td>
+<td align="right">2030257</td>
+</tr>
+<tr class="odd">
+<td align="right">10</td>
+<td align="right">2618283</td>
+<td align="right">1766465</td>
+<td align="right">451968</td>
+<td align="right">19818340</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">4954585</td>
+<td align="right">26518385</td>
+</tr>
+</tbody>
+</table>
+<p>This is the main reading grid:</p>
+<ul>
+<li><code>tax_depreciation</code> transforms acquisition basis and capex
+into fiscal charges,</li>
+<li><code>deductible_interest</code> removes the debt cost that is
+deductible under the simplified rule,</li>
+<li><code>taxable_income_pre_losses</code> is the taxable base before
+using prior losses,</li>
+<li><code>loss_cf_open</code> and <code>loss_cf_used</code> show how
+prior tax losses are mobilized,</li>
+<li><code>cash_is</code> is the annual corporate income tax paid by the
+SPV,</li>
+<li><code>after_tax_equity_cf</code> is the equity cash flow net of that
+annual tax.</li>
+</ul>
+</div>
+<div id="compare-pre-tax-and-after-tax-equity-cash-flows" class="section level2" number="5">
+<h2><span class="header-section-number">5</span> Compare pre-tax and
+after-tax equity cash flows</h2>
+<p>The generic engine does not yet build a complete French
+investor-level valuation. It does, however, let us measure the tax drag
+at the SPV level.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>equity_bridge <span class="ot">&lt;-</span> tax_res<span class="sc">$</span>tax_table <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="fu">select</span>(year, pre_tax_equity_cf, cash_is, after_tax_equity_cf)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  equity_bridge,</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">0</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Bridge from pre-tax to after-tax equity cash flows&quot;</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>Bridge from pre-tax to after-tax equity cash flows</caption>
+<thead>
+<tr class="header">
+<th align="right">year</th>
+<th align="right">pre_tax_equity_cf</th>
+<th align="right">cash_is</th>
+<th align="right">after_tax_equity_cf</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">-30816000</td>
+<td align="right">0</td>
+<td align="right">-30816000</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">1924032</td>
+<td align="right">41008</td>
+<td align="right">1883024</td>
+</tr>
+<tr class="odd">
+<td align="right">2</td>
+<td align="right">1947792</td>
+<td align="right">46948</td>
+<td align="right">1900844</td>
+</tr>
+<tr class="even">
+<td align="right">3</td>
+<td align="right">1971790</td>
+<td align="right">52947</td>
+<td align="right">1918842</td>
+</tr>
+<tr class="odd">
+<td align="right">4</td>
+<td align="right">1996027</td>
+<td align="right">59007</td>
+<td align="right">1937020</td>
+</tr>
+<tr class="even">
+<td align="right">5</td>
+<td align="right">2020507</td>
+<td align="right">65127</td>
+<td align="right">1955380</td>
+</tr>
+<tr class="odd">
+<td align="right">6</td>
+<td align="right">2045232</td>
+<td align="right">71308</td>
+<td align="right">1973924</td>
+</tr>
+<tr class="even">
+<td align="right">7</td>
+<td align="right">2073388</td>
+<td align="right">81930</td>
+<td align="right">1991459</td>
+</tr>
+<tr class="odd">
+<td align="right">8</td>
+<td align="right">2098642</td>
+<td align="right">87881</td>
+<td align="right">2010761</td>
+</tr>
+<tr class="even">
+<td align="right">9</td>
+<td align="right">2124148</td>
+<td align="right">93892</td>
+<td align="right">2030257</td>
+</tr>
+<tr class="odd">
+<td align="right">10</td>
+<td align="right">31472970</td>
+<td align="right">4954585</td>
+<td align="right">26518385</td>
+</tr>
+</tbody>
+</table>
+<p>We can also compare the before-tax leveraged IRR with a stylized
+after-tax SPV equity IRR computed on
+<code>after_tax_equity_cf</code>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>pre_tax_equity_irr <span class="ot">&lt;-</span> case<span class="sc">$</span>leveraged<span class="sc">$</span>irr_equity</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>after_tax_equity_irr <span class="ot">&lt;-</span> <span class="fu">irr_safe</span>(tax_res<span class="sc">$</span>tax_table<span class="sc">$</span>after_tax_equity_cf)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>tax_highlights <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="at">pre_tax_equity_irr =</span> pre_tax_equity_irr,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="at">after_tax_spv_equity_irr =</span> after_tax_equity_irr,</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="at">total_cash_is =</span> tax_res<span class="sc">$</span>summary<span class="sc">$</span>total_cash_is,</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  <span class="at">total_tax_depreciation =</span> tax_res<span class="sc">$</span>summary<span class="sc">$</span>total_tax_depreciation,</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  <span class="at">exit_year_cash_is =</span> tax_res<span class="sc">$</span>tax_table<span class="sc">$</span>cash_is[</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>    tax_res<span class="sc">$</span>tax_table<span class="sc">$</span>year <span class="sc">==</span> <span class="fu">max</span>(tax_res<span class="sc">$</span>tax_table<span class="sc">$</span>year)</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>  ]</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>)</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>  tax_highlights,</span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">3</span>,</span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Stylized before-tax versus after-tax SPV reading&quot;</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>Stylized before-tax versus after-tax SPV reading</caption>
+<colgroup>
+<col width="19%" />
+<col width="25%" />
+<col width="14%" />
+<col width="23%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">pre_tax_equity_irr</th>
+<th align="right">after_tax_spv_equity_irr</th>
+<th align="right">total_cash_is</th>
+<th align="right">total_tax_depreciation</th>
+<th align="right">exit_year_cash_is</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.062</td>
+<td align="right">0.047</td>
+<td align="right">5554632</td>
+<td align="right">17616083</td>
+<td align="right">4954585</td>
+</tr>
+</tbody>
+</table>
+<p>In this example:</p>
+<ul>
+<li>the pre-tax DCF remains the economic backbone of the case,</li>
+<li>the stylized French tax layer reduces equity cash flows through
+annual <code>cash_is</code>,</li>
+<li>depreciation materially shapes the taxable base,</li>
+<li>and the exit year remains a critical point because the final tax
+charge can be large.</li>
+</ul>
+</div>
+<div id="what-this-vignette-captures-and-what-it-does-not" class="section level2" number="6">
+<h2><span class="header-section-number">6</span> What this vignette
+captures and what it does not</h2>
+<p>This French illustration is useful because it shows a coherent
+workflow:</p>
+<ol style="list-style-type: decimal">
+<li>build the investment case,</li>
+<li>extract a tax basis,</li>
+<li>define a country-like SPV parameterization,</li>
+<li>read the yearly tax consequences.</li>
+</ol>
+<p>But it still has clear limits.</p>
+<p>Captured:</p>
+<ul>
+<li>a French office investment setting,</li>
+<li>a normal-CIT-rate scenario,</li>
+<li>non-depreciable land,</li>
+<li>depreciable building and fit-out buckets,</li>
+<li>simple loss carryforwards,</li>
+<li>a visible bridge from pre-tax to after-tax equity cash flows.</li>
+</ul>
+<p>Not captured:</p>
+<ul>
+<li>the full French interest-limitation regime,</li>
+<li>the exact French loss-carryforward formula,</li>
+<li>shareholder taxation,</li>
+<li>transfer-tax mechanics beyond the acquisition-cost block already
+embedded in the DCF,</li>
+<li>exit-structuring choices,</li>
+<li>treaty and cross-border effects.</li>
+</ul>
+</div>
+<div id="summary" class="section level2" number="7">
+<h2><span class="header-section-number">7</span> Summary</h2>
+<p>This vignette shows how <code>cre.dcf</code> can already support a
+realistic French-style teaching case without hard-coding French tax law
+into the package core.</p>
+<ul>
+<li>The before-tax DCF remains the common economic layer.</li>
+<li><code>tax_run_spv()</code> adds a stylized SPV tax reading on top of
+it.</li>
+<li>The result is useful for scenario analysis and methodology, but
+should not be read as legal advice or as a complete French tax
+model.</li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

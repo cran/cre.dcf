@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{styles_distressed_exit}
 \alias{styles_distressed_exit}
-\title{Distressed exit diagnostic across CRE investment styles}
+\title{Distressed exit summary across CRE investment styles}
 \usage{
 styles_distressed_exit(
   styles,
@@ -10,6 +10,9 @@ styles_distressed_exit(
   fire_sale_bps = 100,
   refi_min_year = 3L,
   allow_year1_distress = TRUE,
+  underwriting_mode = c("transition", "stabilized"),
+  exit_shock_bps = 0,
+  growth_shock = 0,
   ext_dir = system.file("extdata", package = "cre.dcf")
 )
 }
@@ -33,6 +36,22 @@ distressed exit can occur. If a breach is detected before this year and
 If \code{FALSE}, breaches in years \verb{< refi_min_year} are shifted to
 \code{refi_min_year} (refinancing window logic).}
 
+\item{underwriting_mode}{Character scalar. Either \code{"transition"} or
+\code{"stabilized"}. In \code{"transition"} mode (default), covenant testing starts
+at \code{stabilization_year} when the preset defines one, which is useful for
+lease-up or refurbishment business plans. In \code{"stabilized"} mode, covenant
+testing starts in year 1, which is more conservative and closer to a
+standard stabilized-income loan reading.}
+
+\item{exit_shock_bps}{Numeric scalar. Additive shock (in basis points)
+applied to the preset's \code{exit_yield_spread_bps} before running the case
+and detecting breaches. This simulates a market repricing environment.
+Default \code{0} (no shock).}
+
+\item{growth_shock}{Numeric scalar. Additive shock applied to the preset's
+\code{index_rate} before running the case. This simulates a rental growth
+slowdown. Default \code{0} (no shock).}
+
 \item{ext_dir}{Optional directory where style presets (YAML) are stored.
 Defaults to the package \code{inst/extdata} folder.}
 }
@@ -41,6 +60,7 @@ A tibble with one row per combination of style and regime, and the
 columns:
 \itemize{
 \item \code{style}, \code{regime}, \code{min_dscr}, \code{max_ltv},
+\item \code{underwriting_mode}, \code{covenant_start_year},
 \item \code{breach_year}, \code{breach_type},
 \item \code{irr_equity_base}, \code{irr_equity_distress},
 \item \code{distress_undefined} (logical),
@@ -51,7 +71,7 @@ columns:
 }
 \description{
 This helper applies a simple lender-driven distressed-exit rule to a set of
-canonical style presets. For each style and covenant regime, it:
+preset style scenarios. For each style and covenant regime, it:
 \enumerate{
 \item Runs the baseline case via \code{\link[=run_case]{run_case()}}.
 \item Identifies the first covenant breach under the bullet-debt scenario

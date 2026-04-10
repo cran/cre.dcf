@@ -20,7 +20,7 @@ irr_project, npv_project).}
 \value{
 Tibble with columns:
 scenario, irr_equity, npv_equity, irr_project, npv_project,
-min_dscr, max_ltv_forward.
+min_dscr, max_ltv_forward, ops_share, tv_share.
 }
 \description{
 Builds a one-line summary for a given scenario using:

@@ -23,21 +23,18 @@ library(dplyr)
 
 ## Purpose
 
-This vignette provides a reproducible skeleton for conducting local comparative statics on DCF outputs by perturbing configuration parameters and re-running run_case() on a grid. The goal is twofold:
+This vignette provides a compact template for running sensitivities on top of `run_case()`.
 
-- Pedagogical – to visualise how valuation metrics respond to small changes in key parameters (e.g., exit yield, discount rate), and to read iso-NPV or iso-IRR loci.
+- It shows how valuation metrics move when you shift a few key parameters, such as exit yield or discount rate.
+- It also checks a couple of standard patterns:
+  - IRR should not depend on the discount rate used for NPV.
+  - NPV should usually fall when discount rate or exit yield goes up.
 
-- Diagnostic – to verify theoretical regularities:
-  - Discount rate neutrality of IRR: equity IRR is computed from flows and therefore should be invariant to the chosen discount rate used for NPV computation (holding cash-flow timing constant).
-  - Monotonicity of NPV: ceteris paribus, a higher discount rate should decrease NPV; similarly, a higher exit yield (higher cap rate at sale) should reduce terminal value and typically decrease both project NPV and equity NPV.
-
-The code below is intentionally minimal-no helper functions from the package are required-so that it can be adapted to other parameters (e.g., rent growth, capex, LTV) and used as a building block for larger sensitivity notebooks.
+The code below stays deliberately simple so it can be adapted to other drivers such as rent growth, capex, or LTV.
 
 ## Baseline configuration and grid design
 
-In classical discounted-cash-flow theory, the sensitivity of valuation metrics to parameter changes constitutes a local comparative static exercise.
-It allows identifying how valuation outcomes respond to exogenous shifts in yield or required return, under ceteris paribus assumptions.
-This procedure, widely used in real-estate investment and corporate finance, reveals whether model behaviour conforms to theoretical expectations of monotonicity, invariance, and convexity.
+The grid is kept small so the vignette stays quick to run while still showing the logic of a two-parameter sensitivity.
 
 ```{r}
 # 2.1 Load baseline configuration (core preset)
@@ -102,9 +99,7 @@ head(param_grid)
 
 ```
 
-The grid is deliberately small (here
-3×3=9
-3×3=9 points) in order to keep the vignette computationally light while illustrating the comparative statics logic.
+The grid is deliberately small (here 5 x 5 = 25 points) so the vignette stays light while still showing the sensitivity logic.
 
 ## Running the model on the grid
 
@@ -233,14 +228,14 @@ fill = "Equity NPV"
 
 ```
 
-This visualisation is intentionally minimal; it can be elaborated (alternative colour scales, percentage axes, log-NPV) in dedicated analysis notebooks.
+This plot is intentionally simple. In a deal notebook, you would usually customise the scales and annotations for the question at hand.
 
-## Theoretical diagnostics: invariants and monotonicities
+## Simple checks on the grid
 
-We now compute a set of diagnostics that compare the numerical behaviour of the model to the expectations of basic DCF theory.
+We now read a few simple patterns from the grid.
 
 ```{r}
-cat("\n=== Theoretical diagnostics: invariants and monotonicities ===\n")
+cat("\n=== Grid checks ===\n")
 
 ## 5.1 Invariance of IRR with respect to discount rate (within each exit_yield)
 
@@ -256,11 +251,10 @@ irr_sd_over_disc = sd(irr_equity, na.rm = TRUE),
 irr_sd_median <- median(irr_sd_by_exit$irr_sd_over_disc, na.rm = TRUE)
 
 cat(
-"\nIRR invariance diagnostics:\n",
+"\nIRR check:\n",
 sprintf("• Median SD of equity IRR across discount-rate variations (per exit_yield slice): %.3e\n",
 irr_sd_median),
-"  --> Near-zero dispersion indicates that IRR behaves as an internal rate of return,\n",
-"    independent of the exogenous discount rate used for NPV computation.\n"
+"  --> Near-zero dispersion means IRR is not being driven by the discount rate used for NPV.\n"
 )
 
 ## 5.2 Monotonicity of equity NPV with respect to disc_rate
@@ -278,12 +272,10 @@ all_non_increasing = all(diff(npv_equity) <= 1e-8),
 share_monotone_disc <- mean(npv_monotone_disc$all_non_increasing, na.rm = TRUE)
 
 cat(
-"\nNPV monotonicity w.r.t discount rate:\n",
+"\nNPV check vs discount rate:\n",
 sprintf("• Share of exit_yield slices where equity NPV is non-increasing in disc_rate: %.1f%%\n",
 100 * share_monotone_disc),
-"  --> In a standard DCF, higher discount rates should decrease NPV. Deviations from\n",
-"    strict monotonicity may indicate discrete changes in cash-flow structure or\n",
-"    numerical tolerances.\n"
+"  --> In a standard DCF, higher discount rates should reduce NPV.\n"
 )
 
 ## 5.3 Monotonicity of equity NPV with respect to exit_yield
@@ -301,29 +293,16 @@ all_non_increasing = all(diff(npv_equity) <= 1e-8),
 share_monotone_exit <- mean(npv_monotone_exit$all_non_increasing, na.rm = TRUE)
 
 cat(
-"\nNPV monotonicity w.r.t exit yield:\n",
+"\nNPV check vs exit yield:\n",
 sprintf("• Share of discount-rate slices where equity NPV is non-increasing in exit_yield: %.1f%%\n",
 100 * share_monotone_exit),
-"  --> Since a higher exit yield reduces terminal value, one expects lower NPV when\n",
-"    exit_yield increases, all else equal. Non-monotonic patterns typically reflect\n",
-"    changes in covenant status or other discrete thresholds in the model.\n"
+"  --> A higher exit yield reduces terminal value, so NPV should usually go down.\n"
 )
 
 ```
 
-In this vignette, these diagnostics are reported but not enforced as hard assertions. They are intended as a starting point for model calibration and for more systematic sensitivity studies rather than as unit tests.
+These checks are reported for interpretation, not enforced as unit tests.
 
 ## Interpretation
 
-The sensitivity skeleton developed here shows how a relatively compact grid over
-(disc_rate,exit_yield)
-(disc_rate,exit_yield) can be used to:
-
-verify that the equity IRR behaves as an internal rate of return, largely invariant to the exogenous discount rate,
-
-check that equity NPV decreases as the discount rate or exit yield increases, in line with standard DCF theory,
-
-identify potential non-monotonicities that may stem from structural features of the model (covenants, refinancing triggers, tax effects) rather than from pure discounting.
-
-The same logic extends immediately to other parameters (rent indexation, CAPEX intensity, LTV, DSCR thresholds).
-By replacing (exit_yield, disc_rate) in the grid construction and in cfg_with_params(), the user can construct a wide range of local comparative-statics experiments rooted in a single, reproducible run_case() grammar.
+This same pattern extends easily to other parameters. Replace `exit_yield` or `disc_rate` in the grid and in `cfg_with_params()`, then rerun the loop on the new scenario set.

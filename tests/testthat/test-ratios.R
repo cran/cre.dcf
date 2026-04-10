@@ -59,3 +59,40 @@ test_that("add_credit_ratios: identités DSCR, debt yield et LTV forward", {
   # Là où la dette est nulle ou la valeur forward manquante, LTV forward doit être NA
   expect_true(all(is.na(rat$ltv_forward[!idx_ltv])))
 })
+
+test_that("credit_guardrails_fast: équivalence avec add_credit_ratios", {
+  dcf <- dcf_calculate(1e7, 0.052, 0.057, 7, 0.072)
+  sch <- debt_built_schedule(6.4e6, 0.048, 6, type = "bullet")
+
+  # Chemin moteur: table compacte (sans merge full)
+  compact_cf <- as.data.frame(dcf$cashflows)
+  compact_cf$gei <- compact_cf$net_operating_income
+  compact_cf$noi <- compact_cf$net_operating_income
+  compact_cf$loan_init <- NA_real_
+
+  fast_fun <- getFromNamespace("credit_guardrails_fast", "cre.dcf")
+  fast <- fast_fun(
+    cf_tab = compact_cf,
+    debt_sched = sch,
+    exit_yield = 0.057,
+    dscr_basis = "noi",
+    ignore_balloon_in_min = TRUE,
+    maturity_year = 6
+  )
+
+  ratios <- add_credit_ratios(
+    cf_tab = compact_cf,
+    debt_sched = sch,
+    exit_yield = 0.057,
+    dscr_basis = "noi",
+    ignore_balloon_in_min = TRUE,
+    maturity_year = 6
+  )
+
+  ref_min_dscr <- attr(ratios, "min_dscr_pre_maturity")
+  ref_max_ltv <- suppressWarnings(max(ratios$ltv_forward[ratios$year >= 1 & ratios$year <= 6], na.rm = TRUE))
+  if (!is.finite(ref_max_ltv)) ref_max_ltv <- NA_real_
+
+  expect_equal(fast$min_dscr_pre_maturity, ref_min_dscr, tolerance = 1e-12)
+  expect_equal(fast$max_ltv_forward, ref_max_ltv, tolerance = 1e-12)
+})

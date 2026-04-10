@@ -349,8 +349,7 @@ types</h1>
 configuration</a></li>
 <li><a href="#deliberate-type-violation-and-controlled-failure" id="toc-deliberate-type-violation-and-controlled-failure"><span class="toc-section-number">3</span> Deliberate type violation and
 controlled failure</a></li>
-<li><a href="#interpretation-and-theoretical-significance" id="toc-interpretation-and-theoretical-significance"><span class="toc-section-number">4</span> Interpretation and theoretical
-significance</a></li>
+<li><a href="#interpretation" id="toc-interpretation"><span class="toc-section-number">4</span> Interpretation</a></li>
 </ul>
 </div>
 
@@ -417,7 +416,7 @@ correct YAML configuration</h2>
 ##  $ purchase_year         : int 2025
 ##  $ horizon_years         : int 10
 ##  $ index_rate            : num 0.01
-##  $ entry_yield           : num 0.045
+##  $ entry_yield           : num 0.05
 ##  $ acq_cost_rate         : num 0.07
 ##  $ exit_yield_spread_bps : int 25
 ##  $ exit_transaction_costs:List of 2
@@ -477,25 +476,18 @@ a character string should therefore cause cfg_validate() to fail.</p>
 <pre><code>## 
 ## ✓ Error successfully detected: invalid type for &#39;purchase_year&#39; was blocked at validation stage.</code></pre>
 </div>
-<div id="interpretation-and-theoretical-significance" class="section level2" number="4">
-<h2><span class="header-section-number">4</span> Interpretation and
-theoretical significance</h2>
-<p>Rigorous configuration validation is not a mere programming
-convenience; it reflects a scientific norm of model governance. In
-computational finance and quantitative geography alike, parameter
-schemas play a role analogous to measurement protocols in laboratory
-sciences: they codify the expected dimensionality and semantic type of
-each variable.</p>
-<p>In the context of a discounted-cash-flow engine such as cre.dcf, this
-mechanism ensures:</p>
+<div id="interpretation" class="section level2" number="4">
+<h2><span class="header-section-number">4</span> Interpretation</h2>
+<p>Configuration validation is more than a coding convenience. It helps
+keep runs comparable and makes input errors visible early.</p>
+<p>In <code>cre.dcf</code>, this helps ensure:</p>
 <ul>
-<li><p>Epistemic reproducibility – identical YAML input always yields an
-equivalent model object.</p></li>
-<li><p>Comparability across simulations – variations in outputs stem
-solely from deliberate parameter changes, not from hidden type
-coercions.</p></li>
-<li><p>Auditability – external reviewers can trace parameter validity
-without inspecting internal code.</p></li>
+<li><p>reproducibility: the same YAML input yields the same type of
+model object;</p></li>
+<li><p>comparability across simulations: output changes come from
+explicit parameter changes, not silent coercions;</p></li>
+<li><p>auditability: reviewers can check input validity without reading
+the engine internals.</p></li>
 </ul>
 </div>
 

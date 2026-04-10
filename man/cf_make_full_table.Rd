@@ -41,7 +41,8 @@ A merged tibble (join on \code{year}) containing:
 \item \code{df} (alias of \code{discount_factor}),
 \item \code{cf_pre_debt} (= \code{free_cash_flow}),
 \item \code{cf_post_debt} (= \code{free_cash_flow - payment - arrangement_fee + debt_draw}),
-\item \code{equity_flow} (= \code{cf_post_debt + sale_proceeds}),
+\item \code{equity_flow} (= \code{cf_post_debt}; sale proceeds are already embedded in
+\code{free_cash_flow} at the exit year),
 \item \code{equity_disc} (= \code{equity_flow / df}).
 }
 }

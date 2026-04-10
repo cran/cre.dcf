@@ -2,15 +2,15 @@
 # Scenario: VALUE-ADDED — Île-de-France inner ring (multi-tenant repositioning, >5,000 sqm)
 # Asset: 1970s/1980s office asset in the inner ring, functional obsolescence but good accessibility.
 # Strategy: phased refurbishment and re-leasing, front-loaded capex and leasing incentives.
-# Horizon: 6 years, purchase in 2025.
-# Financial stance: higher leverage/cost of equity, improving exit yield on successful execution.
+# Horizon: 8 years, purchase in 2025.
+# Financial stance: higher leverage/cost of equity, but without aggressive exit-yield compression.
 # ------------------------------------------------------------------------------------
 purchase_year: 2025
-horizon_years: 7
+horizon_years: 8
 index_rate: 0.012
 entry_yield: 0.075
 acq_cost_rate: 0.060
-exit_yield_spread_bps: -100
+exit_yield_spread_bps: 0
 exit_transaction_costs:
   brokerage: 0.01
   taxes: 0.00
@@ -32,13 +32,13 @@ leases:
     area: 2000
     events:
       - {start: 2025, end: 2026, rent: 140, free_months: 0, capex_sqm: 250, vac: 0.8, new_lease: 0}
-      - {start: 2027, end: 2032, rent: 250, free_months: 3, capex_sqm: 150,  vac: 0.2, new_lease: 1}
+      - {start: 2027, end: 2032, rent: 250, free_months: 3, capex_sqm: 150,  vac: 0.15, new_lease: 1}
   - unit: "U2"
     area: 2000
     events:
       - {start: 2025, end: 2026, rent: 140, free_months: 0, capex_sqm: 250, vac: 0.8, new_lease: 0}
-      - {start: 2027, end: 2032, rent: 250, free_months: 3, capex_sqm: 150,  vac: 0.3, new_lease: 1}
-hurdle_equity_irr: 0.11
+      - {start: 2027, end: 2032, rent: 250, free_months: 3, capex_sqm: 150,  vac: 0.2, new_lease: 1}
+stabilization_year: 3
+hurdle_equity_irr: 0.13
 hurdle_project_irr: 0.08
 hurdle_equity_npv: 0
-
